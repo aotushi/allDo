@@ -1,6 +1,8 @@
 ## 仿掘金网站
 
-### 概述
+
+
+### 概述-后端
 
 > 使用Vue3+TS+serverless来模仿掘金网站
 
@@ -577,4 +579,266 @@ app.use((err, req, res, next) => {
 
 
 ### 将代码发布到云函数
+
+
+
+
+
+
+
+
+
+
+
+
+
+### 概述-前端
+
+### 1.创建项目
+
+1.创建选项
+
+```bash
+npm create vue@3
+```
+
+选择TS,JSX,VueRouter,Pinia
+
+
+
+2.安装UI框架及其他三方必要依赖
+
+axios, element-plus, less, dayjs
+
+```bash
+npm i axios element-plus, less, dayjs
+```
+
+element-plus需要在main.js中引入
+
+```ts
+// src/main.ts
+import ElementPlus from 'element-plus'
+...
+
+app.use(ElementPlus)
+```
+
+
+
+3.优化项目目录结构
+
+```ui
+- assets 静态资源目录,存放图片,文字
+- components 组件目录,存放公共组件
+- router 路由目录,存放路由的配置
+- stores 状态管理目录,存放Pinia仓库
+- pages 页面目录,存放页面级别的组件
+- utils 工具函数目录,存放自定义函数
+- styles 样式目录,存放全局样式文件
+- reqeust 请求目录, 存放axios全局请求对象
+- App.vue 根组件,页面最外层的结构
+- main.ts 入口文件, 在该文件中创建Vue app
+```
+
+
+
+### 2.添加全局样式和代码规范配置
+
+全局样式包含全局UI样式, 公共样式封装和CSS变量定义等.
+
+代码规范主要用于配置格式化风格和设置保存自动格式化.
+
+#### 1.全局样式
+
+全局样式的作用:
+
+* 统一修改某些元素或UI组件的默认样式
+* 封装公共类
+* 加载其他样式
+
+##### 1.位置定义
+
+* 创建`styles/main.less`,定义全局样式
+* 创建`styels/variable.css`,定义CSS变量
+
+##### 2.引入使用
+
+* 将其他样式文件引入到`main.less`中
+
+* 将`main.less`导入到入口文件`main.ts`中
+
+```less
+// src/styles/main.less
+@import 'element-plus//dist/index.css'
+@import './variable.css'
+```
+
+```ts
+// src/main.ts
+import ./styles/main.less
+```
+
+##### 3.使用
+
+* 使用UI组件样式
+* 使用变量
+
+```vue
+<style lang="less">
+  span {
+    color: var(--el-color-primary)
+  }
+</style>
+```
+
+
+
+
+
+#### 2.代码规范
+
+0.安装插件
+
+1.使用Prettier配置,根目录下创建`.prettierrc.json`文件,写入如下内容:
+
+```json
+// src/.prettierrc.json
+{
+  "singleQuote": true,
+  "semi": false,
+  "arrowParens": "avoid",
+  "bracketSpacing": true,
+  "jsxBracketSameLine": true,
+  "requirePragma": false,
+  "overrides": [
+    {
+      "files": ["*.json"],
+      "options": {
+        "parser": "json-stringify"
+      }
+    }
+  ]
+}
+```
+
+2.需要配置vscode, 设置'保存时自动格式化'选项.
+
+为了减少此选项对其他项目的影响, 应该配置vscode工作区设置.我们提交代码时候,也应该加上`.vscode`文件夹.
+
+```json
+// .vscode/settings.json
+
+{
+  //...
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true
+}
+```
+
+
+
+### 3.添加统一路由及请求的配置
+
+VueRouter配置,及axios配置
+
+
+
+#### 3.1 路由配置
+
+创建基础路由框架以后,Vue使用这个插件.
+
+##### 1.创建`router/index.ts`
+
+```ts
+import {createRouter, createWebHistory} from 'vue-router'
+import routes from './routes'
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
+})
+```
+
+##### 2.创建`router/routes.ts`
+
+定义路由配置数组,例如
+
+```ts
+// src/router/routes.ts
+
+import HomeView from '@/pages/home/index.vue'
+
+const routes = [
+  {
+    path: '/',
+    component: HomeView,
+    name: 'home'
+  }
+]
+
+export default routes
+```
+
+
+
+#### 3.2 请求配置
+
+创建axios的实例,添加请求拦截器和响应拦截器. 这个配置非常的简陋.
+
+这里需要回顾一下前端请求的流程:
+
+```md
+- 发起请求
+- 请求参数处理
+- 请求拦截
+	- 添加请求头
+	- 添加用户标识
+- 发起请求
+- 响应拦截
+	- 网络错误处理
+	- 授权错误处理
+	- 普通错误处理
+	- 请求完成
+- 返回参数处理
+```
+
+
+
+```ts
+// src/request/index.ts
+
+import axios, { type AxiosInstance } from 'axios'
+import { ElMessage } from 'element-plus'
+
+const instance: AxiosInstance = axios.create({
+  baseURL: 'xxx.com',
+  timeout: 15000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+instance.interceptors.request.use(request => {
+  request.headers.Authorization = 'Bearer ' + localStorage.getItem('token')
+  return request
+})
+
+instance.interceptors.response.use(
+  response => {
+    return response.data
+  },
+  error => {
+    if (error.response) {
+      let response = error.response
+      if (response.status === 401) {
+        ElMessage.error('登录过期,请重新登录')
+        localStorage.removeItem('token')
+      }
+    }
+  }
+)
+
+export default instance
+```
 

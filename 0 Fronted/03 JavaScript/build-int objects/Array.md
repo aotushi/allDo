@@ -5467,7 +5467,10 @@ Array.from( Array(num).keys() )
 Array.from({length: num}, (v, k) => k + 1);
 
 [...Array(10).keys()].map(x => ++x) ???
+
 Array(N).fill().map(i => i+1)
+
+Array(N).fill(0)
 ```
 
 

@@ -58,20 +58,20 @@ services:
       DATABASE_URL: mysql://root:rootpassword@mysql_db_container:3306/course
       NUXT_BASE_URL: https://jsonplaceholder.typicode.com
       JSON_SECRET: aaabbbcccddd
-    # command: >
-    #   /bin/sh -c 'npm run migrate && npm run build && npm start'
     command: >
-      /bin/sh -c '
-        echo "Waiting for database..." &&
-        sleep 10 &&
-        npm run migrate &&
-        echo "Migration completed" &&
-        npm run seed &&
-        echo "Seeding completed" &&
-        npm run build &&
-        echo "Build completed" &&
-        npm start
-      '
+      /bin/sh -c 'npm run migrate && npx prisma db seed && npm run build && npm start'
+    # command: >
+    #   /bin/sh -c '
+    #     echo "Waiting for database..." &&
+    #     sleep 10 &&
+    #     npx prisma migrate dev --name init --schema server/database/schema.prisma &&
+    #     echo "Migration completed" &&
+    #     npx prisma seed &&
+    #     echo "Seeding completed" &&
+    #     npm run build &&
+    #     echo "Build completed" &&
+    #     npm start
+    #   '
     depends_on:
       mysql_db_container:
         condition: service_healthy
