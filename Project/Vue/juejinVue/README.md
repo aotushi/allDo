@@ -806,39 +806,6 @@ export default routes
 
 
 ```ts
-// src/request/index.ts
 
-import axios, { type AxiosInstance } from 'axios'
-import { ElMessage } from 'element-plus'
-
-const instance: AxiosInstance = axios.create({
-  baseURL: 'xxx.com',
-  timeout: 15000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-})
-
-instance.interceptors.request.use(request => {
-  request.headers.Authorization = 'Bearer ' + localStorage.getItem('token')
-  return request
-})
-
-instance.interceptors.response.use(
-  response => {
-    return response.data
-  },
-  error => {
-    if (error.response) {
-      let response = error.response
-      if (response.status === 401) {
-        ElMessage.error('登录过期,请重新登录')
-        localStorage.removeItem('token')
-      }
-    }
-  }
-)
-
-export default instance
 ```
 
