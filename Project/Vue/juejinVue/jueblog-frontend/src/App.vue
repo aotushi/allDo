@@ -6,7 +6,7 @@ let a
 
 console.log(bbbb)
 console.log(abc)
-sssss s
+sssss
 </script>
 
 <template>
