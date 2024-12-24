@@ -5,6 +5,7 @@ import HelloWorld from './components/HelloWorld.vue'
 let a
 
 console.log(bbbb)
+console.log(abc)
 </script>
 
 <template>
