@@ -9565,7 +9565,7 @@ keep-alive
 使用webpack的require方法来自动将公共组件注册到vue中,省去繁琐引入.
 在这个components文件里使用require.context 动态将需要的高频组件统统打包进来。然后在main.js文件中引入global.js的文件。
 
-类似案例 [[Tool-webpack#API]]
+类似案例 [[构建工具-webpack#API]]
 
 ```js
 // components/global.js

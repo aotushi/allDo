@@ -30,592 +30,20 @@ Axios 是一个基于 promise 的 HTTP 库，可以用在浏览器和 node.js �
 
 
 
-
-## api属性方法介绍
-### axios拦截器
-
-```js
-axios拦截器
-(1).axios请求拦截器:
- 1.是什么？
- 在真正发请求前执行的一个回调函数
- 2.作用：
- 对每次请求做一些处理，例如：统一直追加某些请求头、处理参数等
-(2).axios响应拦截器:
- 1.是什么？
- 得到响应之后执行的两个回调函数（一个给成功用，一个给失败用）
- 2.作用：
- 若请求成功，对成功的数据进行处理 请求拦截器中失败的回调一般不写
- 若请求失败，对失败进行进一步操作 
-```
-
-```js
-//设置文件夹
-src同级目录下设置ajax/axios.js //或者是axios/index.js
-import axios from 'axios';
-
-//请求拦截器 本质上是一个函数.请求真正发出去之前会调用该函数,调完该函数,再发请求
-axios.interceptors.request.use((config)=>{
-    //config.headers.demo=123; 给所有ajax请求追加请求头
-    //config.params.age=18; 给所有ajax请求追加query参数
-    return config;
-})
-
-axios.interceptors.response.use(
-	(response)=>{ //响应成功走这个函数,状态码2开头 response=响应报文
-        return response.data;
-    },
-    (error)=>{ //响应失败走这个函数(状态码不是2开头)
-        //此处返回的若是非promise值,则组件中走成功的回调
-        //此处返回的若是成功的promise值,则组件中走成功的回调
-        //此处返回的若是失败的promise值,则组件中走失败的回调
-         //此处返回的若是初始化的promise值,则组件啥也不走
-        alert(error.message);       //可以省略在组件中的trycatch
-        return new Promise(()=>{})
-    }
-)
-
-export default axios;
-
-
-//组件中导入拦截器
-<script>
-	import axios from './ajax/axios'
-
-	export default {
-		name:'App',
-		methods:{
-			async getData(){
-				const result = await axios.get('https://v1.hitokoto.cn/',{params:{name:'tom'}})
-				console.log(result) //可以省略try..catch语句
-			}
-		}
-	}
-</script>
-```
-
-
-
-### 2.项目中的axios的使用
-
-#### 2.1 axios
-
-```js
-//axios封装 请求和响应拦截,错误统一处理
-import axios from 'axios';
-import {Toast} from 'vant';
-
-const service = axios.create({
-  baseURL: 'http://127.0.0.1:3000',
-  timeout: 6000,
-  withCredentials: false //设置跨域是否允许携带凭证(开发环境需要配置，因为要使用跨域；生产环境可能需要将其注释掉！)
-});
-
-// 设置post请求头
-const contentTypeUTF8 = 'application/x-www-form-urlencoded;charset=UTF-8';
-const contentTypeJSON = 'application/json';
-service.defaults.headers.post['Content-Type'] = false ? contentTypeUTF8 : contentTypeJSON;
-
-//请求拦截器
-service.interceptors.request.use(
-  (config) => {
-  	Toast.loading({
-    	overlay: true,
-    	duration: 0,
-    	forbidClidk: true,
-    	message: '加载中''
-  	});
-  	return config;
-	},
-  (error) => {
-    Toast.clear();
-    Toast({
-      message: '请求错误',
-      duration: 1000,
-      forbidClick: true
-    })
-    return Promise.reject(error);
-  }                           
-)
-
-//响应拦截器
-service.interceptors.response.use(
-	(response) => {
-    Toast.clear();
-    return Promise.reject(response.data);
-  },
-  (error) => {
-    Toast.clear();
-    let {response, message} = error;
-    
-    //状态码404
-    if (response?.status === 404) {
-    	Toast({
-      	message: '网络请求不存在',
-        duration: 1000,
-        forbidClick: true
-      });
-    	return error;
-    }
-  
-  	//网络异常
-  	if (!window.navigator.onLine) {
-  		Toast({
-        message: '请检查网络是否连接正常',
-        duration: 1500,
-        forbidClick: true
-      })
-  		return;
-		}
-
-		//请求超时
-		if (message.includes('timeout')) {
-      Toast({
-        message: '请求超时',
-        duration: 1500,
-        forbidClick: true
-      })
-      return error
-    }
-
-		return error
-  }
-)
-
-
-
-/**********************************************
- * get方法，对应get请求 
- * @param url     @type {String}  [请求的url地址] 
- * @param params  @type {Object}  [请求时携带的参数] 
- */
-export const axiosGet = ({url, data}) => service.get(url, data);
-
-/********************************************** 
- * post方法，对应post请求 
- * @param url     @type {String}  [请求的url地址] 
- * @param datas  @type {Object}  [请求时携带的参数] 
- */
-export const axiosPost = ({url, data}) => service.post(url, data);
-
-
-
-/********************************************** 
- * post方法，对应post请求 
- * @param url     @type {String}  [请求的url地址] 
- * @param datas  @type {Object}  [请求时携带的参数] 
- */
-// export const post = (url, data) => service.post(url, datas);
-
-// export const post = (url, params) => {
-//     return new Promise((resolve, reject) => {
-//       if(isAddPassword === 'true'){
-      
-//         // let authTokenUrl = sessionStorage.getItem("authTokenUrl") ? JSON.parse(sessionStorage.getItem("authTokenUrl")) : {};
-//         // let obj = {auth_token: authTokenUrl.authToken ||  ENV.VUE_APP_TOKEN}
-//         // params = {...params,...obj}
-//         let paramsData = testencrypt(JSON.stringify(params)) 
-
-//         service.post(url,paramsData).then(res => {
-//             resolve(res);
-//         })
-//         .catch(err => {
-//             reject(err)
-//         })
-//       } else {
-        
-//         service.post(url,params).then(res => {
-//           resolve(res);
-//         })
-//         .catch(err => {
-//             reject(err)
-//         })
-//       }
-        
-//     });
-// }
-
-/********************************************** 
- * put方法，对应put请求 
- * @param {String} url [请求的url地址] 
- * @param {Object} params [请求时携带的参数] 
- */
-// export function put(url, params) {
-//     return new Promise((resolve, reject) => {
-//         service.put(url, JSON.stringify(params))
-//             .then(res => {
-//                 resolve(res);
-//             })
-//             .catch(err => {
-//                 reject(err)
-//             })
-//     });
-// }
-
-
-/********************************************** 
- * delete方法，对应delete请求 
- * @param {String} url [请求的url地址] 
- * @param {Object} params [请求时携带的参数] 
- */
-// export function del(url, params) {
-//     return new Promise((resolve, reject) => {
-//         service.delete(url, JSON.stringify(params))
-//             .then(res => {
-//                 resolve(res);
-//             })
-//             .catch(err => {
-//                 reject(err)
-//             })
-//     });
-// }
-```
-
-
-
-
-
-#### 2.2 axios项目封装
-
-```javascript
-import axios from 'axios'
-import store from '@/store'
-import { Toast }from 'vant'
-
-import { baseApi } from '@/config'
-
-const service = axios.crate({
-  baseURL: baseApi,  // url = baseApi url + request url
-  withCredentials: true, //send cookies when cross-domain request
-  timeout: 5000
-})
-
-
-// 请求拦截器
-service.interceptors.request.use(
-	config => {
-    // 不传默认开启loading
-    if (!config.hidelaoding) {
-      // loading
-      Toast.loading({
-        forbidClick: true
-      })
-    }
-    
-    if (store.getters.token) {
-      config.headers['X-Token'] = ''
-    }
-    
-    return config
-  },
-  
-  error => {
-    console.log(error)
-    return Promise.reject(error)
-  }
-)
-
-
-service.interceptors.response.use(
-	response => {
-    Toast.clear()
-    const res = response.data
-    if (res.status && res.status !== 200) {
-      // 登录超时
-      if (res.status === 401) {
-        store.dispatch('FedLogOut').then(() => {
-          location.reload()
-        })
-      }
-      
-      return Promise.reject(res || 'error')
-    } else {
-      return Promise.resolve(res)
-    }
-  },
-  error => {}
-)
-```
-
-
-
-### 如何添加headers
-
-post方法：
-
-```coffeescript
-axios.post(this.baseUrl+'/vat/fpxx',{
-	"params":value
-},{
-	headers:{
-		'authorization':Token
-	}
-}).then((res)=>{})
-```
-
-注意：post的headers不能写在请求体里面，在参数对象之前或之后都可以，再添加一个对象，然后声明headers;
-
-get方法：
-
-```coffeescript
-axios.get(that.baseUrl+"/vat/myinfo",{
-	headers:{
-		authorization:Token
-	},
-	params:{
-		'params1':value
-	}
-}).then((res)=>{});
-```
-
-
 # axios二次封装
 
-## 简略版
+### 如何优雅的封装axios
+希望做到如下几点,[来源]([如何优雅地封装 axios | Jack Chou's blog](https://jackchoumine.github.io/web/js/%E5%B0%81%E8%A3%85axios.html)):
+* 引用方便.  例如在vue2中,可以通过`this.$http[method]`引用
+* 兼容REST风格封装，使用 JSON 进行交互，提供常用的四种方法
+* 不同的请求方法, 参数格式一致.例如,vue2中`this.$http.get(url,params), this.$http.post(url, params)`
+* 可进行二次确认,  例如在vue2中`this.$http.delete(url,params,{content:'删除后不可恢复!',type:'danger'})；`
+* 统一处理错误,同时提供抛出错误的方法
+* 错误时,控制台有日志输出, 如果有需要提交到服务器.
+* 可取消重复请求,用户切换路径取消请求
+* 文件下载及上传
+* 指定是否走mock服务. 如果使用strapi本地服务,则本地开发时候仅使用roxy的地址即可,也不用指定特别的请求路径.
 
-```javascript
-import axios from 'axios';
-import NProgress from 'nprogress/nprogress';
-import 'nprogress/nprogress.css';
-
-const service=axios.create({
-    baseURL:'/api',
-    timeout:20000
-})
-
-service.interceptors.request.use(
-	(config)=>{
-        NProgress.start();
-        return config;
-    },
-    //()=>{}
-);
-
-service.interceptors.response.use(
-	(response)=>{
-        NProgress.done();
-        return response.data;
-    },
-    (error)=>{
-        NProgress.done();
-        return new Promise(()=>{})
-    }
-)
-```
-
-
-
-## 封装2
-
-### 来源
-> https://mp.weixin.qq.com/s?__biz=MzAxODE2MjM1MA==&mid=2651578212&idx=2&sn=3a4bdc17b0c1808f2b5649d84eff93a1&chksm=802508a5b75281b366dca8441c3ab2dc63b93adcd139ec5bb002dc8b10fef80efa49d49d92c2&scene=21#wechat_redirect
-
-### 引入
-> 一般在src目录中创建一个http(或request或api)文件夹,然后再里面新建一个http.js, 一个api.js.
-> http.js用于axios的封装; api.js用来管理接口
-
-```js
-// http.js中
-
-import axios from 'axios'
-import {Toast} from 'vant'; //提示框组件
-import router from '../router'
-import store from '../store/index'
-```
-
-### 设置不同环境下的基础URL
-我们的项目环境可能有开发环境、测试环境和生产环境。我们通过node的环境变量来匹配我们的默认的接口url前缀。axios.defaults.baseURL可以设置axios的默认请求地址
-
-```js
-// 环境的切换  
-if (process.env.NODE_ENV == 'development') {      
-    axios.defaults.baseURL = 'https://www.baidu.com';}   
-else if (process.env.NODE_ENV == 'debug') {      
-    axios.defaults.baseURL = 'https://www.ceshi.com';  
-}   
-else if (process.env.NODE_ENV == 'production') {      
-    axios.defaults.baseURL = 'https://www.production.com';  
-}
-```
-
-
-### 创建实例&&设置请求超时
-通过axios.defaults.timeout设置默认的请求超时时间。例如超过了5s，就会告知用户当前请求超时，请刷新等。
-```js
-const instance = axios.create({
-	timeout: 1000*5
-})
-```
-
-
-### post请求头设置
-post请求的时候，我们需要加上一个请求头，所以可以在这里进行一个默认的设置，即设置post的请求头为`application/x-www-form-urlencoded;charset=UTF-8`
-```js
-instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
-```
-
-
-### 请求拦截
-```js
-// 请求拦截器  
-
-instance.interceptors.request.use(      
-    config => {          
-        // 登录流程控制中，根据本地是否存在token判断用户的登录情况          
-        // 但是即使token存在，也有可能token是过期的，所以在每次的请求头中携带token          
-        // 后台根据携带的token判断用户的登录情况，并返回给我们对应的状态码          
-        // 而后我们可以在响应拦截器中，根据状态码进行一些统一的操作。          
-        const token = store.state.token;          
-        token && (config.headers.Authorization = token);          
-        return config;      
-    },      
-    error => Promise.error(error))
-```
-
-
-### 响应拦截
-```js
-
-// 提示函数
-const tip = msg => {
-	Toast({
-		message: msg,
-		duration: 1000,
-		forbidClick: true
-	})
-}
-
-// 跳转登录页
-const toLogin = () => {
-	router.replace({
-		path: '/login',
-		query: {
-			redirect: router.currentRoute.fullPath
-		}
-	})
-}
-
-// 请求失败后的错误统一处理
-const errorHandle = (satus, other) => {
-	// 状态码判断
-	switch(status) {
-		// 401: 未登录状态，跳转登录页  
-		case 401:  
-				toLogin();  
-				break;  
-		// 403 token过期  
-		// 清除token并跳转登录页  
-		case 403:  
-				tip('登录过期，请重新登录');  
-				localStorage.removeItem('token');  
-				store.commit('loginSuccess', null);  
-				setTimeout(() => {  
-						toLogin();  
-				}, 1000);  
-				break;  
-		// 404请求不存在  
-		case 404:  
-				tip('请求的资源不存在');   
-				break;  
-		default:  
-				console.log(other);	
-	}
-}
-
-instance.interceptors.response.use(      
-    // 请求成功  
-    res => res.status === 200 ? Promise.resolve(res) : Promise.reject(res),      
-    // 请求失败  
-    error => {  
-        const { response } = error;  
-        if (response) {  
-            // 请求已发出，但是不在2xx的范围   
-            errorHandle(response.status, response.data.message);  
-            return Promise.reject(response);  
-        } else {  
-            // 处理断网的情况  
-            // eg:请求超时或断网时，更新state的network状态  
-            // network状态在app.vue中控制着一个全局的断网提示组件的显示隐藏  
-            // 关于断网组件中的刷新重新获取数据，会在断网组件中说明  
-            if (!window.navigator.onLine) {  
-               store.commit('changeNetwork', false);  
-            } else {  
-                return Promise.reject(error);  
-            }  
-        }  
-    });
-
-//暴露实例
-export default instance
-
-```
-
-
-## 封装3
-
->新建了一个api文件夹，里面有一个index.js和一个base.js，以及多个根据模块划分的接口js文件。index.js是一个api的出口，base.js管理接口域名，其他js则用来管理各个模块的接口。
-
-index.js
-```js
-/**   
- * api接口的统一出口  
- */  
-// 文章模块接口  
-import article from '@/api/article';  
-// 其他模块的接口……  
-  
-// 导出接口  
-export default {      
-    article,  
-    // ……  
-}
-```
-
-
-base.js
-通过base.js来管理我们的接口域名，不管有多少个都可以通过这里进行接口的定义。即使修改起来，也是很方便的。
-```js
-/**  
- * 接口域名的管理  
- */  
-const base = {      
-    sq: 'https://xxxx111111.com/api/v1',      
-    bd: 'http://xxxxx22222.com/api'  
-}  
-  
-export default base;
-```
-
-article.js
-```js
-/**  
- * article模块接口列表  
- */  
-  
-import base from './base'; // 导入接口域名列表  
-import axios from '@/utils/http'; // 导入http中创建的axios实例  
-import qs from 'qs'; // 根据需求是否导入qs模块  
-  
-const article = {      
-    // 新闻列表      
-    articleList () {          
-        return axios.get(`${base.sq}/topics`);      
-    },
-    // 新闻详情,演示      
-    articleDetail (id, params) {          
-        return axios.get(`${base.sq}/topic/${id}`, {              
-            params: params          
-        });      
-    },  
-    // post提交      
-    login (params) {          
-        return axios.post(`${base.sq}/accesstoken`, qs.stringify(params));      
-    }  
-    // 其他接口…………  
-}
-
-export default article;
-```
 
 
 ## 封装4
@@ -644,10 +72,10 @@ export default article;
 ![image](https://jsd.cdn.zzko.cn/gh/aotushi/picx-images-hosting@master/image.8ad3bhf9ks.webp)
 
 
-#### 封装4-1
+#### 封装1
 
 ```ts
-// tool.ts
+// src/request/tool.ts
 import {message} from '../antd'
 export const handleChangeRequestHeader = config => {
 	config['xxxx'] = 'xxxx'
@@ -715,7 +143,7 @@ export const handleGeneralError = (errno:string, errmsg:string):boolean => {
 
 
 ```ts
-//server.ts
+// src/request/server.ts
 import axios, {
   AxiosError,
   type AxiosResponse,
@@ -828,7 +256,7 @@ export const Post = <T>(
 
 
 ```ts
-//index.ts
+// request/index.ts
 import { userApi } from "./path/user";
 
 export const api = {
@@ -838,7 +266,7 @@ export const api = {
 
 
 ```ts
-//src/api/path/user.ts
+//src/request/path/user.ts
 
 import {Get} from '../server'
 
@@ -860,8 +288,8 @@ export const userApi = {
 ```
 
 
-#### **封装4-2**
-降低耦合度的方案
+#### 封装1-1
+降低耦合度的方案, 相对于上一个方案来说, 就是将请求统一封装, REST风格请求只需传参并调用这个请求即可. 
 
 ```ts
 // architectcure
@@ -1006,7 +434,7 @@ export default class HttpRequest {
 ```
 
 
-#### 封装4-2-1
+#### 封装1-2
 在前者的基础上再次进行完善,添加了重复请求,移除重复请求,取消请求的功能.
 ```ts
 // src/request/http.ts
@@ -1396,6 +824,20 @@ export const api = {
   ...userApi,
 }
 ```
+
+
+#### 封装2
+> 来源: [blog/docs/ts/axios.md at master · kvchen95/blog](https://github.com/kvchen95/blog/blob/master/docs/ts/axios.md)
+
+```ts
+// src/reqeust
+```
+
+使用
+```vue
+
+```
+
 
 
 # 实例

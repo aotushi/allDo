@@ -1624,7 +1624,42 @@ Using uary plus
 * the method returns `false` if the property is inherited, or has not been declared at all.
 * Unlike the `in` operator, this method does not check for the specified property in the object's prototype chain.
 * the method can be called on most JS objects, because most objects descend from `Object`, and hence inherit its methods.
-* the method will not be available in objects where it is reimplemented, or on objects created using `Object.create(null)`(as these don't inherit from `Object.prototype`).
+* <span style="color:red">the method will not be available in objects where it is reimplemented(在对象上重新实现了hasOwnProperty方法), or on objects created using `Object.create(null)`(as these don't inherit from `Object.prototype`).</span>
+
+
+##### 实现
+```js
+//implement by self
+
+Object.protoype.hasOwnProperty2 = function(key) {
+	let obj = this;
+	key = typeof key === 'symbol' ? key : String(key)
+	return Object.getOwnPropertyDescriptor(obj, key) !== undefined
+}
+
+Object.prototype.getOwnProperty3 = function(key) {
+	let obj = this;
+	key = typeof key === 'symbol' ? key : String(key)
+	return Object.keys(obj).includes(key)
+}
+```
+
+
+##### 实例
+在日常开发中, eslint不建议在对象上直接调用`hasOwnProperty`方法, 说是会有性能问题(why?).
+所以会有如下几种变通方案:
+```js
+Object.prototype.hasOwnProperty.call(obj, key)
+Object.hasOwn(obj, key)
+key in obj
+```
+
+
+
+### Object.hasOwn()
+
+#### 是什么
+> 
 
 
 
@@ -1934,6 +1969,36 @@ toLocaleString()
 通常的做法是，先检查当前浏览器是否支持某个[API](https://so.csdn.net/so/search?q=API&spm=1001.2101.3001.7020)，如果不支持的话就加载对应的polyfill，然后新旧浏览器就都可以使用这个API了
 
 
+### Object.hasOwn
+
+#### define
+> 如果规定的对象具有指定的属性作为它自身的属性就返回true; 如果属性是继承的,或不存在, 则返回false
+
+
+#### syntax
+```js
+Object.hasOwn(obj, prop)
+```
+
+* obj: 需要测试的对象
+* prop: 用来测试的字符串名称或Symbol
+
+#### desc
+* 它比`Object.prototype.hasOwnProperty()`更推荐使用, 因为它作用于`null-prototype objects`和重写了继承的方法`Object.prototype.hasOwnProperty`的对象.
+* `Object.hasOwn`比调用`Object.prototype.hasOwnProperty`更直观
+
+intuitive?(更直观)
+```js
+
+/ 第一种写法 - 直接调用（可能有风险）
+obj.hasOwnProperty('prop')
+
+// 第二种写法 - 安全但不直观
+Object.prototype.hasOwnProperty.call(obj, 'prop')
+
+// 更直观的写法 
+Object.hasOwn(obj, 'prop')
+```
 
 ### Object.is
 
@@ -3054,8 +3119,7 @@ Object.fromEntries(iterable)
 一个新的对象, 其属性由迭代器的条目给出.
 
 #### 描述
-此方法接收一个键值对(key-value)列表并且返回一个对象,该对象的属性由这些条目(entries)提供. 可迭代参数预计为一个对象, 其可以执行`[Symbol.iterator]()`方法.
-<del>该方法返回一个迭代器对象，该对象生成两个元素数组类对象。 </del>
+此方法接收一个键值对(key-value)列表并且返回一个对象,该对象的属性由这些条目(entries)提供. 可迭代参数预期为为一个实现了`[Symbol.iterator]()`方法的对象, 该对象的方法返回一个迭代器对象，该对象生成两个元素数组类对象。 
 
 
 #### 实例

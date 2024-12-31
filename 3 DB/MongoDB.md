@@ -460,6 +460,13 @@ update命令与findAndModify比较:
 
 #### 5使用聚合
 
+利用MongoDB的聚合框架（aggregation framework）来完成计算。
+
+
+
+
+
+
 
 
 #### 计算文档大小

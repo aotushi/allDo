@@ -1,4 +1,4 @@
-## 仿掘金网站
+## 仿掘金网站后端
 
 
 
@@ -16,9 +16,6 @@
 * 个人主页
 * 消息页
 
-
-
-a
 
 ### 2.开发接口
 
@@ -87,6 +84,38 @@ app.listene(port, () => {
 #### 1.运行
 
 #### 2.pm2监控
+**是什么**
+进程管理器, 解决`npm run xxx`运行后,代码修改不会立即生效问题.
+
+**怎么做?**
+1.安装
+```bash
+pm2 start --watch
+```
+
+2.项目根目录下创建pm2模块的配置文件`ecosystem.config.js`,添加如下内容:
+```js
+// ecosystem.config.js
+
+module.exports = {
+	apps: [{
+		name: 'alifc-blog', //定义应用名称
+		script: './index.js' //定义入口文件
+	}]
+}
+```
+
+3.启动pm2
+根据npm run相关命令启动pm2
+```bash
+pm2 start --watch
+```
+
+
+
+
+
+
 
 #### 3.使用路由创建API接口
 
@@ -592,7 +621,7 @@ app.use((err, req, res, next) => {
 
 
 
-### 概述-前端
+## 前端
 
 ### 1.创建项目
 
@@ -670,7 +699,7 @@ app.use(ElementPlus)
 
 ```less
 // src/styles/main.less
-@import 'element-plus//dist/index.css'
+@import 'element-plus/dist/index.css'
 @import './variable.css'
 ```
 
@@ -698,50 +727,15 @@ import ./styles/main.less
 
 #### 2.代码规范
 
-0.安装插件
+这里简述一下, 使用`eslint, commitlint, .vscode/settings.json, commitizen, git-cz`来实现代码格式化和提交的格式化.
 
-1.使用Prettier配置,根目录下创建`.prettierrc.json`文件,写入如下内容:
-
-```json
-// src/.prettierrc.json
-{
-  "singleQuote": true,
-  "semi": false,
-  "arrowParens": "avoid",
-  "bracketSpacing": true,
-  "jsxBracketSameLine": true,
-  "requirePragma": false,
-  "overrides": [
-    {
-      "files": ["*.json"],
-      "options": {
-        "parser": "json-stringify"
-      }
-    }
-  ]
-}
-```
-
-2.需要配置vscode, 设置'保存时自动格式化'选项.
-
-为了减少此选项对其他项目的影响, 应该配置vscode工作区设置.我们提交代码时候,也应该加上`.vscode`文件夹.
-
-```json
-// .vscode/settings.json
-
-{
-  //...
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true
-}
-```
+具体可以查看: [[前端工程化概览#3.检测和统一规范]]
 
 
 
 ### 3.添加统一路由及请求的配置
 
 VueRouter配置,及axios配置
-
 
 
 #### 3.1 路由配置
@@ -805,7 +799,34 @@ export default routes
 
 
 
-```ts
 
+
+### 4.添加mock配置
+
+使用strapi创建模拟请求的后端.来对数据进行增删改查操作.
+
+
+
+
+
+### 5.开发全局公共组件
+
+掘金网站的页面布局是上下结构, 所以根组件也要分成上下结构.
+
+#### 1.根组件App.vue
+
+
+#### 2.头部组件components/cus-header
+文件构成:
+消息弹框子组件, 用户弹窗子组件
+
+```md
+- cus-header
+	- index.vue
+	- message.vue
+	- 
 ```
+
+
+
 
