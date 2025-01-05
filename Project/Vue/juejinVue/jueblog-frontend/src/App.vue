@@ -1,27 +1,49 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import { RouterView } from 'vue-router'
+import { onMounted } from 'vue'
+import CusHeader from '@/components/cus-header/index.vue'
+// import { useArticleApi } from '@/composables/useArticleApi'
+
+// const { getArticlesList } = useArticleApi()
+
+// async function getData() {
+//   axios
+//     .get('/api2/users/list', {
+//       headers: {
+//         Authorization:
+//           'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWJjZjJjYjM1N2ViOGI0YjQwN2VmMyIsInVzZXJuYW1lIjoiYWJjMiIsImlhdCI6MTczNTQ0Mzg3OSwiZXhwIjoxNzM2MDQ4Njc5fQ.EuGrIGJamCwncmAarRnc-RMVLDLY1L8qPEzbTwUM9po',
+//       },
+//     })
+//     .then(res => {
+//       console.log(res)
+//       return res.data
+//     })
+//     .then(res => {
+//       console.log(res)
+//     })
+// }
+
+// let a
+
+onMounted(() => {
+  console.log('onmounted>')
+  // getArticlesList()
+  // let res = getData()
+  // console.log(res)
+})
 </script>
 
 <template>
-  <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+  <div id="root-layout">
+    <div id="header-layout">
+      <!-- 头部组件区域 -->
+      <CusHeader />
     </div>
-  </header>
+    <div id="main-layout">
+      <!-- 路由区域 -->
+      <RouterView />
+    </div>
+  </div>
 
   <RouterView />
 </template>

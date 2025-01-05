@@ -6,7 +6,10 @@ const handleChangeRequestHeader = config => {
 }
 
 const handleRequestHeaderAuth = config => {
-  config.headers.Authorization = 'Bearer ' + localStorage.getItem('token')
+  // config.headers.Authorization = 'Bearer ' + localStorage.getItem('token')
+  config.headers.Authorization =
+    'Bearer ' +
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWJjZjJjYjM1N2ViOGI0YjQwN2VmMyIsInVzZXJuYW1lIjoiYWJjMiIsImlhdCI6MTczNTQ0Mzg3OSwiZXhwIjoxNzM2MDQ4Njc5fQ.EuGrIGJamCwncmAarRnc-RMVLDLY1L8qPEzbTwUM9po'
   return config
 }
 
@@ -70,6 +73,9 @@ type AuthErrCode =
   | '10037'
   | '10038'
 const handleAuthError = (errno: AuthErrCode) => {
+  if (!errno) {
+    return
+  }
   const authErrMap = {
     '10031': '登录失效，需要重新登录', // token 失效
     '10032': '您太久没登录，请重新登录~', // token 过期
@@ -81,15 +87,18 @@ const handleAuthError = (errno: AuthErrCode) => {
     '10038': '账号未找到',
   }
 
-  if (authErrMap.hasOwnProperty(errno)) {
+  if (Object.hasOwn(authErrMap, errno)) {
     ElMessage.error(authErrMap[errno])
     // logout()
-    return false
+    // return false
   }
-  return true
+  // return true
 }
 
 const handleGeneralError = (errno: string, errmsg: string) => {
+  if (!errno || !errmsg) {
+    return
+  }
   if (errno !== '0') {
     ElMessage.error(errmsg)
     return false

@@ -21,8 +21,8 @@ export interface IAnyObj {
 
 /** 基础响应格式 */
 export interface FcResponse<T> {
-  errno: string
-  errmsg: string
+  errno?: string
+  errmsg?: string
   data: T
 }
 
@@ -48,12 +48,12 @@ export interface RetryConfig {
  */
 export default class HttpRequest {
   /** axios 实例 */
-  private instance: AxiosInstance;
+  private instance: AxiosInstance
   /** 请求计数器，用于防止重复请求 */
-  private pendingRequests: Map<string, AbortController>;
+  private pendingRequests: Map<string, AbortController>
   /** 默认重试配置 */
-  private defaultRetryConfig: RetryConfig;
-  
+  private defaultRetryConfig: RetryConfig
+
   /**
    * 构造函数
    * @param config - axios 配置
@@ -61,7 +61,7 @@ export default class HttpRequest {
    */
   constructor(
     config?: AxiosRequestConfig,
-    retryConfig: RetryConfig = { retries: 3, retryDelay: 1000 }
+    retryConfig: RetryConfig = { retries: 3, retryDelay: 1000 },
   ) {
     this.instance = axios.create({
       timeout: 1000 * 10,
@@ -70,11 +70,11 @@ export default class HttpRequest {
       withCredentials: true,
       // 默认请求头
       headers: {
-        'Content-Type': 'application/json;charset=utf-8'
+        'Content-Type': 'application/json;charset=utf-8',
       },
-      ...config
+      ...config,
     })
-    
+
     this.pendingRequests = new Map()
     this.defaultRetryConfig = retryConfig
     this.setupInterceptors()
@@ -125,7 +125,7 @@ export default class HttpRequest {
       (config: InternalAxiosRequestConfig) => {
         // 防止重复请求
         this.addPendingRequest(config)
-        
+
         // 处理请求头
         config = handleChangeRequestHeader(config)
         config = handleRequestHeaderAuth(config)
@@ -134,7 +134,7 @@ export default class HttpRequest {
       },
       (error: AxiosError) => {
         return Promise.reject(error)
-      }
+      },
     )
 
     // 响应拦截器
@@ -142,15 +142,17 @@ export default class HttpRequest {
       (response: AxiosResponse) => {
         // 移除已完成的请求
         this.removePendingRequest(response.config as InternalAxiosRequestConfig)
-
+        console.log('response>', response)
         if (response.status !== 200) {
+          console.log('aaaa', response)
+
           return Promise.reject(new Error(response.statusText || 'Error'))
         }
 
         const data = response.data
         // 处理业务错误
-        handleAuthError(data.errno)
-        handleGeneralError(data.errno, data.errmsg)
+        handleAuthError(data?.errno)
+        handleGeneralError(data?.errno, data?.errmsg)
 
         return response
       },
@@ -171,7 +173,7 @@ export default class HttpRequest {
         }
 
         return Promise.reject(error)
-      }
+      },
     )
   }
 
@@ -183,10 +185,10 @@ export default class HttpRequest {
    */
   private async retry<T>(
     fn: () => Promise<T>,
-    retryConfig: RetryConfig
+    retryConfig: RetryConfig,
   ): Promise<T> {
     const { retries, retryDelay, retryCondition } = retryConfig
-    
+
     for (let i = 0; i < retries; i++) {
       try {
         return await fn()
@@ -212,12 +214,12 @@ export default class HttpRequest {
    */
   private async request<T>(
     config: AxiosRequestConfig,
-    transform?: TransformFn<T>
+    transform?: TransformFn<T>,
   ): ApiResponse<T> {
     try {
       const response = await this.retry(
         () => this.instance.request(config),
-        this.defaultRetryConfig
+        this.defaultRetryConfig,
       )
       const responseData = response.data as FcResponse<T>
       return [null, transform ? transform(responseData) : responseData]
@@ -238,8 +240,9 @@ export default class HttpRequest {
   public async get<T>(
     url: string,
     params?: IAnyObj,
-    transform?: TransformFn<T>
+    transform?: TransformFn<T>,
   ): ApiResponse<T> {
+    console.log('url>', url)
     return this.request<T>({ method: 'GET', url, params }, transform)
   }
 
@@ -255,7 +258,7 @@ export default class HttpRequest {
     url: string,
     data?: IAnyObj,
     params?: IAnyObj,
-    transform?: TransformFn<T>
+    transform?: TransformFn<T>,
   ): ApiResponse<T> {
     return this.request<T>({ method: 'POST', url, data, params }, transform)
   }
@@ -272,7 +275,7 @@ export default class HttpRequest {
     url: string,
     data?: IAnyObj,
     params?: IAnyObj,
-    transform?: TransformFn<T>
+    transform?: TransformFn<T>,
   ): ApiResponse<T> {
     return this.request<T>({ method: 'PUT', url, data, params }, transform)
   }
@@ -287,7 +290,7 @@ export default class HttpRequest {
   public async delete<T>(
     url: string,
     params?: IAnyObj,
-    transform?: TransformFn<T>
+    transform?: TransformFn<T>,
   ): ApiResponse<T> {
     return this.request<T>({ method: 'DELETE', url, params }, transform)
   }
@@ -304,9 +307,31 @@ export default class HttpRequest {
     url: string,
     data?: IAnyObj,
     params?: IAnyObj,
-    transform?: TransformFn<T>
+    transform?: TransformFn<T>,
   ): ApiResponse<T> {
     return this.request<T>({ method: 'PATCH', url, data, params }, transform)
+  }
+
+  // http.ts
+
+  // 添加文件下载方法
+  download(url: string, params?: IAnyObj): ApiResponse<Blob> {
+    return this.instance
+      .get(url, {
+        params,
+        responseType: 'blob',
+      })
+      .then(response => {
+        // 创建一个 URL 对象
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'file') // 可以根据需要设置默认文件名
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return response.data
+      })
   }
 
   /**

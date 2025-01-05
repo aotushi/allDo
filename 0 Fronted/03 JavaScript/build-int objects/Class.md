@@ -147,7 +147,7 @@ class Person {
 1.创建一个新的对象
 2.`constructor`使用给定的参数运行,并将参数挂载到`this`上
 
-构造函数的new操作符做了什么? [[202301181138#new操作符调用构造函数时具体做了什么]]
+参考: 构造函数的new操作符做了什么?  [[Function#new的具体流程]]
 
 #### 来源
 
@@ -1228,6 +1228,32 @@ console.log(PersonClass2.nameValue); //'jack'
 
 
 ## 其它
+
+### 类的初始化顺序
+> 来源: <TS全栈开发> 10.7.1
+
+**类的实例化顺序是: **
+
+1.初始化父类属性,赋予默认值
+2.执行父类构造函数
+3.初始化子类属性,赋予默认值
+4.执行子类构造函数
+
+```js
+
+class A {
+	name = 'A'
+	constructor() {
+		console.log('this is ' + this.name)
+	}
+}
+
+class B extends A {
+	name = 'B'
+}
+```
+
+
 
 
 #### 类与自定义类型对象之间的差异

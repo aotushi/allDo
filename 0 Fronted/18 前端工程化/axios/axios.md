@@ -1040,3 +1040,8 @@ transformResponse: [function transformResponse(data) {
 处理方案: 只能是后端把浮点数转成字符串传给前端，或者前端特殊处理加上小数显示
 
 
+## 阻止重复请求
+
+
+
+## 缓存请求
