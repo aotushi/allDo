@@ -2016,6 +2016,107 @@ type SKU = `${Brand}-${Memory}-${ItemType}`;
 
 
 
+### 条件类型
+
+基础条件类型
+```ts
+type IsString<T> = T extends string ? true :false
+```
+
+联合类型分配条件类型
+```ts
+type ToArray<T> = T extends any ? T[] : never;
+
+// 使用联合类型来分配.  等价于string[] | number[]
+type Result = ToArray<string | number>
+
+// 如果不想分配，可以用方括号包裹 
+type NoDistribute<T> = [T] extends [any] ? T[] : never;
+```
+
+推断类型
+```ts
+//提取函数返回类型
+type ReturnType<T> = T extends (...args: any[]) => infer  R ? R : never;
+
+//提取数组元素类型
+type ElementType<T> = T extends (infer U)
+
+//提取Promise值类型
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
+
+// 使用示例
+type A = ReturnType<() => string>;          // string
+type B = ElementType<number[]>;             // number
+type C = UnwrapPromise<Promise<string>>;    // string
+```
+
+条件类型链(多重条件)
+```ts
+type TypeName<T> = 
+	T extends string ? 'string':
+	T extends number ? 'number':
+	T extends boolean ? 'boolean':
+	T extends undefined ? 'undefined':
+	T extends Function ? 'function':
+	'object';
+
+// 使用示例
+type A = TypedName<string>   //'string'
+type B = TypeName<()=>void>  //'function'
+```
+
+条件类型中的never处理
+```ts
+// 从联合类型中排除某个类型
+type Exclude<T,U> = T extends U ? never : T;
+
+//使用示例
+type T = Exclude<string | number | boolean, bookean>
+```
+
+
+结合映射类型使用
+```ts
+//移除类型中的所有可选属性
+type RemoveOptional<T> = {
+	[K in keyof T as T[K] extends undefined ? never : K] : T[K]
+}
+
+interface User {
+	name: string
+	age?: number
+	email?: string
+}
+```
+
+
+递归条件类型
+```ts
+
+//深度readonly
+type DeepReadonly<T> = {
+	readonly [P in keyof T]: T[P] extends object
+		? T[P] extends Function
+			? T[P]
+			: DeepReadonly<T[P]>
+		: T[P]
+}
+
+//使用场景
+//1.类型安全的事件处理
+type EventConfig<Events extends {kind: string}> = {
+	[E in Events as E['kind']]: (event: E) => void;
+}
+
+//2提取对象中的函数类型
+type FunctionPropertyNames<T> = {
+	[K in keyof T]: T[K] extends Function ? K : never
+}[keyof T]
+```
+
+
+
 
 
 ## 配置TypeScript
