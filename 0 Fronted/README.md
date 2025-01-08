@@ -6,25 +6,11 @@
 
 
 
-# 任务概述
-> 如果有检验标准就去达到这个标准,没有检验标准就用项目来验证所学知识.
-
-## 目标集合
-* 计算机
-* 前后端全栈
-* 外语
-* SEO推广
-
-
-## 计算机
-> 软考
 
 ### 书籍推荐
 * https://software-engineering-books.com/#personal_development
 * https://www.douban.com/doulist/1204928/
 
-## 前端
-### HTML/CSS/JS/TS
 
 
 
@@ -82,43 +68,6 @@ https://exercism.org/
 * 数据结构与算法js描述
 **快餐书籍**
 * 前端工程化: 基于vue.js3.0的设计与实践
-* 
-
-
-#### 项目练习
-* 搭建一个网站, 分类展示前端学习资源, 案例: [前端导航 | 百度前端技术学园](https://ife.baidu.com/encyclopedia/readme1.html)
-
-
-### Vue/React/nodejs
-
-#### 小程序/uniapp项目
-
-
-### 脚手架Vite
-
-
-### 前端工程化
-
-#### 是什么
-
-#### 怎么做?
-* [吃透前端工程化](https://www.xiufm.com/1138.html)
-* [前言 – 大厂面试每日一题](https://q.shanyue.tech/engineering)
-
-
-### 前端性能优化
-
-
-### 微服务/serverless/低代码
-
-
-
-
-
-## web3
-> [WTF学院, Web3 Open University | WTF学院](https://wtf.academy/)
-
-
 
 
 
@@ -126,8 +75,8 @@ https://exercism.org/
 
 
 # RSS
-* [前端专栏 - 知乎](https://zhuanlan.zhihu.com/tw1993)
-* [大前端\_大前端-InfoQ\_InfoQ精选频道](https://www.infoq.cn/topic/1208)
+
+
 * [JavaScript — Smashing Magazine](https://www.smashingmagazine.com/category/javascript)
 * https://www.joshwcomeau.com/
 * [JavaScript Weekly Archives](https://javascriptweekly.com/issues)
@@ -142,16 +91,6 @@ https://exercism.org/
 * https://github.com/ascoders/weekly
 
 
-# 在线课程
-
-* https://frontendmasters.com/
-* https://www.coursera.org/
-
-
-### vue3教程
-* https://vue3.chengpeiquan.com/
-
-
 
 ### React
 * https://github.com/reactnativecn/react-native-guide
@@ -159,7 +98,6 @@ https://exercism.org/
 ### css教程
 * https://segmentfault.com/a/1190000006689923
 * https://github.com/jobbole/awesome-css-cn
-* https://zhuanlan.zhihu.com/p/26559921
 
 ### js教程
 * https://zh.javascript.info/
@@ -229,15 +167,11 @@ https://exercism.org/
 * https://f2e.tech/
 * https://github.com/microsoft/Web-Dev-For-Beginners
 * https://juejin.cn/post/6850037268963721230#heading-8
-* 带你入门前端工程化 谭光志 | [gitee](https://woai3c.gitee.io/introduction-to-front-end-engineering/#%E7%AE%80%E4%BB%8B) 
+* * https://regex101.com/
 
 
 
-
-### 正则表达式
-* https://regex101.com/
-
-### 刷题
+### 前端刷题
 * https://bigfrontend.dev/zh?continueFlag=dd247624ee03283cd8cd889ba2d86144
 * https://javascript30.com/
 * codewars
@@ -247,8 +181,6 @@ https://exercism.org/
   ​                                                                                            
 
 ## 路径
-
-
 
 ![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1c638a8ba35e49eab3052c9872942071~tplv-k3u1fbpfcp-zoom-in-crop-mark:3024:0:0:0.awebp)
 
