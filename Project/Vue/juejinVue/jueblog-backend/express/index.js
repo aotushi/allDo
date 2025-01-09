@@ -11,7 +11,7 @@ app.use(mongoInit)
 app.use(bodyParser.json())
 app.use(
   verifyJwt().unless({
-    path: ['/users/create', 'users/login']
+    path: ['/users/create', '/users/login']
   })
 )
 

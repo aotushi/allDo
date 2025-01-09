@@ -5405,7 +5405,14 @@ for (let e of iterator) {
 
 ## 数组使用案例
 
+### 数组浅拷贝
+```js
+let arr = [1,2,null, '1', Boolean, {a:1}]
 
+let arr2 = arr.concat();
+let arr3 = arr.slice(0)
+let arr4 = [...arr]
+```
 
 ### 数组实例
 

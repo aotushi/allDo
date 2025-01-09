@@ -1868,7 +1868,7 @@ function curry(fn, args, holes) {
 
 我们直接看第三版的代码：
 
-```
+```js
 // 第三版
 function curry(fn, args, holes) {
     length = fn.length;

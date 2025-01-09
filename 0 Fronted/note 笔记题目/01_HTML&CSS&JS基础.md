@@ -4402,14 +4402,17 @@ multiply(2)(3);  // 6
 ```js
 function curryIt(fn){
     var args = [];
-    return function() {
+    return function curried() {
         // 类数组转数组方式1：
         var arg = [].slice.call(arguments);
         // 方式2：
         //var arg = Array.from(arguments);
         args = args.concat(arg);
         if(args.length < fn.length){
-            return arguments.callee;
+            // return arguments.callee;
+            return function () {
+	            return curried.apply(this, args.concat(arguments))
+            }
         }else{
             return fn.apply(null,args);
         }
