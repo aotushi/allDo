@@ -253,6 +253,15 @@ JavaScript 正则表达式迷你书 > 速查表
 
 
 # 实例
+### 匹配汉字的最佳方案
+
+> [[JS 0-1Grammar and types#Unicode字符属性转义序列]]
+
+```js
+'abc汉字'.replace(/\p{Unified_Ideograph}/ug, '');  // return: 'abc'
+```
+
+
 
 ### 检查路径是否是相对路径
 正则表达式中的`'\\'`代表一个`'\'`反斜杠字符。这个正则表达式中的`'\\/'`代表匹配一个反斜杠'/'字符。

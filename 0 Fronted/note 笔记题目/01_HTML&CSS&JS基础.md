@@ -3570,6 +3570,9 @@ V8的堆内存回收分为新生代内存和老生代内存，新生代内存是
 
 ## 手写代码
 
+### 来源
+* https://bigfrontend.dev/zh/problem
+
 ### 深拷贝
 
 #### 是什么
@@ -4469,6 +4472,13 @@ function count() {
 >https://github.com/Easay/issuesSets/issues/105
 
 
+#### 实现curry() -(BEF.dev)
+```js
+
+function curry() {
+	let 
+}
+```
 
 
 

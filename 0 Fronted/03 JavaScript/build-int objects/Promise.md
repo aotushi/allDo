@@ -10,9 +10,9 @@ https://github.com/wangfupeng1988/js-async-tutorial
 
 # 异步编程背景
 
-* JavaScript引擎是基于<span style="background: #ccc;">单线程（Single-threaded）事件循环</span>的概念构建的，<u>同一时刻只允许一个代码块在执行</u>
-* 即将运行的代码存放在<span style="background: #ccc;">任务队列（job queue）</span>中，每当一段代码准备执行时，都会被添加到任务队列
-* 事件循环（eventloop）是JavaScript引擎中的一段程序，负责监控代码执行并管理任务队列，会执行队列中的下一个任务
+[[01_HTML&CSS&JS基础#事件循环]]
+
+
 
 # Promises/A+
 

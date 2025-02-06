@@ -8,9 +8,12 @@
 
 [Docker 入门教程 - 阮一峰的网络日志](https://www.ruanyifeng.com/blog/2018/02/docker-tutorial.html)
 
+[Docker学习资料集（从入门到实践） - 追逐时光者 - 博客园](https://www.cnblogs.com/Can-daydayup/p/17813981.html)
+
 ### 是什么
 
-> 是一个开放平台,用来开发,交付,运行应用.
+> Docker 是一个开源的应用容器引擎，基于 Golang 语言开发，可以让开发者打包他们的应用以及依赖包到一个轻量级、可移植的容器中，然后发布到任何流行的 Linux 服务器。
+> 容器是一个沙箱机制、相互隔离、相互之间不会有影响（类似于我们手机上运行的 App），并且容器开销是较低的。
 
 
 

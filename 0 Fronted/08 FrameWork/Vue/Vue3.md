@@ -70,6 +70,28 @@ npm create vite@latest
 
 ## Reactivity fundamentals
 
+### ref
+
+#### 使用ref的原因
+* 在JS中,干净变量的访问和更新是无法监测的,但可以使用getter/setter方法来拦截对象属性的set/get操作.
+* `.value`给Vue检测ref访问和更新的能力, 基于以上,Vue在get时候执行track, 在set时候执行trigger.
+* 不像JS中其它干净的变量, 传递进函数中的ref依然保留了最新值的访问和响应式连接.
+
+
+
+#### 搭配TS的注意事项
+
+##### 声明空数组但显式声明类型, 其类型会变成`never[]`
+```vue
+const arr = ref([]) // this type is implicit a never[]
+```
+表示一个不包含任何元素的数组。当 TypeScript 无法推断出数组的具体类型时，就会默认将其类型设为 `never[]`。
+
+
+
+
+
+
 ### reactive()
 
 #### What
@@ -542,9 +564,228 @@ function warn(event) {
 
 
 ## 表单输入绑定
+#### 概述
+背景就是在处理表单输入时,我们尝尝需要同步输入值和js中的状态. 手动绑定值和触发事件监听的话会比较笨重.
+
+所以,vue中创建了`v-model`来处理不同类型的表单输入, 它会基于使用的元素来自动扩展不同的DOM属性和事件配对. 注意: v-model会忽略初始化的元素上的value,checked,selected属性
+* `<input> <textarea>` 使用`input事件和value属性
+* `<input type="radio"> <input type="checkout">`使用了change事件和checked属性
+* `<select>`使用了change事件和value属性
+
+#### 基本用法
+
+#### 值绑定
+对radio/checkbox/select来说, 可以绑定动态值
+```ts
+
+<input type="checkbox" v-model="toggle" :true-value="dynamicTrueVal" :false-value="daynamciFalseVal" />
+
+<input type="radio" v-model="pick" :value="first" />
 
 
-## 监视器
+<select v-model="selected">
+  <!-- inline object literal -->
+  <option :value="{ number: 123 }">123</option>
+</select>
+```
+
+
+#### 修饰符
+
+#### 在组件上使用
+
+
+**如何使用?**
+
+`v-model`可以用在组件上,实现双方绑定(two-way binding). 
+
+1.Vue 3.4+
+
+```vue
+// child.vue
+<script setup>
+const model = defineModel()
+function update() {
+	model.value++
+}
+</script>
+
+//parent.vue
+<Child v-model="countVal" />
+```
+
+**概述**
+* `defineModel()`返回值是一个`ref`
+* 返回值的`.value`和父组件绑定到`v-model`上的值同步
+* 当子组件更新这个值后, 父组件的绑定值也会更新
+
+这意味着你可以使用`v-model`绑定这个ref到原生input元素上.
+```vue
+// child.vue
+
+<script setup>
+const model = defineModel()
+</script>
+
+<template>
+	<input v-model="model" />
+</template>
+```
+
+
+**内部机制**
+编译器会将`defineModel`扩展为下面两个方面:
+* 属性名称: `modelValue`, 也就是本地局部ref的同步值
+* 事件名称: `update:modelValue`, 当本地ref的值变化发时触发(emitted)
+vue 3.4之前的实现:
+```vue
+// child.vue
+
+<script setup>
+const props = defineProps(['modelValue'])
+const emit = defineEmits(['update:modelValue'])
+</script>
+
+<template>
+<input 
+	:value="props.modelValue"
+	@input="emit('update:modelValue', $event.target.value)"  
+/>
+
+</template>
+
+
+//parent.vue
+<Child :modelValue="foo" @update:modelValue="$event => (foo=$event)" />
+```
+
+**传递选项配置**
+可以为props传递default/required的属性.
+注意: 有默认值,但是父组件绑定的变量没有值(也就是undefined)的情况下, 会引起非同步问题(de-synchronization).
+```js
+const model = defineModel({
+	required: true,
+	default: 1
+})
+
+//parent.vue
+const myRef=ref()
+<Child v-model="myRef" />
+```
+
+
+**`v-model`的参数**
+> Vue 3.4+
+
+在组件上的`v-model`也能接收一个参数, 在子组件中向`defineModel()`传递一个字符串当作其第一个参数.
+
+```vue
+// parent.vue
+const abcd = ref('v-model title')
+const abc = ref(123)
+<Child v-model:title="abcd" v-model="abc" />
+
+// child.vue
+const title = defineModel('title') //'v-model title'
+const modelVal = defineModel() //123
+```
+
+同样的,我们可以在此基础上使用prop的选项配置:
+```vue
+const title = defineModel('title', {required: true})
+```
+
+
+**v-model自定义修饰符**
+自定义修饰符,满足需求场景下的需求.
+> vue 3.4+
+
+获取修饰符的内容
+```vue
+// parent.vue
+<Child v-model.capitalize="myText" />
+
+
+// child.vue
+<script setup>
+const [modelVal, modifiers] = defineModel()
+
+consoe.log(modifiers) //{capitalize: true}
+
+</script>
+```
+
+
+根据修饰符的内容*读写*绑定的值.(传递set/get选项)
+```vue
+// child.vue
+
+<script setup>
+const [model, modifiers] = defineModel({
+	set(value) {
+		if (modifiers.capitalize) {
+			return value.charAt(0).toUpperCase() + value.slice(1)
+		}
+		return value
+	}
+})
+
+</script>
+```
+
+
+
+
+## 监视器watcher
+
+### 背景
+> 计算属性允许声明式的计算派生值, 但有种需求是在数据变化时候,我们需要执行副作用来响应数据变化, 例如DOM更新, 基于异步操作来改变另一个状态等等.
+
+
+
+### 描述
+ * 可以监听ref, computed ref, reactive objet, getter函数, 或数组中多个以上的数据类型.
+ * 不能监听reactive object的属性值, 应该是用getter函数代替
+```vue
+const x = ref(0)
+const y = ref(0)
+
+// single ref
+watch(x, newX => {
+	//...
+})
+
+// getter
+watch(
+	() => x.value,
+	newVal => {}
+)
+
+// array of multiple sources
+watch(
+	[x, () => y.value], ([newX, newY] => {})
+)
+```
+
+
+### 其它描述
+
+#### 深度监听
+
+
+#### 触发监听
+
+
+#### 一次性监听
+
+
+
+
+  
+
+
+
+
 
 
 ## 模板引用

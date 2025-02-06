@@ -1,11 +1,12 @@
 
+let mongoose = require("mongoose");
 let express = require('express')
 let router = express.Router()
 let usersModel = require('../module/users')
+let followsModel = require('../module/follows')
 let encrypt = require('../utils/crypto')
 let {geneJwt} = require('../utils/jwt')
-
-
+const { ObjectId } = mongoose.Types;
 
 
 router.get('/users', (req, res) => {
@@ -100,6 +101,36 @@ router.get('/list', async(req, res, next) => {
     next(err)
   }
   
+})
+
+
+// 获取用户信息
+router.get('/info/:id', async(req, res, next) => {
+  let { id } = req.params
+  if (id == 'self') {
+    if (!req.auth) {
+      return res.status(401).send({ message: '请登录' })
+    }
+    id = req.auth.id
+  }
+  try {
+    let result = await usersModel.findById(id)
+    let follows = await Promise.all([
+      followsModel.countDocuments({ user_id: new ObjectId(id) }),
+      followsModel.countDocuments({ fans_id: new ObjectId(id) }),
+    ])
+    result = JSON.parse(JSON.stringify(result))
+    console.log('follows>>>', follows);
+    
+    delete result.password
+    res.send({
+      ...result,
+      fans_num: follows[0],
+      follow_num: follows[1],
+    })
+  } catch (err) {
+    next(err)
+  }
 })
 
 module.exports = router

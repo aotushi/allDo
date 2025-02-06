@@ -3,12 +3,12 @@ let express = require("express");
 let router = express.Router();
 let mongoose = require("mongoose");
 const {ObjectId} = mongoose.Types
+var { groups } = require('../config/static')
 
 router.get("/", (req, res) => {
   res.send("沸点管理api");
 });
 
-console.log('shortmsgsModel>', shortmsgsModel)
 
 //新增沸点
 router.post('/create', async(req, res, next) => {
@@ -23,7 +23,9 @@ router.post('/create', async(req, res, next) => {
 
 // 沸点列表
 router.get('/lists', async(req, res, next) => {
-  let {group, user_id, created_by, orderby, per_page, page} = req,query
+  console.log('express>>/lists/req.query>', req);
+  
+  let {group, user_id, created_by, orderby, per_page, page} = req.query
   try {
     per_page = +per_page || 10
     page = +page || 1
@@ -125,6 +127,11 @@ router.delete('/remove/:id', async(req, res) => {
   } catch(err) {
     next(err)
   }
+})
+
+// 返回分类
+router.get('/group', async (req, res, next) => {
+  res.json(groups)
 })
 
 module.exports = router;

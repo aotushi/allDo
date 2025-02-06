@@ -35,7 +35,7 @@ const articlesSchema = new mongoose.Schema({
   page_view: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  created_by: { type: String, required: true },
+  created_by: { type: ObjectId, required: true }, //文章创建者
 });
 
 const Model = mongoose.model("Articles", articlesSchema);

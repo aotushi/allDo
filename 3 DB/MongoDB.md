@@ -95,10 +95,20 @@ db.people.find().limit(5).skip(10)
 
 #### 更新数据
 
+更新当前集合中所有符合条件的的数据
 ```js
 db.people.updateMany(
 	{age: {$gt: 25}},
   {$set: {status: 'caa'}}
+)
+
+//更新所有数据
+db.people.updateMany(
+  {}, // 空查询条件，匹配所有文档
+  {
+    $set: { avatar: "https://api.zxki.cn/api/sjtx?type=image" } // 更新 avatar 字段
+  }
+	
 )
 ```
 
@@ -126,9 +136,34 @@ db.people.deleteMany(
 
 6版本之前使用mongshell连接, 之后需要单独安装这个软件.
 
-在命令行中输入`mongsh`, 进入`>test`集合, 连接成功.
+在命令行中输入`mongosh`, 进入`>test`集合, 连接成功.
 
 在安装目录下bin文件夹中的mongod.cfg文件中, 有默认选项:主机,端口
+
+在命令行上执行`mongosh`命令后,提示了数据库信息及
+
+```sh
+C:\Users\Null>mongosh
+
+Current Mongosh Log ID: 677f9e4c4445649b6c893bf7
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.3.4
+Using MongoDB:          5.0.30
+Using Mongosh:          2.3.4
+
+For mongosh info see: https://www.mongodb.com/docs/mongodb-shell/
+
+------
+   The server generated these startup warnings when booting
+   2025-01-04T19:11:59.851+08:00: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+------
+
+Warning: Found ~/.mongorc.js, but not ~/.mongoshrc.js. ~/.mongorc.js will not be loaded.
+  You may want to copy or rename ~/.mongorc.js to ~/.mongoshrc.js.
+test>
+```
+
+
+
 
 #### 2.初始化用户
 
@@ -176,6 +211,10 @@ db.createUser({
 
 
 ### 使用
+
+#### 连接数据库
+
+可以通过mongodb提供的mongoshell连接到数据库(版本6之前后之后), 也可以通过vscode插件`MongoDB for vscode`插件连接数据库.
 
 #### 1插入文档
 

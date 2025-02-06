@@ -1,11 +1,49 @@
 
 # 一些方法论
 
+### 学习方式
+
 >理解不是0或1的，而是复杂有多层次，不同的人看完一本书，他们的理解范围和深度都是不同的。可能“自以为理解了，其实是错的”，或者“本身有10层，只理解了5层”；比如在第1，2，3，4次看到FreeMonad，和之后也许会有的第5，6，7，8次，如果别人提到，我都可以说“哦， FreeMonad，我知道哪个”，然而“知道”和“知道”天差地远。
 >如果没有一个超理解力的大脑，或者有老师带路，对于无法理解的东西，那么可能增加新的数据，让更多更新的数据来调整自己的理解，通过多角度审视问题，特别是在这个知识数据爆炸的年代，或许是我们最有效率的学习方式。--[阿莱克西斯](https://zhuanlan.zhihu.com/p/52518198)
 
 
+### 如何自学
+>自学一定要有具体的目标, 最好能配套实操.另外,自学时把自己所理解的内容讲给他人听, 或者写出来,是提高自学效率的好办法. -  [Patrick Zhang]([怎么样有效率的自学？ - 知乎](https://www.zhihu.com/question/9701761478/answer/82973801198))
+>学习一个东西首先不是去学理论而是去学习将一个实例分解成小的部件是怎么解决的, 比如要学习怎么制造汽车的理论, 不是去学汽车的理论而是学各个部件并最后组装出一辆汽车。
 
+
+
+## 日常需要学习的
+### AI方面
+- cursor做小程序 ,app软件
+- 阅读收藏的知识库
+- copy一个官网
+### 编程语言及项目
+* java/go
+* ts
+	* 书籍: 5
+* 函数式编程
+	* 书籍
+* mysql/mongodb
+	* b站教程
+	* 书籍
+* docker
+	* b站教程
+	* 书籍
+* eslint学习
+* nodejs
+	* b站教程
+* electron
+	* 书籍
+### 面试题
+
+* 手写代码-BFE网站
+* 设计模式- 微信读书
+* 收集vue/react面试问题
+
+### 外语
+* 每天需要翻译一点 你不知道的js
+* 听说读写译
 
 ### 书籍推荐
 * https://software-engineering-books.com/#personal_development
@@ -24,6 +62,7 @@
 - [ ] [30 seconds of code](https://www.30secondsofcode.org/)
 - [ ] [CSS-Tricks - Tips, Tricks, and Techniques on using Cascading Style Sheets.](https://css-tricks.com/)
 https://exercism.org/
+* 
 
 #### 书籍集合
 
@@ -188,3 +227,41 @@ https://exercism.org/
 
 
 
+### 全栈最短路径:
+
+1.前端vue后端go
+go不会更改服务器环境
+```md
+前端: vue3+elementplus+echarts
+后端: go, http用gin, tcpserver不用库, 定时任务用robfig/cron
+
+
+websock使用mosquitto做服务器
+消息系统使用tabbitmq
+数据库使用mysql 对性能有要求其加redis
+部署用supervisor
+```
+
+2.前端react后端next
+```md
+
+前端: react
+后端: nextjs+prisma+trpc
+```
+
+3.前端next后端海外服务器
+```md
+前端: nextjs, 推送到vercel部署 tailwindcss, shadcn/ui
+后端: rackNerd服务器(一年100多)+node.js搭建api
+数据库: nosql(开始用简单的)
+登录注册: auth.js或者supabase(每月5万用户免费额度)
+发邮件: resend
+```
+
+
+4.国外技术栈和国内技术栈
+```md
+
+国外: nextjs , tailwindcss, mongodb, stripe
+国内: nextjs tailwindcss, mongodb, 微信支付
+```

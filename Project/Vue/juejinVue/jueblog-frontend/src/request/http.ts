@@ -30,7 +30,15 @@ export interface FcResponse<T> {
 export type ApiResponse<T> = Promise<[Error | null, FcResponse<T> | undefined]>
 
 /** 响应数据转换函数类型 */
-export type TransformFn<T> = (response: FcResponse<T>) => FcResponse<T>
+export type TransformFn<T> = (response: IAnyObj) => FcResponse<T>
+
+export const defaultTransform = <T>(data: IAnyObj): FcResponse<T> => {
+  return {
+    errno: '',
+    errmsg: '',
+    data: data as T,
+  }
+}
 
 /** 重试配置接口 */
 export interface RetryConfig {
@@ -142,10 +150,7 @@ export default class HttpRequest {
       (response: AxiosResponse) => {
         // 移除已完成的请求
         this.removePendingRequest(response.config as InternalAxiosRequestConfig)
-        console.log('response>', response)
         if (response.status !== 200) {
-          console.log('aaaa', response)
-
           return Promise.reject(new Error(response.statusText || 'Error'))
         }
 
@@ -214,14 +219,15 @@ export default class HttpRequest {
    */
   private async request<T>(
     config: AxiosRequestConfig,
-    transform?: TransformFn<T>,
+    transform: TransformFn<T> = defaultTransform,
   ): ApiResponse<T> {
     try {
       const response = await this.retry(
         () => this.instance.request(config),
         this.defaultRetryConfig,
       )
-      const responseData = response.data as FcResponse<T>
+      // const responseData = response.data as FcResponse<T>
+      const responseData = response.data
       return [null, transform ? transform(responseData) : responseData]
     } catch (err) {
       // 确保错误是 Error 类型
@@ -242,7 +248,7 @@ export default class HttpRequest {
     params?: IAnyObj,
     transform?: TransformFn<T>,
   ): ApiResponse<T> {
-    console.log('url>', url)
+    console.log('get>params>', params)
     return this.request<T>({ method: 'GET', url, params }, transform)
   }
 

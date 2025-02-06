@@ -1,6 +1,10 @@
 ## 仿掘金网站后端
 
 
+# feature
+## 工程化
+### 项目架构
+### 代码
 
 ### 概述-后端
 
@@ -822,11 +826,104 @@ export default routes
 
 ```md
 - cus-header
-	- index.vue
-	- message.vue
-	- 
+	- index.vue //头部组件
+	- message.vue //消息弹窗组件
+	- user.vue  //用户弹窗组件
 ```
 
 
 
+#### 3.登录组件
 
+
+
+#### 4.编辑器组件
+使用开源编辑器项目: bytemd
+> [pd4d10/bytemd: ByteMD v1 repository](https://github.com/pd4d10/bytemd#readme)
+
+
+安装插件
+```bash
+npm i @bytemd/vue-next @bytemd/plugin-gfm @bytemd/plugin-highlight @bytemd/plugin-medium-zoom @bytemd/plugin-mermaid
+```
+
+创建编辑器组件`components/cus-editor/index.vue`
+```vue
+<
+```
+
+可以单独封装成一个组件,作为一个npmjs包使用.  
+可以参考: [21st.dev – The NPM for Design Engineers](https://21st.dev/)
+
+
+#### 5.首页各部分
+
+#### 5.1 文章分类
+需要先获得文章分类的数据: 定义文章store存储该数据,再创建组件并关联数据.
+1.创建首页左侧的文章分类组件`pages/home/nav.vue`
+2.创建文章列表子组件 `pages/home/articles.vue`
+
+
+#### 文章详情页
+文章详情页包括markdown渲染, 点赞, 收藏, 评论及目录解析等功能.该页面采用左中右布局, 分别是操作模块, 内容模块, 目录模块.
+
+##### 1.在文章store中获取文章详情/点赞/取消点赞/收藏/取消收藏的方法
+* `stores/article/index.ts => getArticlesDetail`
+##### 2.创建文章详情组件
+* `pages/article/detail.vue`
+##### 3.开发md文档渲染组件
+1. 安装showdown的相关依赖
+```bash
+npm i showdown showdown-highlight
+```
+
+2. 创建`components/mk-render/index.vue`
+```vue
+<article className="cus-mk-render" v-html="content" ></article>
+```
+
+3. 编写组件的JS内容及样式. 
+
+以上就是基本步骤
+
+
+##### 4.开发文章内容展示模块
+引入创建的渲染组件, 
+
+detail组件中添加内容模块的模板代码
+
+
+##### 5.开发文章作者和目录模块
+
+detail组件中添加文章作者和目录模块
+
+
+#### 用户中心页
+##### 1.开发用户基本信息模块
+
+* 用户中心页面 `pages/user/index.vue`及路由创建
+	* 组件左侧-个人信息模块,展示用户的基本信息, 拥有'编辑'按钮
+
+
+
+##### 2.展示用户的文章和沸点数据
+
+
+
+##### 3.用户的个人成就模块
+
+页面右侧展示个人成就,包括点赞量,阅读量和掘力值等
+
+
+
+
+
+#### 开发消息中心页
+
+##### 1.开发消息类型tab标签
+
+1.创建文件`pages/messages/index.vue`,并添加路由
+
+2.编写模板代码,根据状态判断某个标签是否已被选中,当有未读消息时展示未读消息的数量
+
+3.在stores中添加getComments方法, getPraises,getFollows方法,分别获取评论消息,获取点赞与收藏消息和获取关注消息.

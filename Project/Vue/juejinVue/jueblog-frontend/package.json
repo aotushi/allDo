@@ -38,11 +38,20 @@
     }
   },
   "dependencies": {
+    "@bytemd/plugin-gfm": "^1.21.0",
+    "@bytemd/plugin-highlight": "^1.21.0",
+    "@bytemd/plugin-medium-zoom": "^1.21.0",
+    "@bytemd/plugin-mermaid": "^1.21.0",
+    "@bytemd/vue-next": "^1.21.0",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",
     "element-plus": "^2.9.1",
+    "image-conversion": "^2.1.1",
     "less": "^4.2.1",
     "pinia": "^2.2.6",
+    "pinia-plugin-persistedstate": "^4.2.0",
+    "showdown": "^2.1.0",
+    "showdown-highlight": "^3.1.0",
     "vue": "^3.5.13",
     "vue-router": "^4.4.5"
   },

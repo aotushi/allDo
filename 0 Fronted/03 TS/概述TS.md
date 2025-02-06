@@ -1,3 +1,34 @@
+
+## 阅读资料
+## [Recommended Readings](https://github.com/type-challenges/type-challenges#recommended-readings)
+- [The TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+    - [Unions and Intersection Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)
+    - [Literal Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types)
+    - [Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html)
+    - [Advanced Types](https://www.typescriptlang.org/docs/handbook/2/types-from-types.html)
+- [The New Handbook](https://github.com/microsoft/TypeScript-Website/tree/v2/packages/documentation/copy/en/handbook-v2)
+### Articles
+- [Learn Advanced TypeScript Types](https://medium.com/free-code-camp/typescript-curry-ramda-types-f747e99744ab)
+- [The Art of Type Programming](https://mistlog.medium.com/the-art-of-type-programming-cfd933bdfff7)
+- [Type Query: jQuery Style Type Manipulation](https://mistlog.medium.com/type-query-jquery-style-type-manipulation-497ce26d93f)
+- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript/)
+
+### Talks
+- [Type Level Programming in Typescript](https://www.youtube.com/watch?reload=9&v=vGVvJuazs84)
+
+### Projects / Solutions
+- [🎥 Video Explanations and Solutions for every challenge!](https://www.youtube.com/playlist?list=PLOlZuxYbPik180vcJfsAM6xHYLVxrEgHC)
+- [Type Challenges Solutions](https://github.com/ghaiklor/type-challenges-solutions)
+- [Type Gymnastics](https://github.com/g-plane/type-gymnastics)
+- [TypeType Examples](https://github.com/mistlog/typetype-examples)
+
+### Books
+- [Effective TypeScript](https://effectivetypescript.com/)
+- [Learning TypeScript](https://www.learningtypescript.com/)
+- [TypeScript in 50 Lessons](https://typescript-book.com/)
+- [TypeScript Cookbook](https://typescript-cookbook.com/)
+
+
 ## TS开发环境搭建
 
 > 主要是VSCode中配置
@@ -24,6 +55,8 @@
 推荐的方式
 * 使用 Web IDE，比如 CodeSandbox
 * TS官方的 [TypeScript Playground](https://link.juejin.cn/?target=https%3A%2F%2Fwww.typescriptlang.org%2Fplay "https://www.typescriptlang.org/play")
+
+
 
 ## TS中的类型
 
@@ -793,9 +826,30 @@ obj = undefined
 
 
 
+### 数组类型
 
+#### 声明的几种方式
 
+```ts
+// 方式1：类型注解
+const articles: ArticleType[] = [];
 
+// 方式2：泛型注解
+const articles: Array<ArticleType> = [];
+
+// 方式3：类型断言（不太推荐）
+const articles = <ArticleType[]>[];
+// 或
+const articles = [] as ArticleType[];
+
+// 在 Vue3 的 ref 中使用
+const articleInfo = ref({
+  // 方式1
+  articles: [] as ArticleType[],
+  // 或方式2
+  categories: [] as Array<CategoryType>
+});
+```
 
 ### 元组类型
 
@@ -2350,3 +2404,10 @@ let mathTool: Complex = (<any>Object).assign(
   }
 );
 ```
+
+
+
+## TS练习
+> [Type-Challenges | 汪图南](https://wangtunan.github.io/blog/typescript/challenge.html)
+
+

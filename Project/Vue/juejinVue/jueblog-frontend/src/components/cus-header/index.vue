@@ -1,11 +1,10 @@
 <template>
   <div class="cus-header">
-    <!-- v-if="ustore.show_tips" -->
-    <div class="site-tips fx-c">
-      <span>本项目是开源项目，仅用于交流学习👏</span>
-      <!-- @click="ustore.setTips(false)" -->
-      <span class="close-btn fx-c">
-        <!-- <el-icon><Close /></el-icon> -->
+    <div class="site-tips fx-c" v-if="user_store.user_state.show_tips">
+      <!-- <span></span> -->
+
+      <span class="close-btn fx-c" @click="user_store.setTips(false)">
+        <el-icon><Close /></el-icon>
       </span>
     </div>
     <header>
@@ -14,10 +13,10 @@
           <!-- <img class="logo" src="/logo.png" /> -->
           <span class="title">仿稀土掘金</span>
         </span>
-        <!-- <Menus></Menus> -->
+        <Menus></Menus>
       </div>
       <div class="inner-row fx">
-        <!-- <Search style="margin-right: 26px"></Search> -->
+        <Search style="margin-right: 26px"></Search>
         <el-popover
           placement="bottom-end"
           :width="100"
@@ -41,14 +40,13 @@
             >
           </div>
         </el-popover>
-        <!-- v-if="ustore.user_info" -->
-        <template>
+
+        <template v-if="user_store.user_state.user_info._id">
           <Message></Message>
-          <!-- <UserAva></UserAva> -->
+          <UserAva></UserAva>
         </template>
-        <template>
-          <!-- @click="ustore.showLogin" -->
-          <el-button class="hover">登录/注册</el-button>
+        <template v-else>
+          <el-button class="hover" @click="showLogin">登录/注册</el-button>
         </template>
       </div>
     </header>
@@ -63,17 +61,70 @@ import Menus from './menus.vue'
 import { EditPen, Close } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-// import { useUserStore } from '@/stores'
+import { useUserStore } from '@/stores'
 
 const router = useRouter()
-// const ustore = useUserStore()
+const user_store = useUserStore()
+console.log('user_store>', user_store)
 const popover = ref()
+
+const toHome = () => {
+  location.href = '/'
+}
 
 const toRoute = (url: string) => {
   popover.value.hide()
+  if (!user_store.user_state.user_info) {
+    return user_store.showLogin()
+  }
+  if (url.includes('create')) {
+    window.open(url)
+  } else {
+    router.push(url)
+  }
+}
 
-  router.push(url)
+const showLogin = () => {
+  user_store.showLogin()
 }
 </script>
 
-<style scoped></style>
+<style lang="less">
+.cus-header {
+  .site-tips {
+    position: relative;
+    background: #faecd8;
+    height: 34px;
+    font-size: 14px;
+  }
+  .close-btn {
+    position: absolute;
+    right: 15px;
+    width: 17px;
+    height: 17px;
+    cursor: pointer;
+  }
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  padding: 0 24px;
+  .inner-row {
+    .title-wrap {
+      cursor: pointer;
+    }
+    .title {
+      font-size: 21px;
+      font-weight: 300;
+      margin-right: 20px;
+    }
+    .logo {
+      height: 26px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+  }
+}
+</style>

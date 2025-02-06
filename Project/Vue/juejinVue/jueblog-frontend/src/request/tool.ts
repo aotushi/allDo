@@ -1,3 +1,4 @@
+import { useUserStore } from '@/stores'
 import { ElMessage } from 'element-plus'
 
 const handleChangeRequestHeader = config => {
@@ -6,10 +7,11 @@ const handleChangeRequestHeader = config => {
 }
 
 const handleRequestHeaderAuth = config => {
-  // config.headers.Authorization = 'Bearer ' + localStorage.getItem('token')
   config.headers.Authorization =
-    'Bearer ' +
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NWJjZjJjYjM1N2ViOGI0YjQwN2VmMyIsInVzZXJuYW1lIjoiYWJjMiIsImlhdCI6MTczNTQ0Mzg3OSwiZXhwIjoxNzM2MDQ4Njc5fQ.EuGrIGJamCwncmAarRnc-RMVLDLY1L8qPEzbTwUM9po'
+    'Bearer ' + localStorage.getItem('jueblog_token')
+  // config.headers.Authorization =
+  //   'Bearer ' +
+  //   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3N2Y4N2IzNTg2MGFhNmEzMGI1ZDAwYiIsInVzZXJuYW1lIjoiYWJjMiIsImlhdCI6MTczNjQxMTY5NiwiZXhwIjoxNzM3MDE2NDk2fQ.Lo8IRjgNWRv8Ouar0KJ6y0w4cIVRZUCEu0-z36MCpxA0'
   return config
 }
 
@@ -22,6 +24,8 @@ const handleNetworkError = (errStatus: number) => {
         break
       case 401:
         errMsg = '未授权'
+        localStorage.removeItem('jueblog_token')
+        useUserStore().showLogin() //显示登录框
         break
       case 403:
         errMsg = '拒绝访问'

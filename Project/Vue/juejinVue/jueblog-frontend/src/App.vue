@@ -3,8 +3,9 @@ import { RouterView } from 'vue-router'
 import { onMounted } from 'vue'
 import CusHeader from '@/components/cus-header/index.vue'
 // import { useArticleApi } from '@/composables/useArticleApi'
-
-// const { getArticlesList } = useArticleApi()
+import CusLogin from '@/components/cus-login/index.vue'
+import { useUserStore } from '@/stores'
+import { watch, computed, ref } from 'vue'
 
 // async function getData() {
 //   axios
@@ -25,11 +26,19 @@ import CusHeader from '@/components/cus-header/index.vue'
 
 // let a
 
+const user_store = useUserStore()
+const login_ref = ref<InstanceType<typeof CusLogin> | null>(null)
+
+const need_login = computed(() => user_store.user_state.need_login)
+
+watch(need_login, new_val => {
+  console.log('app.vue>', new_val)
+  if (new_val) {
+    login_ref.value!.visible = true
+  }
+})
 onMounted(() => {
   console.log('onmounted>')
-  // getArticlesList()
-  // let res = getData()
-  // console.log(res)
 })
 </script>
 
@@ -42,10 +51,9 @@ onMounted(() => {
     <div id="main-layout">
       <!-- 路由区域 -->
       <RouterView />
+      <CusLogin ref="login_ref" />
     </div>
   </div>
-
-  <RouterView />
 </template>
 
 <style scoped>
