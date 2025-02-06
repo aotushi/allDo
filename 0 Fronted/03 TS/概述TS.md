@@ -1565,6 +1565,166 @@ type UnionIntersection = (1 | 2 | 3) & (1 | 2); // 1 | 2
 
 
 
+## 条件类型
+
+### 简述
+> 条件类型与条件表达式类似，它表示一种非固定的类型。条件类型能够根据条件判断从可选类型中选择其一作为结果类型。
+
+### 语法
+```ts
+T extends U ? X : Y
+```
+
+**解释:**
+* T、U、X和Y均表示一种类型。
+* 若类型T能够赋值给类型U，则条件类型的结果为类型X，否则条件类型的结果为类型Y。
+* 条件类型的结果类型只可能为类型X或者类型Y
+
+**实例**
+条件类型通常与类型参数结合使用
+```ts
+type TypeName<T> = T extends string 
+	? 'string'
+	: T extends number
+	? 'number'
+	: T extends boolean
+	? 'boolean'
+	: T extends undefined
+	? 'undefined'
+	: T extends Function
+	? 'function'
+	: 'object'
+
+
+type T0 = TypeName<'a'> // 'string'
+type T1 = TypeName<0> //'number'
+type T2 = TypeName<1> //'boolean'
+type T3 = TypeName<string[]> //'object'
+```
+
+
+### 分布式条件类型
+#### 是什么
+> 在条件类型`T extends U ? X : Y`中，如果类型T是一个**裸（Naked）类型参数**，那么该条件类型也称作分布式条件类型
+
+#### 裸类型参数
+> 从字面上理解，裸类型参数是指裸露在外的没有任何装饰的类型参数。如果类型参数不是复合类型的组成部分而是独立出现，那么该类型参数称作裸类型参数。
+
+##### 实例
+> 例如，在下例的`T0<T>`类型中，类型参数T是裸类型参数.
+> 但是在`T1<T>`类型中，类型参数T不是裸类型参数，因为它是元组类型的组成部分。因此，类型`T0<T>`是分布式条件类型，而类型`T1<T>`则不是分布式条件类型
+
+```ts
+type T0<T> = T extends string ? true : false; //T是裸类型参数
+
+type T1<T> = [T] extends [string] ? true : false; //T是非裸类型参数
+```
+
+
+#### 分布式行为
+> 如果实际类型参数T为联合类型，那么会将分布式条件类型展开为由子条件类型构成的联合类型。
+
+```ts
+T extends U ? X : Y
+```
+
+如果实际类型参数T是联合类型“A | B”​，那么分布式条件类型会被展开。示例如下：
+```ts
+T === A | B
+
+T extends U ? X : Y
+  === (A extends U ? X : Y) | (B extends U ? X : Y)
+```
+
+
+#### 实例
+
+##### 过滤联合类型
+
+背景知识:
+* 联合类型`U = U0 | U1`中, 如果U1是U0的子类型,那么联合类型可表示为`U = U0`
+* never是尾端类型, 当never与其它类型组合成联合类型时,可以直接从联合类型中消掉never. `T | never = T`
+
+故:
+从联合类型中过滤掉特定的类型
+```ts
+type Exclude<T, U> = T extends U ? never : T
+```
+
+故:
+该类型能够从联合类型T中挑选符合条件的类型
+```ts
+type Extract<T, U> = T extends U ? T : never
+```
+
+如果“Exclude<T, U>”类型中的类型参数U为联合类型“null | undefined”​，那么“Exclude<T, U>”类型就表示*从联合类型T中去除null类型和undefined类型*，也就是将类型T转换为一个非空类型。
+故,
+创建一个非空类型`NonNullable<T>`
+```ts
+type NonNullable<T> = T extends null | undefined ? never : T
+
+type NonNullable<T> = Exclude<T, null | undefined>;
+```
+
+
+
+#### 避免分布式行为
+>存在某些场景，要禁用分布式条件类型的分布式行为。
+   这就需要将分布式条件类型转换为非分布式条件类型。
+一种可行的方法是将分布式条件类型中的裸类型参数修改为非裸类型参数，这可以通过将extends两侧的类型包裹在元组类型中来实现。
+
+
+```ts
+//将如下分布式条件类型变成非分布式条件类型
+
+type CT<T> = T extends string ? true : false;
+type T = CT<string | number>; // boolean
+
+
+type CT<T> = [T] extends [string] ? true : false
+type T = CT<string | number>
+```
+
+
+
+### infer关键字
+
+#### 使用介绍
+条件类型语法:
+```ts
+T extends U ? X : Y
+```
+在extends语句中类型U的位置上允许使用infer关键字来定义可推断的类型变量，可推断的类型变量只允许在条件类型的true分支中引用，即类型X的位置上使用。
+```ts
+T extends infer U ? U : Y
+```
+
+#### 实例
+##### 1.可以使用条件类型和infer类型变量来获取某个函数的返回值类型。
+```ts
+type ReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R
+```
+
+##### 2.条件类型中定义多个infer声明
+
+2-1. 多个infer定义了同一个推断类型变量U
+```ts
+// 存在两个infer声明，它们定义了同一个推断类型变量U：
+type CT<T> = T extends {a: infer U; b: infer U} ? U : never;
+
+type T = CT<{a: string; b: number}> // string | number
+```
+
+TS允许我们通过多次使用 `infer` 来收集和合并多个相关的类型, 所以虽然都是U类型,但是结果是联合类型.
+
+2-2. 在多个infer声明中也可以定义不同的推断类型变量
+```ts
+
+type CT<T> = 02 T extends { a: infer M; b: infer N } ? [M, N] : never; 
+
+type T = CT<{ a: string; b: number }>; // [string, number]
+```
+
 
 
 ## 泛型
