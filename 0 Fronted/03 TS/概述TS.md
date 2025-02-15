@@ -1636,6 +1636,8 @@ T extends U ? X : Y
   === (A extends U ? X : Y) | (B extends U ? X : Y)
 ```
 
+注意: boolean类型是联合类型: `true | false`
+
 
 #### 实例
 
@@ -2111,8 +2113,10 @@ const addResult: AddResult = 3;
 
 
 ### typeof
+> [TypeScript: Documentation - Typeof Type Operator](https://www.typescriptlang.org/docs/handbook/2/typeof-types.html#handbook-content)
 
-> 那么如果，我们只有一个函数，而并没有这个函数类型呢？此时可以使用 TypeScript 提供的类型查询操作符，即 typeof（记得和 JavaScript 的 typeof 区分一下），来获得一个函数的结构化类型，再配合工具类型即可即可：
+#### 是什么
+> refer to the _type_ of a variable or property:
 
 ```ts
 const addHandler = (x: number, y: number) => x + y;
@@ -2127,8 +2131,13 @@ const addResult: AddResult = 3;
 
 ```
 
+#### 注意事项
+* 只能用在变量或属性上
+* 在基本类型上使用用处不大,一般多是和其它操作符组合使用
 
+```ts
 
+```
 ### Awaited
 
 > 对于异步函数类型，提取出的返回值类型是一个 `Promise<string>` 这样的类型，如果我想提取 Promise 内部的 string 类型呢？贴心的 TypeScript 为你准备了 Awaited 类型用于解决这样的问题：
@@ -2161,7 +2170,14 @@ type Result = Awaited<ReturnType<typeof getPromise>>; // string 类型
 
 ```
 
+### 类型查询
 
+
+### 类型断言
+
+
+
+### 类型细化
 
 
 

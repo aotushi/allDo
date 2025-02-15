@@ -1,14 +1,13 @@
-let shortmsgsModel = require("../module/shortmsg");
-let express = require("express");
-let router = express.Router();
-let mongoose = require("mongoose");
-const {ObjectId} = mongoose.Types
+let shortmsgsModel = require('../module/shortmsg')
+let express = require('express')
+let router = express.Router()
+let mongoose = require('mongoose')
+const { ObjectId } = mongoose.Types
 var { groups } = require('../config/static')
 
-router.get("/", (req, res) => {
-  res.send("沸点管理api");
-});
-
+router.get('/', (req, res) => {
+  res.send('沸点管理api')
+})
 
 //新增沸点
 // router.post('/create', async(req, res, next) => {
@@ -23,7 +22,7 @@ router.get("/", (req, res) => {
 
 router.post('/create', async (req, res, next) => {
   let body = req.body
-  let user_id = req.auth.id
+  let user_id = req.auth._id
   try {
     body.created_by = user_id
     let result = await shortmsgsModel.create(body)
@@ -34,10 +33,10 @@ router.post('/create', async (req, res, next) => {
 })
 
 // 沸点列表
-router.get('/lists', async(req, res, next) => {
-  console.log('express>>/lists/req.query>', req);
-  
-  let {group, user_id, created_by, orderby, per_page, page} = req.query
+router.get('/lists', async (req, res, next) => {
+  console.log('express>>/lists/req.query>', req)
+
+  let { group, user_id, created_by, orderby, per_page, page } = req.query
   try {
     per_page = +per_page || 10
     page = +page || 1
@@ -45,7 +44,7 @@ router.get('/lists', async(req, res, next) => {
     orderby = orderby || 'new'
 
     if (!['new', 'hot'].includes(orderby)) {
-      return res.status(400).send({message: 'orderby参数错误'})
+      return res.status(400).send({ message: 'orderby参数错误' })
     }
     let where = {}
     if (group) {
@@ -116,27 +115,26 @@ router.get('/lists', async(req, res, next) => {
       meta: {
         total,
         page,
-        per_page
+        per_page,
       },
-      data: result
+      data: result,
     })
-
-  } catch(err) {
+  } catch (err) {
     next(err)
   }
 })
 
 // 删除沸点
-router.delete('/remove/:id', async(req, res) => {
-  let {id} = req.params
+router.delete('/remove/:id', async (req, res) => {
+  let { id } = req.params
   try {
     let result = await shortmsgsModel.findByIdAndDelete(id)
     if (result) {
-      res.send({message: '删除成功'})
+      res.send({ message: '删除成功' })
     } else {
-      res.status(400).send({message: '文档未找到,删除失败'})
+      res.status(400).send({ message: '文档未找到,删除失败' })
     }
-  } catch(err) {
+  } catch (err) {
     next(err)
   }
 })
@@ -146,4 +144,4 @@ router.get('/group', async (req, res, next) => {
   res.json(groups)
 })
 
-module.exports = router;
+module.exports = router

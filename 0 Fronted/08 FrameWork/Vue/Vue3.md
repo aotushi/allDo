@@ -79,19 +79,6 @@ npm create vite@latest
 
 
 
-#### 搭配TS的注意事项
-
-##### 声明空数组但显式声明类型, 其类型会变成`never[]`
-```vue
-const arr = ref([]) // this type is implicit a never[]
-```
-表示一个不包含任何元素的数组。当 TypeScript 无法推断出数组的具体类型时，就会默认将其类型设为 `never[]`。
-
-
-
-
-
-
 ### reactive()
 
 #### What
@@ -166,6 +153,133 @@ console.log(map.get('count').value)
 * 在模板上ref解包, 只有在ref是在模板解析上下文中的顶级属性才会解包
 * 如果 ref 是文本插值的最终评估值（即 {{ }} 标签），则 ref 会被解包
 
+
+
+### 响应式数据下的typescript问题
+
+#### 1.声明空数组但显式声明类型, 其类型会变成`never[]`
+```vue
+const arr = ref([]) // this type is implicit a never[]
+```
+表示一个不包含任何元素的数组。当 TypeScript 无法推断出数组的具体类型时，就会默认将其类型设为 `never[]`。
+
+
+#### 2.声明响应式数据后,在模板中使用报错`xxx..value' is possibly 'undefined'.ts-plugin(18048)`
+**原因:**
+* 可能是没有提供初始值,TS会将类型判断为`Ref<XxxType | undefined>`
+
+**解决方案**
+* 提供初始值(最佳实践)
+* 使用非空断言
+* 使用可选链和条件判断(安全但啰嗦)
+* 使用类型断言(不推荐)
+
+```vue
+<script>
+//1.提供初始值
+const form = ref<UserType>({
+  avatar: '',
+  name: '',
+  age: 0,
+  email: '',
+})
+
+const updateForm = res => {
+	form.value = res
+}
+
+
+
+//2.使用非空断言操作符
+const form = ref<UserType>({
+})
+
+const updateForm = res => {
+	form.value!.avatar = res
+}
+
+//3.使用可选连或条件判断
+const form = ref<UserType>({
+})
+
+//3.1 可选连操作符
+const updateForm = res => {
+	if (form.value?.avatar !== undefined) {
+		form.value?.avatar = res
+	}
+	
+}
+
+//3.2 直接条件判断
+if (form.value) {
+	form.value.avatar = res
+}
+
+
+
+//4.使用类型断言
+const form = ref<UserType>(); 
+(form.value as UserType).avatar = value;
+
+</script>
+```
+
+
+#### 3.某个值的类型为联合类型,做真值判断后再条件判断报错
+```vue
+<script setup lang="ts">
+
+interface formType {
+	status: 0 | 1
+	//...
+}
+
+const form = <formType>({
+	status: 0,
+	//...
+})
+
+
+
+if (form.value.status && form.value.status === 1) {
+	//...
+}
+
+在form.value.status有报错提示:This comparison appears to be unintentional because the types '1' and '0' have no overlap.ts-plugin(2367)
+
+
+
+</script>
+```
+**原因:**
+因为 TypeScript 的类型检查机制导致的:
+* 在 `if (form.value.status && form.value.status === 1)` 中
+- 第一个条件 `form.value.status` 会被 TypeScript 理解为真值检查
+- 因为 `0` 是 falsy 值，所以第一个条件成立时，`status` 就不可能是 `0`
+- 这样在第二个条件 `form.value.status === 1` 中，TypeScript 认为 `status` 只能是 `1`
+- 所以会报类型不重叠的错误
+
+**解决方案**
+1.比较比较值,不做真值判断
+2.如果要判断真值存在, 使用`!==undefined`
+3.如果要检查多个条件,建议使用多个明确的比较
+
+
+```ts
+
+//1
+if(form.value.status === 1)
+
+//2
+if (form.value.status !== undefined && form.value.status === 1)
+
+//3-1
+if ([1].includes(form.value.status))
+
+//3-2
+const isStatusOne = (status: 0 | 1): status is 1 => status === 1; 
+if (isStatusOne(form.value.status)) { // ... }
+```
 
 ## computed properties
 
