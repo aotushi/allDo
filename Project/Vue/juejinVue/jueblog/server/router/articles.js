@@ -250,43 +250,19 @@ router.get('/detail/:id', async (req, res, next) => {
           },
         },
       },
-      // {
-      //   $addFields: {
-      //     praise_records: {
-      //       $filter: {
-      //         input: '$praises',
-      //         as: 'arrs',
-      //         cond: { $eq: ['$$arrs.type', 1] },
-      //       },
-      //     },
-      //     comments: {
-      //       $size: '$comments',
-      //     },
-      //     star_records: {
-      //       $filter: {
-      //         input: '$praises',
-      //         as: 'arrs',
-      //         cond: { $eq: ['$$arrs.type', 2] },
-      //       },
-      //     },
-      //     user: {
-      //       $first: '$user',
-      //     },
-      //   },
-      // },
       {
         $addFields: {
           is_praise: {
-            $in: [new ObjectId(user_id), '$praises.records.created_by'],
+            $in: [new ObjectId(user_id), '$praises.created_by'],
           },
           praises: {
             $size: '$praises',
           },
           is_start: {
-            $in: [new ObjectId(user_id), '$stars_records.created_by'],
+            $in: [new ObjectId(user_id), '$stars.created_by'],
           },
           stars: {
-            $size: '$stars_records',
+            $size: '$stars',
           },
         },
       },

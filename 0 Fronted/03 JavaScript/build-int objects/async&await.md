@@ -13,7 +13,7 @@ async/await 是以更舒适的方式使用promise的一种特殊语法.
 
 #### aysnc/await 概述
 
-* `async`用来描述`async`函数的.函数的返回值为promise对象.
+* `async`用来描述`async`函数的. 函数的返回值为promise对象.
 * promise对象的结果和状态由`async`函数的返回值决定. 返回规则和then方法回调返回结果是一样的.
   * 如果返回结果是非promise类型的值,则返回值是成功的promise
   * 抛出一个错误, 函数的状态为失败状态rejected, 错误值为函数返回值.
@@ -22,6 +22,23 @@ async/await 是以更舒适的方式使用promise的一种特殊语法.
   * 如果表达式是promise对象, await返回的是promise成功的值.如果是失败的值,await会把promise的异常抛出, 并使用try..catch捕获错误.
   * 如果表达式是其它值, 直接将此值作为await的返回值
 * await...后面的代码相当于放到成功的回调中
+* await调用函数后, 当前函数后边所有代码会在当前函数执行完毕后, 被放入到微任务队列中.
+* await只能用于async函数或es模块顶级作用域中
+
+```js
+
+async function fn1() {
+	console.log(1)
+	await console.log(2)
+	console.log(3)
+}
+
+fn1()
+
+console.log(4)
+
+//1 2 4 3
+```
 
 
 

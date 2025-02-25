@@ -31,10 +31,17 @@
 	* b站教程
 	* 书籍
 * eslint学习
+* babel学习
 * nodejs
 	* b站教程
 * electron
 	* 书籍
+
+
+
+
+
+
 ### 面试题
 
 * 手写代码-BFE网站
@@ -48,10 +55,6 @@
 ### 书籍推荐
 * https://software-engineering-books.com/#personal_development
 * https://www.douban.com/doulist/1204928/
-
-
-
-
 
 
 #### 日常练习
@@ -265,3 +268,39 @@ websock使用mosquitto做服务器
 国外: nextjs , tailwindcss, mongodb, stripe
 国内: nextjs tailwindcss, mongodb, 微信支付
 ```
+
+
+### 全栈技术栈
+#### 设计
+```md
+Figma
+Blender
+Midjourney
+
+Ocam(录屏)
+
+```
+
+
+#### 框架
+```md
+Dify: 提供ai llmops
+
+框架: Astro Next
+
+
+文档管理: 语雀+自建
+
+部署: 免费: Vercel Cloudflare
+域名: spaceship porkbun
+右键: Resend(3000 emails/mo 100 emailes/day)
+存储: Couldflare R2(免费)
+Auth: supabase(鉴权和数据库)
+CMS: Sanity(免费)
+日志: Axiom(免费)
+同级: Google Analytics(免费) Umami(3/免费)
+SEO: AITDK(插件) afhrefs(免费查DR)
+AI API : Deepseek
+d
+```
+

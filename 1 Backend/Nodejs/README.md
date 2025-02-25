@@ -30,6 +30,9 @@ nvm node_mirror https://npmmirror.com/mirrors/node
 ```
 
 
+#### 文档
+质量比较高的文档
+* nodejs.org
 
 ### 2.异步编程&Promise
 
@@ -144,3 +147,4 @@ class MyPromise {
 ```
 
 
+#### async和await

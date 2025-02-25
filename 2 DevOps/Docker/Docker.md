@@ -135,7 +135,590 @@ docker-compose --version
 
 
 
-### 问题
+
+## Docker
+
+
+
+### 安装Docker
+
+1.访问安装说明
+```url
+https://docs.docker.com/engine/install/
+```
+
+2.移除系统中的旧版本
+```sh
+# 移除旧版本docker  yum是旧命令 dnf是新命令
+sudo yum remove docker \
+                  docker-client \
+                  docker-client-latest \
+                  docker-common \
+                  docker-latest \
+                  docker-latest-logrotate \
+                  docker-logrotate \
+                  docker-engine
+```
+
+3.配置docker yum源
+```sh
+# 配置docker yum源。
+sudo yum install -y yum-utils
+sudo yum-config-manager \
+--add-repo \
+http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+
+4.安装docker引擎
+
+```sh
+# 安装最新docker dnf
+sudo dnf install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 安装 最新 docker yum
+sudo yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+
+5.启动docker, 开机qidsdocker; enable + start二合一
+```sh
+sudo systemctl start docker
+```
+
+```sh
+systemctl enable docker --now
+```
+
+
+6.配置加速
+```sh
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+    "registry-mirrors": [
+        "https://mirror.ccs.tencentyun.com",
+        "https://docker.m.daocloud.io"
+    ]
+}
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+```
+
+
+
+### 镜像操作命令
+
+#### 1.下载镜像相关命令
+
+```sh
+#查看运行中的容器
+docker ps
+#查看所有容器
+docker ps -a
+#搜索镜像
+docker search nginx
+#下载镜像
+docker pull nginx
+#下载指定版本镜像
+docker pull nginx:1.26.0
+#查看所有镜像
+docker images
+#删除指定id的镜像
+docker rmi e784f4560448
+```
+
+
+#### 2.启动容器相关命令
+```sh
+#运行一个新容器
+docker run nginx
+#停止容器
+docker stop keen_blackwell
+#启动容器
+docker start 592
+#重启容器
+docker restart 592
+#查看容器资源占用情况
+docker stats 592
+#查看容器日志
+docker logs 592
+#删除指定容器
+docker rm 592
+#强制删除指定容器
+docker rm -f 592
+# 后台启动容器
+docker run -d --name mynginx nginx
+# 后台启动并暴露端口
+docker run -d --name mynginx -p 80:80 nginx
+# 进入容器内部
+docker exec -it mynginx /bin/bash
+```
+
+#### 3.提交容器相关命令
+```sh
+# 提交容器变化打成一个新的镜像
+docker commit -m "update index.html" mynginx mynginx:v1.0
+# 保存镜像为指定文件
+docker save -o mynginx.tar mynginx:v1.0
+# 删除多个镜像
+docker rmi bde7d154a67f 94543a6c1aef e784f4560448
+# 加载镜像
+docker load -i mynginx.tar 
+```
+
+
+#### 4.发布镜像
+```sh
+# 登录 docker hub
+docker login
+# 重新给镜像打标签
+docker tag mynginx:v1.0 用户名/mynginx:v1.0
+# 推送镜像
+docker push 用户名/mynginx:v1.0
+```
+
+
+#### 其它命令
+```sh
+
+# 删除容器
+docker rm -f $(docker ps -aq)
+
+#删除全部卷
+docker volume rm $(docker volume ls -q)
+
+
+```
+
+
+### 镜像实践操作
+
+#### 实现
+> 启动一个nginx, 并更改他的首页,发布, 让所有人都能使用
+
+
+#### 下载镜像
+docker pull nginx:1.26.0
+
+#### 启动容器
+
+```sh
+docker run nginx:1.26.0
+docker run -d nginx:1.26.0
+docker run -d --name mynginx -p 80:80 nginx:1.26.0  // -p 主机端口:容器端口
+docker run -d --name mynginx -p 80:80 --rm nginx:1.26.0 //rm参数 容器停止后删除
+```
+
+#### 进入容器
+进入容器中,修改容器中nginx的内容. 使用bin/bash命令更新文件内容
+```sh
+docker exec -it mynginx /bin/bash
+```
+
+
+```sh
+
+```
+
+
+#### 提交容器
+
+```sh
+# 提交容器变化达成一个新的镜像
+docker commit -m 'update index.html' mynginx mynginx:v1.0
+
+# 查看新保存的镜像
+docker images
+
+# 保存镜像为指定文件
+docker save -o mynginx.tar mynginx:v1.0
+
+
+# 加载获得镜像tar文件
+docker load -i mynginx.tar
+```
+
+
+
+#### 发布镜像到hub
+```sh
+# 上面已经提交了命令, 这里不做太多注释
+
+docker login
+
+docker tag mynginx:v1.0 用户名/mynginx:v1.0
+
+docker push 用户名/mynginx:v1.0
+```
+
+
+
+### Docker存储
+容器内部文件有俩问题: 修改麻烦, 容易丢失.
+
+> 注意, 任何命令通过 docker xx --help来查看相关选项或命令. 事倍功半
+
+```sh
+# 删除所有容器
+docker rm -f $(docker ps -aq)
+```
+
+
+##### 目录挂载
+两种方式:
+* 目录挂载 `-v /app/nghtml:/usr/share/nginx/html`
+* 卷映射 ``
+
+
+```sh
+# 目录挂载
+docker run -d -p 80:80 -v /app/nghtml:/usr/share/nginx/html --name app01 nginx
+
+# 卷映射
+docker run -d -p 99:80 -v /app/nghtml:/usr/share/nginx/html -v ngconf:/etc/nginx --name app02 nginx
+```
+
+
+
+##### 卷映射
+写法
+```sh
+-v ngconf(自定义的卷名):/etc/nginx
+```
+
+
+位置
+统一放在`/var/lib/docker/volumes/<volume-name>/_data`
+
+
+相关命令
+```sh
+# 查看卷
+docker volume ls
+
+# 创建一个卷
+docker volume crate 卷名
+
+
+# 查看某个卷的详情
+docker volume inspect 卷名
+```
+
+
+
+
+
+
+### Docker网络
+> docker为每一个容器分配唯一的ip, 使用容器**ip+容器端口**可以相互访问
+> ip由于各种原因可能会变化, docker0默认不支持主机域名, 所以创建自定义网络, 容器名就是稳定域名
+
+
+#### 容器之间的访问
+```sh
+# 第一种方式: 通过容器的bash,使用主机ip+端口
+docker exec -it mynginx
+# 进入bash
+root@xxxx:/ curl http://xxx.xxx.xxx.xxx:容器端口
+
+
+# 第二种方式: 通过docker的网络docker0进行访问(172.17.0.1)
+//查询目标容器的ip地址
+docker container inspect 容器名称
+root@xxxx:/ curl  容器ip:端口
+
+
+# 第三种方式: 创建docker网络  docker0默认不支持主机域名
+// 删除所有容器
+docker rm -f $(docker ps -aq)
+
+//创建自定义网络
+docker network create 网络名称
+//启动容器
+docker run -d -p 88:80 --name app1 --network mynet nginx
+docker run -d -p 99:80 --name app2 --network mynet nginx
+//进入一个容器中,访问另一个容器
+docker exec -it app1 bash
+// 访问目标容器
+curl http://app2:80
+
+
+
+
+# 查看容器的网络配置
+docker container inspect 容器名字
+```
+
+
+#### 网络实践-Redis主从集群
+```sh
+
+
+
+
+
+```
+
+
+#### 最佳实践
+
+以mysql配置为例:
+
+端口暴露
+存储配置
+环境变量
+镜像版本
+
+```sh
+docker run -d -p 3306:3306 \
+-v /app/myconf:/etc/mysql/conf.d \
+-v /app/mydata:/var/lib/mysql \
+-e MYSQL_ROOT_PASSWORD=123456 \
+mysql:8.0.37-debian
+```
+
+
+
+### Docker compose
+> 批量管理容器
+> docs.docker.com/compose/comopse-file
+
+
+
+#### 特点
+- 增量更新
+	- 修改 Docker Compose 文件。重新启动应用。只会触发修改项的重新启动。
+- 数据不删
+	- 默认就算down了容器，所有挂载的卷不会被移除。比较安全
+
+
+
+#### 语法
+```md
+顶级元素
+	name 名字
+	services 服务 //要启动的应用
+	networks 网络
+	volumes 卷
+	configs 配置
+	secrets 密钥
+```
+
+
+
+#### 创建一个wordpress博客
+
+```sh
+# 上线  之前没有创建过
+docker compose up -d
+
+# 下线
+docker comopse down
+
+# 启动  之前已经创建过了,是重新启动
+docker compose start x1 x2 x3
+
+# 停止
+docker compose stop x1 x3
+
+# 扩容
+docker comopse scale x2=3
+```
+
+**实例-启动wordpress+mysql**
+```sh
+
+// 未采用compose形式的
+
+# 1.创建一个网络
+docker network create blog
+
+
+# 创建mysql容器
+docker run -d -p 3306:3306 \
+-e MYSQL_ROOT_PASSWORD=123456 \
+-e MYSQL_DATABASE=wordpress \
+-v mysql-data:/var/lib/mysql \
+-v /app/myconf:/etc/mysql/conf.d \
+--restart always --name mysql \
+--network blog \
+mysql:8.0
+
+
+# 创建wordpress容器
+docker run -d -p 8080:80 \
+-e WORDPRESS_DB_HOST=mysql \
+-e WORDPRESS_DB_USER=root \
+-e WORDPRESS_DB_PASSWORD=123456 \
+-e WORDPRESS_DB_NAME=wordpress \
+-v wordpress:/var/www/html \
+--restart always --name wordpress-app \
+--network blog \
+wordpress:latest
+```
+
+
+```yml
+
+// 采用compose形式的启动
+
+
+name: myblog
+services:
+	mysql:
+		container_name: mysql
+		image: mysql:8.0
+		ports:
+			- "3306:3306"
+		environment:
+			- MYSQL_ROOT_PASSWORD=123456
+			- MYSQL_DATABASE=wordpress
+		volumes:
+			- mysql-data:/var/lib/mysql
+			- /app/myconf:/etc/mysql/conf.d
+		restart: always
+		network:
+			-blog
+
+	wordpress:
+		image: wordpress
+	    ports:
+	      - "8080:80"
+	    environment:
+	      WORDPRESS_DB_HOST: mysql
+	      WORDPRESS_DB_USER: root
+	      WORDPRESS_DB_PASSWORD: 123456
+	      WORDPRESS_DB_NAME: wordpress
+	    volumes:
+	      - wordpress:/var/www/html
+	    restart: always
+	    networks:
+	      - blog
+	    depends_on:
+	      - mysql
+
+volumes:
+	mysql-data:
+	wordpress:
+
+networks:
+	blog:
+ 
+```
+
+
+
+#### 其它操作
+
+```yaml
+# 启动comopse文件
+docker compose -f compose.yaml up -d // -f compose.yaml 是默认写法,可以根据名称的不同而不同
+
+
+# 下线+不删除卷
+docker compose -f compose.yaml down
+
+
+# 下线+删除卷
+docker compose down -f compose.yaml down -rmi all -v
+
+
+# 查看容器日志
+docker logs myginx
+
+```
+
+
+
+
+#### 制作自定义镜像
+> 使用Dockerfile制作镜像
+
+
+##### dockerfile 常见指令
+> docs.docker.com/reference/dockerfile
+
+
+| 常见指令           | 作用           |
+| -------------- | ------------ |
+| ==FROM==           | ==指定镜像基础环境==     |
+| RUN            | 运行自定义命令      |
+| CMD            | 容器启动命令或参数    |
+| ==LABEL==      | ==自定义标签==    |
+| ==EXPOSE==     | ==指定暴露端口==   |
+| ENV            | 环境变量         |
+| ADD            | 添加文件到镜像      |
+| ==COPY==       | ==复制文件到镜像==  |
+| ==ENTRYPOINT== | ==容器固定启动命令== |
+| VOLUME         | 数据卷          |
+| USER           | 指定用户和用户组     |
+| WORKDIR        | 指定默认工作目录     |
+| ARG            | 指定构建参数       |
+
+
+##### 实例: 制作镜像
+
+```dockerfile
+
+FROM openjdk:17
+
+LABEL author=xxxx
+
+COPY app.jar /app.jar
+
+EXPOSE 8080
+
+
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+
+```
+
+
+```sh
+# 构建镜像
+dcoker build -f Dockerfile -t myjavaapp:v1.0 .
+
+# 查看本地镜像
+docker images
+
+
+# 启动构建的容器
+docker run -d -p 8888:8080 myjavaapp:v1.0
+```
+
+
+
+### docker镜像分层存储机制
+
+
+```sh
+docker image history nginx
+```
+
+
+
+### 安装常见镜像
+
+* 独立组件
+	* 缓存redis
+	* 据库mysql
+	* 消息队列RabbitMQ
+	* 分布式协调Zookeeper
+* 集群套件
+检索opensearch
+可视化 opensearch dashboard
+消息队列kafka 
+可视化 kafka-ui
+注册/配置中心 Nacos
+持久化 nacos-mysql
+时序数据库 Prometheus
+监控看板 grafana
+
+
+
+
+## 问题
 #### 1.报错:`failed to resolve source metadata for docker.io/library`
 
 执行命令`docker-compose up --build`后, 具体报错信息:
@@ -259,3 +842,104 @@ nuxt_app              |
 nuxt_app              | 
 nuxt_app              | > build
 nuxt_app              | > nuxt build
+
+
+
+
+
+## 命令大全
+
+### 停止删除所有镜像/容器
+
+
+0.查看所有容器
+```sh
+docker ps -a
+```
+
+
+1.强制停止并删除所有容器
+```sh
+docker-compose down --remove-orphans
+
+# 或手动停止
+docker stop $(docker ps -aq)
+docker rm $(docker ps -aq)
+```
+
+2.删除网络
+```sh
+# 列出所有网络
+docker network -ls
+
+# 删除项目网络
+docker network rm  xxx
+```
+
+3.删除镜像
+```sh
+docker rmi xxxx
+
+# 删除悬空镜像
+docker image prune -f
+
+
+# 删除所有镜像
+docker rmi $(docker images -q) -f
+
+# 删除所有镜像-ps
+docker images -q | ForEach-Object { docker rmi $_ -f }
+
+# 或者更简单的方式-ps
+
+docker rmi $(docker images -q) -f
+```
+
+4.删除所有卷和缓存
+```sh
+# 删除所有卷
+docker volume prune -f
+
+#删除构建缓存
+docker builder prune -f
+```
+
+5.完全重置
+```sh
+# 删除所有未使用的容器,网络,镜像和缓存
+docker system prune -a -f --volumes
+
+# 删除所有卷  linux
+docker volume ls -q | xargs -r docker volume rm
+# 删除所有卷 powershell
+docker volume ls -q | ForEach-Object { docker volume rm $_ }
+```
+
+
+
+
+
+4.重新开发
+```sh
+docker network create web
+```
+
+
+```
+#重新构建启动
+docker-compose up --buld -d
+```
+
+
+```ts
+
+docker network create web && \
+docker-compose down && \
+docker system prune -f && \
+docker-compose build --no-cache && \
+docker-compose up -d
+```
+
+
+
+
