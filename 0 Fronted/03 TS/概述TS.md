@@ -2349,6 +2349,108 @@ type FunctionPropertyNames<T> = {
 
 
 
+
+
+
+
+
+
+## 一些问题
+
+### 联合类型(数组)中的遍历问题
+> [最近TypeScript困惑我的地方 | Himself65 (@himself65)](https://web.archive.org/web/20210511014518/https://www.himself65.com/ts-confuse-me/)
+
+
+```ts
+type MyArray = string[] | {name:string}[]
+
+// 直接对类型进行map等操作是不行的.
+function f(array: MyArray) {
+	// Error:(8, 9) TS2349: This expression is not callable.
+  //   Each member of the union type '(<U>(callbackfn: (value: string, index: number, array: string[]) => U, thisArg?: any) => U[]) | (<U>(callbackfn: (value: { name: string; }, index: number, array: { name: string; }[]) => U, thisArg?: any) => U[])' has signatures, but none of those signatures are compatible with each other.
+	array.map(item => {
+		// do something
+	})
+}
+```
+
+通过判断来筛选类型呢? 还是报错
+```ts
+
+function g(array: MyArray) {
+	if (typeof array[0] === 'string') {
+	//```Error:(17, 11) TS2349: This expression is not callable.
+    //   Each member of the union type '(<U>(callbackfn: (value: string, index: number, array: string[]) => U, thisArg?: any) => U[]) | (<U>(callbackfn: (value: { name: string; }, index: number, array: { name: string; }[]) => U, thisArg?: any) => U[])' has signatures, but none of those signatures are compatible with each other.
+
+		array.map(item => {
+			// do something
+		})
+	}
+}
+```
+
+作者找到的方法是, 魔改返回值, 或者 类型断言
+```ts
+cosnt isStringArray = (arr: MyArray): arr is string[] => typeof arr[0] === 'string'
+
+
+function h(array: MyArray) {
+	if (isStringArray(array)) {
+		// it workds
+		array.map(item => {
+			// do something
+		})
+	}
+}
+
+
+
+// 类型断言
+function j(array: MyArray) {
+	if (typeof array[0] === 'string') {
+		(array as string[]).map(item => {
+			// do something
+		})
+	}
+}
+```
+
+
+### if表达式的推断
+> [最近TypeScript困惑我的地方 | Himself65 (@himself65)](https://web.archive.org/web/20210511014518/https://www.himself65.com/ts-confuse-me/)
+
+
+```ts
+let a: Array<{ name: string }>
+
+if (true) {
+    a = []
+}
+
+(() => {
+    const b: any[] = a || [] 
+})()
+```
+
+上面代码可以运行, 因为`a`一定是`any[]`
+
+但是下面的这个做法却不行
+```ts
+let a: Array<{ name: string }>
+
+if ((() => true)()) {
+    a = []
+}
+
+(() => {
+    const b: any[] = a || [] 
+})()
+```
+
+
+
+
+
 ## 配置TypeScript
 
 > 按照这些配置的能力来划分，可以分为**产物控制、输入与输出控制、类型声明、代码检查**几大类，你并不需要每次创建新项目都把它们配置一遍，按照自己的实际需求进行微调即可。

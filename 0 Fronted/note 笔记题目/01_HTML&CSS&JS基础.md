@@ -1,4 +1,4 @@
-## HTML
+# HTML
 
 ### 文档声明的作用
 
@@ -273,16 +273,6 @@ textarea
 
 
 
-
-### 渐进式渲染
-渐进式渲染是用于提高网页性能（尤其是提高用户感知的加载速度），以尽快呈现页面的技术。
-使用场景: 带宽小的时代/不稳定的移动互联网场景
-案例:
-* 图片懒加载
-* 分层次渲染: 页面只包含基本的最少量的 CSS、脚本和内容，然后可以使用延迟加载脚本或监听DOMContentLoaded/load事件加载其他资源和内容。
-* 异步加载 HTML 片段. 当页面通过后台渲染时，把 HTML 拆分，通过异步请求，分块发送给浏览器
-
-
 ### img标签中使用srcset属性.
 因为需要设计响应式图片。我们可以使用两个新的属性: srcset 和 sizes——来提供更多额外的资源图像和提示，帮助浏览器选择正确的一个资源.
 * srcset 提供多图像资源
@@ -344,9 +334,65 @@ textarea
 有一个工具叫做 capo.js，https://github.com/rviscomi/capo.js，使用它可以快速识别和优化性能问题，同时也提供了一个 Chrome 插件，可以安装试一试：https://chrome.google.com/webstore/detail/capo-get-your-EF%B9%A4%F0%9D%9A%91%F0%9D%9A%8E%F0%9D%9A%8A%F0%9D%9A%8D%EF%B9%A5/ohabpnaccigjhkkebjofhpmebofgpbeb
 
 
+### meta viewport
 
-## CSS
+#### 是什么
+> meta viewport 是一个 HTML 元素，用于控制网页在移动设备上的显示和缩放行为。它通过设置 viewport 元素的属性，告诉浏览器如何调整页面的尺寸和缩放，以适应不同屏幕大小和分辨率的设备。
+
+```html
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+```
+
+- name 为 viewport 表示供移动设备使用
+- content 定义了 viewport 的属性
+    - width 表示显示宽度为设备宽度（兼容苹果）
+    - initial-scale 表示设备与视口的缩放比率（兼容IE）
+
+
+### Data URL
+#### 是什么
+> Data URL 是将图片转换为 base64 直接嵌入到了网页中，使用 <img src="data:[MIME type];base64"/> 这种方式引用图片，不需要再发请求获取图片。
+
+#### 缺点
+- base64 编码后的图片会比原来的体积大三分之一左右
+- Data URL 形式的图片不会缓存下来，每次访问页面都要被下载一次。
+    - 可以将 Data URL 写入到 CSS 文件中随着 CSS 被缓存下来。
+
+
+
+
+
+
+
+
+
+# CSS
 > https://segmentfault.com/a/1190000013325778
+> [常规](https://evelance.notion.site/3deb29fe2f464eaa938606bbbb2fc3e4)
+
+
+### 常规问题
+#### 初始化CSS原因? 
+- 因为浏览器的兼容问题，不同浏览器对有些标签的默认值是不同的，如果没对CSS初始化往往会出现浏览器之间的页面显示差异。
+- 当然，初始化样式会对 SEO 有一定的影响，但鱼和熊掌不可兼得，但力求影响最小的情况下初始化。
+- 最简单的初始化方法： `* { padding: 0; margin: 0; }` （强烈不建议）
+- 使用 `normalize.css`
+#### min-width, max-width,width的包含关系(优先级)是什么?
+**属性的含义：**
+- `min-width` 限制元素的最小宽度
+- `max-width` 限制元素的最大宽度
+- `width` 元素的宽度
+**三者之间的优先级：**
+`min-width` 和 `max-width` 的优先级都高于 `width`。即使 `width` 后面加上 `!important`。
+- 当浏览器缩小导致元素宽度小于 `min-width` 时，元素的 `width` 就会被 `min-width` 的值取代，浏览器出现滚动条来容纳元素。
+- 当浏览器放大导致元素的宽度大于 `max-width` 时，元素的 `width` 就会被 `max-width` 值取代。
+- 当 `min-width` 值大于 `max-width` 时，则以 `min-width` 值为准。
+**所以三者优先级排序： min-width > max-width > width**
+
+### 元素竖向的百分比设定是相对于父容器的高度吗
+- 对于 height 属性来说是的。
+- 对于 **margin-top/bottom(padding-top/bottom) 来讲不是**，而是**相对于容器的宽度**计算的
+
 
 
 ### 页面中引入CSS文有几种方式
@@ -575,6 +621,7 @@ BFC是一个独立的布局环境，其中的元素布局是不受外界的影�
 
 #### BFC应用
 
+
 防止margin重叠: 创建新的BFC来防止相邻元素间的margin重叠
 ```css
 //防止margin重叠  两个p标签的上下外边距会使用两个外边距中较大的那个值,使其中一个p变为bfc区域后,外边距为两个外边距和.
@@ -611,6 +658,97 @@ BFC是一个独立的布局环境，其中的元素布局是不受外界的影�
 </body>
 ```
 
+- 清除浮动：
+    - 子浮动，父 `overflow: hidden`（缺点：阴影和下拉菜单）
+- div 垂直方向 margin 上下合并：
+    - 其中一个包 div ，设置 `overflow：hidden`
+- div 垂直方向 margin 内外合并：
+    - 父容器 1px 透明上边框
+    - 父容器 `overflow: hidden`
+- 右侧 div 自适应：左边浮动，右边设置 `overflow：hidden`
+
+### line-height理解
+行高是指一行文字的高度，具体说是两行文字间基线的距离。CSS中起高度作用的是 height 和 line-height，没有定义 height 属性，最终其表现作用一定是 line-height 。
+
+
+###  display:none, visiblity: hidden; opacity: 0之间的区别
+- `display: none` （不占空间，不能点击）（回流+重绘）
+- `visibility: hidden` （**占据空间**，不可点击）（重绘）
+- `opacity: 0`（**占据空间**，可以点击）（重建图层，性能较高）
+
+更多：[分析比较 opacity: 0、visibility: hidden、display: none 优劣和适用场景](https://github.com/Advanced-Frontend/Daily-Interview-Question/issues/100)
+
+### 浏览器如何解析 CSS 选择器的，换句话说 CSS 的匹配规则是什么？
+
+从右向左，提高查找效率
+- 浏览器根据选择器过滤掉 DOM 中的元素，并向上遍历其父元素以确定匹配项。
+- 选择器链的长度越短，浏览器可以越快地确定该元素是否与选择器匹配。
+（div p em）
+- 如果从左到右，有无数多个 div 都得向下查找，效率低
+- 反之，只有当当前元素是 em 时，才会向上查找，效率高
+
+**例如**：
+- 使用这个选择器 `p span`，浏览器首先找到所有`<span>`元素，然后一直向上遍历其父元素直到根以找到`<p>`元素。
+- 对于特定的`<span>`，一旦找到`<p>` ，它就知道 `<span>` 匹配并可以停止匹配。
+
+
+### 文字超长的省略号写法
+#### 单行文本省略
+```css
+.single-line-ellipsis {
+  width: 200px; /* 设置一个固定宽度，根据实际需求调整 */
+  white-space: nowrap; /* 强制文本在一行内显示 */
+  overflow: hidden; /* 超出宽度的部分隐藏 */
+  text-overflow: ellipsis; /* 用省略号表示超出的文本 */
+}
+```
+
+#### 多行文本省略
+```css
+
+.multi-line-ellipsis {
+  width: 200px; /* 设置一个固定宽度，根据实际需求调整 */
+  overflow: hidden; /* 超出宽度的部分隐藏 */
+  text-overflow: ellipsis; /* 这行对于多行省略号只是辅助，主要靠下面的属性 */
+  display: -webkit-box; /* 开启弹性伸缩盒子模型 */
+  -webkit-line-clamp: 3; /* 显示的行数，超出部分用省略号表示，这里设置为 3 行，可根据需求修改 */
+  -webkit-box-orient: vertical; /* 子元素垂直排列 */
+}
+```
+
+
+### 图片为什么有左右上下间隙,怎么去除?
+**原因：**
+- 左右：因为 img 是 `inline-block` 行内块元素，行内元素之间有『换行（回车），空格，tab』时会产生左右间隙
+- 上下：**行内元素默认与父容器基线对齐**，而基线与父容器底部有一定间隙，所以上下图片间有间隙。
+**解决办法：**
+- 移除上下间隙：
+    - img 本身设置 `display: block;`
+    - 父元素设置 `font-size: 0;` （基线与字体大小有关，字体为零，基线间就没距离了）
+    - img 本身设置 `vertical-align: bottom;`（让inline-block的img与每行的底部对齐）
+- 移除左右间距：
+    - 行内元素间不要有换行，连成一行写消除间隙
+    - 第一行结尾写上 `<!-- ，第二行开头跟上 -->` 。即利用注释消除间距
+    - 父元素 font-size 设置 0
+
+### chrome字体如何小于12px?
+- 老版：`webkit-text-size-adjust: none`
+- 新版：`webkit-transform: scale(.8, .8)`
+
+
+### 为什么会发生样式抖动?
+因为没有指定元素具体高度和宽度，比如数据还没有加载进来时元素高度是 100px(假设这里是 100px)，数据加载进来后，因为有了数据，然后元素被撑大，所有出现了抖动
+
+### css 如何匹配前 N 个子元素及最后 N 个子元素
+- 如何匹配最前三个子元素: `:nth-child(-n+3)`
+- 如何匹配最后三个子元素: `:nth-last-child(-n+3)`
+### li 与 li 之间有看不见的空白间隔是什么原因引起的？有什么解决办法？
+- **场景：**
+    - 有时，在写页面的时候，会需要将这个块状元素横排显示，此时就需要将 display 属性设置为 inline-block，此时问题出现了，在两个元素之间会出现大约8px左右的空白间隙。
+- **原因：**
+    - 浏览器的默认行为是把 inline 元素间的空白字符（空格换行tab）渲染成一个空格，也就是我们上面的代码 `<li>` 换行后会产生换行字符，而它会变成一个空格，当然空格就占用一个字符的宽度。
+- **解决：**
+    - 给 ul 标签设置 `font-size: 0;` 并为 li 元素重新设置 `font-size: XXpx;`
 
 
 
@@ -686,6 +824,66 @@ Flexbox是一种用于布局的CSS3模块，它提供了一种灵活的方式来
 
 
 #### 实例
+
+##### flex布局解决最后一行两边分布的问题
+**解决前:**
+![[Pasted image 20250227160455.png]]
+
+**解决后:**
+![[Pasted image 20250227160433.png]]
+
+**解决方案:**
+
+```html
+<div class="container">
+    <div class="item">1</div>
+    <div class="item">2</div>
+    <div class="item">3</div>
+    <div class="item">4</div>
+    <div class="item">5</div>
+    <div class="item">6</div>
+    <div class="item">7</div>
+    <span></span>
+    <span></span>
+  </div>
+```
+
+
+**方案说明:**
+ 如果我们每一行显示的个数为 n，那我们可以最后一行子项的后面加上 n-2 个 span 元素，span 元素的宽度和其它子项元素宽度一样，但不用设置高度。
+**为什么是添加 n-2 个 span 元素呢 ？**
+- 当最后一行只有 1 个子元素时，他会默认靠左，不用处理
+- 当最后一行子元素正好时，我们就不用关心这个问题。
+所以要去掉这两种情况，只需要加 n-2 个 span 元素就好
+
+
+### Grid布局
+
+#### 是什么
+Grid 布局则是将容器划分成行和列，产生单元格，然后指定项目所在的单元格，可以看作是二维布局。
+
+#### 优缺点
+- **grid 布局的优点：**
+    1. 固定和灵活的轨道尺寸
+    2. 可以使用行号，名称或通过定位网格区域将项目放置在网格上的精确位置。网格还包含一种算法，用于控制未在网格上显示位置的项目的放置。
+    3. 在需要时添加其他行和列
+    4. 网格包含对齐功能，以便我们可以控制项目放置到网格区域后的对齐方式，以及整个网格的对齐方式。
+    5. 可以将多个项目放入网格单元格或区域中，它们可以彼此部分重叠。然后可以用 z-index 属性控制该分层。
+- **grid 布局的缺点：**
+    - 兼容性不太好
+
+
+
+
+
+
+
+
+
+
+
+
+
 ##### 如何实现响应式flex布局
 通过使用媒体查询和弹性盒子属性，实现响应式Flex布局，以适应不同的屏幕尺寸。
 ```html
@@ -791,11 +989,11 @@ position有四个常用属性值：relative、absolute、fixed、static。三个
 默认值. 不设定position或者设定position:static都不会对这个div（或者别的标签）的布局有影响. top，left，right，bottom不会起作用
 
 ##### relative
-* 相对定位. 未脱离文档流,基于元素的margin左上角进行偏移,不会影响其它元素的位置
+* 相对定位. 未脱离文档流,**基于元素的margin左上角进行偏移**,不会影响其它元素的位置
 * left和right同时存在，仅left有效;当top和bottom同时存在仅top有效。
 
 ##### absolute
-* 绝对定位. 元素脱离了文档流,绝对定位元素相对于最近的非static祖先元素定位。基于其左上角位置
+* 绝对定位. 元素脱离了文档流,**绝对定位元素相对于最近的非static祖先元素定位**。基于祖先元素的左上角位置, 不包含margin区域, 从padding区域开始计算.
 * 当祖先元素不存在时，则相对于ICB（inital container block, 初始包含块）,可以理解为窗口/body元素.
 * 关于盒子层叠的次序，可以设置一个叫z-index的属性，值越大，离眼睛越近。
 
@@ -807,11 +1005,91 @@ position有四个常用属性值：relative、absolute、fixed、static。三个
 * 磁贴定位. 
 * 像position:relative和position:fixed的合体:
 
-#### 其它
+#### 实例
 
-##### 声明为fixed/absolute时
+##### 1.声明为fixed/absolute时
 * 该元素将变为块级元素(例子,span设置absolute后,可以设置宽高)
 * 如果该元素是块元素且宽度是100%,则宽度变为auto
+
+##### 2.实现水平垂直居中
+> 见下面
+
+
+
+
+
+### 重排和重绘
+> https://juejin.cn/post/6844904083212468238
+
+
+#### 重绘重排区别
+重绘和重排是浏览器渲染页面的两个过程，它们有以下区别：
+* 重绘是指元素的外观发生改变，但不影响布局的情况，例如改变颜色、背景、边框等。
+* 重排是指元素的几何属性发生改变，影响了布局的情况，例如改变位置、大小、内容等。
+* 重排往往有重绘。因此，在优化页面性能时，应该尽量减少重排和重绘的次数和范围。
+
+#### 哪些操作导致重排
+回流主要计算节点的位置和几何信息，那么当页面布局和几何信息发生变化时，就需要回流。
+* 浏览器一开始渲染的时候
+- 元素位置和尺寸发生改变的时候
+- 新增和删除可见的DOM元素
+- 内容发生改变（文字数量或图片大小等等）
+- 元素字体大小变化。
+- 频繁查询布局信息的属性。比如说： offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、scrollWidth、scrollHeight、clientTop、clientLeft、clientWidth、clientHeight
+
+
+#### 哪些操作会导致重绘
+- 更新元素的颜色
+- 文本方向
+- 阴影
+
+#### 重排优化
+
+##### 1.减少重排范围
+* 尽可能直接在目标元素上操作,而不用操作父元素/兄弟元素
+* 不使用table布局,1个小改动会造成整个table重新布局
+
+##### 2.减少重排次数
+* 样式集中改变 class代替style
+* 分离读写操作
+* 将DOM元素离线操作
+* 使用absolute或fixed脱离文档流
+* 优化动画
+
+**样式集中改变**
+
+**分离读写操作**
+读操作放在一起,写入操作放在一起
+
+**将DOM离线** !!
+* 使用 display:none
+* documentFragment
+* 复制节点,副本操作,然后替换
+
+```js
+//一般操作
+const container = document.getElementById('container')
+container.style.width = '100px'
+container.style.height = '200px'
+container.style.border = '10px solid red'
+container.style.color = 'red'
+
+//离线后操作
+const container = document.getElementById('container')
+container.style.width = '100px'
+container.style.height = '200px'
+container.style.border = '10px solid red'
+container.style.color = 'red'
+```
+
+**优化动画**
+* 动画效果应用position为absolute/fixed
+* 启用GPU加速的属性: CSS转换, CSS33D变换transform webgl, 视频
+
+
+
+
+
 
 
 ### css问题总结
@@ -868,8 +1146,7 @@ position有四个常用属性值：relative、absolute、fixed、static。三个
 
 **水平垂直居中**
 * flex
-* absolute+left/top+margin
-* absolute+left/top+transform
+* absolute+left/top+margin / absolute+left/top+transform
 * absolute+(left/right/top/bottom) + margin
 * tabel-cell + vertical-align
 
@@ -927,7 +1204,13 @@ display: -webkit-box;
 
 
 
-#### 画三角形
+### 使用css画一个三角形/圆形/半圆
+> https://github.com/Easay/issuesSets/issues/7
+
+
+#### 三角形
+
+
 * border
 * border+transform
 * 伪元素
@@ -939,6 +1222,52 @@ display: -webkit-box;
      title="三角形"
      allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>
+
+
+**border方式**
+```css
+div {
+	width: 0px;
+	height: 0px;
+	border-width: 0 40px 40px;
+	border-style: solid;
+	border-color: transparent transparent green;
+}
+```
+
+**clip-path方式**
+clip-path属性使用裁剪方式创建元素的可显示区域，区域内的部分显示，区域外的隐藏。
+```css
+#triangle{
+	width:100px;
+	height:100px;
+	background: red;
+	clip-path:polygon(0 100%,50% 0,100% 100%);
+}
+```
+
+#### 圆形/半圆/扇形
+```css
+.circle {
+    border-radius: 50%
+}
+
+
+.container{ //半圆
+    width: 100px;
+    height: 50px;
+    background: red;
+    border-radius: 50px 50px 0 0;
+}
+
+.container{ //扇形
+    width: 50px;
+    height: 50px;
+    background: red;
+    border-radius: 50px 0 0;
+}
+```
+
 
 
 
@@ -953,7 +1282,9 @@ display: -webkit-box;
 
 
 #### 布局案例
-##### 左侧固定右侧自适应
+##### 1.左侧固定右侧自适应
+**1-1.float方案**
+缺点: 初始渲染后,无法自动适应宽高,有空白
 <iframe src="https://codesandbox.io/embed/bu-ju-zuo-ce-gu-ding-you-ce-zi-gua-ying-ez6btk?fontsize=14&hidenavigation=1&theme=dark"
      style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
      title="布局-左侧固定右侧自适应"
@@ -961,10 +1292,15 @@ display: -webkit-box;
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
 
+**1-2.flex方案**
+<HTML>
+<iframe height="300" style="width:100%;" src="https://codepen.io/westover/embed/MYWbNvO?default-tab=html%2Cresult"></iframe>
+</HTML>
 
 
 
-##### 圣杯布局
+##### 2.圣杯布局
+**2.1 浮动方案**
 <iframe src="https://codesandbox.io/embed/bu-ju-sheng-bei-bu-ju-yt3zf5?fontsize=14&hidenavigation=1&theme=dark"
      style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
      title="布局-圣杯布局"
@@ -974,7 +1310,8 @@ display: -webkit-box;
 
 
 
-##### 双飞翼布局
+##### 3.双飞翼布局
+**3.1 浮动方案**
 <iframe src="https://codesandbox.io/embed/bu-ju-shuang-fei-yi-bu-ju-fnjxv4?fontsize=14&hidenavigation=1&theme=dark"
      style="width:100%; height:500px; border:0; border-radius: 4px; overflow:hidden;"
      title="布局-双飞翼布局"
@@ -1031,70 +1368,9 @@ CSS 预处理器的原理: 是将类 CSS 语言通过 **Webpack 编译** 转成�
 混合（Mixin）是一种将一组属性从一个规则集包含（或混入）到另一个规则集的方法。
 ```
 
-### 使用css画一个三角形/圆形/半圆
-> https://github.com/Easay/issuesSets/issues/7
+# JavaScript
 
-
-#### 三角形
-**border方式**
-```css
-div {
-	width: 0px;
-	height: 0px;
-	border-width: 0 40px 40px;
-	border-style: solid;
-	border-color: transparent transparent green;
-}
-```
-
-**clip-path方式**
-clip-path属性使用裁剪方式创建元素的可显示区域，区域内的部分显示，区域外的隐藏。
-```css
-#triangle{
-	width:100px;
-	height:100px;
-	background: red;
-	clip-path:polygon(0 100%,50% 0,100% 100%);
-}
-```
-
-#### 圆形/半圆/扇形
-```css
-.circle {
-    border-radius: 50%
-}
-
-
-.container{ //半圆
-    width: 100px;
-    height: 50px;
-    background: red;
-    border-radius: 50px 50px 0 0;
-}
-
-.container{ //扇形
-    width: 50px;
-    height: 50px;
-    background: red;
-    border-radius: 50px 0 0;
-}
-```
-
-
-## JavaScript
-
-### ES6新增特性
-let和const
-箭头函数
-剩余参数（rest参数）和展开运算符
-模板字符串
-解构赋值
-类
-Set和Map
-Promise
-Proxy
-新增数组方法
-
+## 常规问题
 ### var/const/let的区别
 - const定义常量, let/var定义变量
 - const和let相对于var
@@ -1330,7 +1606,7 @@ AO = {
 
 
 
-#### 编程语言中作用域的类型
+#### 作用域的两种类型
 
 作用域共有两种主要的工作模型。
 - 词法作用域: 最为普遍的，被大多数编程语言所采用的。<span style="color:blue;">词法作用域就是定义在词法阶段的作用域</span>。
@@ -1368,7 +1644,7 @@ AO = {
 let关键字可以将变量绑定到所在的任意作用域中（通常是{ .. }内部）。换句话说，let为其声明的变量<span style="color:blue;">隐式地劫持了所在的块作用域</span>
 
 
-#### JS块作用域的实例
+#### JS块作用域的作用
 
 1.作用域作用-垃圾回收
 
@@ -1410,12 +1686,7 @@ function process(data) {
 
 可以用来创建块作用域变量，但其值是固定的（常量）。之后任何试图修改值的操作都会引起错误。
 
-
-
-
-
-#### 作用域的使用
-> 基于作用域隐藏变量和函数
+4.基于作用域隐藏变量和函数
 
 
 #### 作用域嵌套
@@ -1425,8 +1696,6 @@ function process(data) {
 
 查找规则?
 引擎从当前的执行作用域开始查找变量，如果找不到，就向上一级继续查找。当抵达最外层的全局作用域时，无论找到还是没找到，查找过程都会停止。
-
-
 
 #### 作用域链
 
@@ -1462,7 +1731,7 @@ function process(data) {
 	* 以函数声明的方法定义的函数,函数可以在函数声明之前调用
 	* 函数表达式的函数只能在声明之后调用
 * **使用范围**
-	* 以函数声明的方法定义的函数并不是真正的声明,它们仅仅可以出现在全局中,或者嵌套在其他的函数中,但是它们不能出现在循环,条件或者try/catch/finally中
+	* 以函数声明的方法定义的函数并不是真正的声明,它们仅仅可以出现在全局中,或者嵌套在其他的函数中,但是<span style="color: blue">它们不能出现在循环/条件或try/catch/finally中</span>
 	* 函数表达式可以在任何地方声明。换句话说，函数声明不是一个完整的语句，所以不能出现在if-else,for循环，finally，try catch语句以及with语句中。
 
 ```js
@@ -1502,7 +1771,8 @@ Function.prototype.bind2 = function(...restArgs) {
 ```
 
 ##### 手写new方法
-1.在内存中新建一个对象
+  >
+  1.在内存中新建一个对象
 >
 >2.将新对象内部的[[prototype]]的指针赋值为构造函数的prototype属性
 >
@@ -1777,20 +2047,70 @@ foo.identify(); //'FOO MODULE'
 
 ### 高阶函数
 #### 实现一个currying函数
+> https://bigfrontend.dev/problem/implement-curry
 ```js
-const currying = function(fn) {
+//错误方法
+function curry(fn) {
 	let args = []
-	return function() {
-		if (arguments.length === 0) {
-			fn.apply(this, args)
+	return function curried() {
+		args.push(...arguments)
+		if (args < fn.length) {
+			return curried
 		} else {
-			[].push.apply(args, arguments)
-			return arguments.callee
+			return fn(...args)
+		}
+	}
+}
+
+//正确方法
+function curry(fn) {
+	return curried(...args) {
+		let fnArgsLen = fn.length
+		if (args.length < fnArgsLen) {
+			return function(...moreArgs) {
+				return curried.apply(this, args.concat(moreArgs))
+			}
+		} else {
+			return fn.apply(this, args)
 		}
 	}
 }
 ```
 
+#### 按需求实现一个debounce函数
+> https://bigfrontend.dev/problem/implement-basic-debounce
+
+```js
+
+let currentTime = 0
+const run = (input) => {
+  currentTime = 0
+  const calls = []
+  const func = (arg) => {
+     calls.push(`${arg}@${currentTime}`)
+  }
+  const debounced = debounce(func, 3)
+  input.forEach((call) => {
+     const [arg, time] = call.split('@')
+     setTimeout(() => debounced(arg), time)
+  })
+  return calls
+}
+expect(run(['A@0', 'B@2', 'C@3'])).toEqual(['C@5'])
+
+
+
+function debounce(fn, delay) {
+	let timeout
+	return function(...args) {
+		if (timeout) {
+			clearTimeout(timeout)
+		}
+
+		
+	}
+}
+```
 
 
 
@@ -4743,71 +5063,128 @@ cookie和session都是用来记录客户状态的机制，但它们有以下几�
 
 
 
-
-### 重排和重绘
-> https://juejin.cn/post/6844904083212468238
-
-
-#### 重绘重排区别
-重绘和重排是浏览器渲染页面的两个过程，它们有以下区别：
-* 重绘是指元素的外观发生改变，但不影响布局的情况，例如改变颜色、背景、边框等。
-* 重排是指元素的几何属性发生改变，影响了布局的情况，例如改变位置、大小、内容等。
-* 重排往往有重绘。因此，在优化页面性能时，应该尽量减少重排和重绘的次数和范围。
-
-#### 哪些操作导致重排
-回流主要计算节点的位置和几何信息，那么当页面布局和几何信息发生变化时，就需要回流。
-* 浏览器一开始渲染的时候
-- 元素位置和尺寸发生改变的时候
-- 新增和删除可见的DOM元素
-- 内容发生改变（文字数量或图片大小等等）
-- 元素字体大小变化。
-- 频繁查询布局信息的属性。比如说： offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、scrollWidth、scrollHeight、clientTop、clientLeft、clientWidth、clientHeight
+# TypeScript面试题
+> [TypeScript高频面试题及解析本文整理了一些TypeScript 的高频面试题，并附带详细答案及解析代码，涉及包括 - 掘金](https://juejin.cn/post/7321542773076082699)
 
 
-#### 哪些操作会导致重绘
-- 更新元素的颜色
-- 文本方向
-- 阴影
 
-#### 重排优化
+## 常规问题
+### 类型声明和类型推断的区别
+* 类型声明是显式地为变量或函数指定类型
+* 类型推断是TypeScript根据赋值语句右侧的值自动推断变量的类型
+```ts
+// 类型声明
+let x: number;
+x = 10;
+// 类型推断
+let y = 20; // TypeScript会自动推断y的类型为number
 
-##### 1.减少重排范围
-* 尽可能直接在目标元素上操作,而不用操作父元素/兄弟元素
-* 不使用table布局,1个小改动会造成整个table重新布局
-
-##### 2.减少重排次数
-* 样式集中改变 class代替style
-* 分离读写操作
-* 将DOM元素离线操作
-* 使用absolute或fixed脱离文档流
-* 优化动画
-
-**样式集中改变**
-
-**分离读写操作**
-读操作放在一起,写入操作放在一起
-
-**将DOM离线** !!
-* 使用 display:none
-* documentFragment
-* 复制节点,副本操作,然后替换
-
-```js
-//一般操作
-const container = document.getElementById('container')
-container.style.width = '100px'
-container.style.height = '200px'
-container.style.border = '10px solid red'
-container.style.color = 'red'
-
-//离线后操作
-const container = document.getElementById('container')
-container.style.width = '100px'
-container.style.height = '200px'
-container.style.border = '10px solid red'
-container.style.color = 'red'
 ```
 
-**优化动画**
-* 动画效果应用position为absolute/fixed
-* 启用GPU加速的属性: CSS转换, CSS33D变换transform webgl, 视频
+### 接口是什么, 作用,使用场景?和类型别名的区别
+#### 是什么
+> 接口是用于描述对象的形状的结构化类型。它定义了对象应该包含哪些属性和方法。
+
+#### 区别
+* 接口定义了一个契约，描述了对象的形状（属性和方法），以便在多个地方共享。它可以被类、对象和函数实现。
+* 类型别名给一个类型起了一个新名字，便于在多处使用。它可以用于原始值、联合类型、交叉类型等。与接口不同，**类型别名可以用于原始类型、联合类型、交叉类型等，而且还可以为任意类型指定名字**
+
+
+### 泛型是什么, 如何创建泛型函数和泛型类, 实际用途
+#### 是什么
+
+
+### 枚举是什么? 作用及案例.
+#### 是什么
+> 枚举是一种对数字值集合进行命名的方式。它们可以增加代码的可读性，并提供一种便捷的方式来使用一组有意义的常量。
+
+```ts
+enum Color {
+ red,
+ green,
+ blue
+}
+
+let selectedColor: Color = Color.red
+```
+
+#### 枚举和常量枚举区别
+* 枚举可以包含计算得出的值，而常量枚举则在编译阶段被删除，并且不能包含计算得出的值，它只能包含常量成员。
+* 常量枚举在编译后会被删除，而普通枚举会生成真实的对象。
+```ts
+const enum Direction {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+function move(direction: Direction) {
+    switch (direction) {
+        case Direction.Up: //编译之后, 只会保留值
+            console.log('向上移动');
+            break;
+        case Direction.Down:
+            console.log('向下移动');
+            break;
+        case Direction.Left:
+            console.log('向左移动');
+            break;
+        case Direction.Right:
+            console.log('向右移动');
+            break;
+    }
+}
+
+move(Direction.Up); 
+
+```
+
+### 如何处理可空类型（nullable types）和undefined类型，如何正确处理这些类型以避免潜在错误
+
+
+在TypeScript中，可空类型是指一个变量可以存储特定类型的值，也可以存储`null`或`undefined`。（通过使用可空类型，开发者可以明确表达一个变量可能包含特定类型的值，也可能不包含值（即为`null`或`undefined`）
+
+为了声明一个可空类型，可以使用联合类型（Union Types），例如 `number | null` 或 `string | undefined`。 例如：
+
+
+### 联合类型和交叉类型, 类型断言
+
+### 命名空间和模块
+
+`模块`提供了一种组织代码的方式，使得我们可以轻松地在多个文件中共享代码，
+
+`命名空间`则提供了一种在全局范围内组织代码的方式，防止命名冲突
+模块示例:
+
+
+```ts
+//模块
+// greeter.ts
+export function sayHello(name: string) {
+  return `Hello, ${name}!`;
+}
+// app.ts
+import { sayHello } from './greeter';
+console.log(sayHello('John'));
+
+
+
+// 命名空间
+// greeter.ts
+namespace Greetings {
+  export function sayHello(name: string) {
+    return `Hello, ${name}!`;
+  }
+}
+// app.ts
+<reference path="greeter.ts" />
+console.log(Greetings.sayHello('John'));
+
+
+```
+
+
+
+
+

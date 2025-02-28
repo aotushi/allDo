@@ -1015,8 +1015,16 @@ device-width = 设备的物理分辨率 / (devicePixelRatio * scale)
 * window.screen.availHeight：浏览器窗口可用的高度。
 
 
-
-
+#### `window.innerWidth与documentElement.clientWidth区别?`
+* 是否包含滚动条
+	* innerWidth包含滚动条宽度
+	* clientWidth不包含滚动条宽度
+* 视口与文档根元素的区别
+	* `window.innerWidth`关注的是浏览器窗口的视口（viewport），即用户当前看到的部分，与页面内容无关。即使页面内容超出视口，`innerWidth` 仍返回视口的实际宽度
+	* document.documentElement.clientWidth​ 关注的是文档根元素的可视区域，与页面布局相关。如果根元素被 CSS 修改了尺寸（如设置 width: 80%），clientWidth 会反映调整后的值
+* 应用场景
+	* 需要获取包含滚动条的窗口宽度时，使用 `window.innerWidth`
+	* 需要精确计算页面内容布局（如响应式设计）时，优先使用 `document.documentElement.clientWidth`
 
 
 
@@ -1295,6 +1303,7 @@ $$
 有了vw单位，再配合calc()函数进行计算，无须使用任何JavaScript代码，我们就可以实现基于设备宽度的移动端布局适配方案。
 
 例如，希望375px～414px的宽度区间的根字号大小是16px～18px，就可以这么设置：
+**第一步**: **使用calc函数+媒体查询配置字体**
 ```css
 html {
 	font-size: 16px;
@@ -1315,11 +1324,12 @@ html {
 ```
 
 按照上面的计算公式,如果设备宽度是375px,则font-size属性的计算值是16px; 如果设备宽度是400px,则计算值为17.28px; 如果设备宽度是414px，则font-size属性的计算值是18px;
-第二步,将觉稿对应的px尺寸使用rem表示就可以了.例如，视觉稿上图片尺寸是120px×80px，则我们布局的时候使用：
+
+**第二步**,**将视觉稿对应的px单位改成等比例的rem单位**.例如，视觉稿上图片尺寸是120px×80px，则我们布局的时候使用：
 ```css
 img {
-	width: 7.5rem;
-	height: 5rem;
+	width: 7.5rem; // 120 / 16 = 7.5
+	height: 5rem;  // 80 / 16 = 5
 }
 ```
 3px的间隙可以如下表示:
