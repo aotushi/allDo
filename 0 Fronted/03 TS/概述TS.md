@@ -2181,6 +2181,38 @@ type Result = Awaited<ReturnType<typeof getPromise>>; // string 类型
 
 
 
+## 类型体操
+
+### 判断类型是否相同
+```ts
+//最佳方案
+// 利用了 TypeScript 在逆变位置（函数参数）的严格类型检查，能精确识别类型差异。
+type IsEqual<T,U> = 
+	(<G>() => G extends T ? 1 : 2) extends
+	(<G>() => G extends U ? 1 : 2)
+	? true
+	: false;
+
+// 方案2
+// 检查 `T` 和 `U` 是否互为子类型。若 `T extends U` 且 `U extends T`，返回 `true`。通过包装成元组避免条件类型分布，但仅验证结构兼容性。
+type IsEqual<T,U> = 
+	[T] extends [U]
+	? [u] extends [T] ? true : false
+	: false;
+```
+
+
+最佳方案处理范围:(了解)
+* 处理any与具体类型
+* 识别修饰符差异
+* 联合类型顺序无关性
+* 函数类型精确判断
+
+
+
+
+
+
 
 
 ## 模板字符串类型

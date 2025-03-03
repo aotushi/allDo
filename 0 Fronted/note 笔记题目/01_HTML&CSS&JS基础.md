@@ -2201,7 +2201,8 @@ function newOperator() {
 
 function createObject(ctor) {
   let obj = Object.create(null);
-  Object.setPropertyOf(obj, ctor.prototype);// 上面的两步可以合并为一步: obj = Object.create(ctor.prototype)
+  Object.setPropertyOf(obj, ctor.prototype);
+  // 上面的两步可以合并为一步: obj = Object.create(ctor.prototype)
   
   const res = ctor.apply(obj, [].slice.call(arguments, 1));
   
@@ -2442,7 +2443,7 @@ async function Ajax(type, url, data, success, failed) {
 > 子类原型 = 父类实例
 
 **存在的问题:** 
-1.原型中包含的引用值会在所有实例间共享，这也是为什么属性通常会在构造函数中定义而不会定义在原型上的原因(基本类型的值更改后不会被共享, 基本类型是按值传递的,引用类型的值是按引用传递的)
+1.原型中包含的**引用值**会在所有实例间共享，这也是为什么属性通常会在构造函数中定义而不会定义在原型上的原因(基本类型的值更改后不会被共享, 基本类型是按值传递的,引用类型的值是按引用传递的)
 2.子类型在实例化时不能给父类型的构造函数传参
 
 ```javascript
@@ -2491,13 +2492,13 @@ console.log(person2.hobbies); // 输出：['reading']，person2的hobbies属性�
 
 #### **盗用构造函数继承**
 **背景**
-为了解决原型包含引用值导致的继承问题
+为了解决原型链继承中引用值导致的继承问题
 
 **实现**
 > 在子类构造函数中,通过call()/apply()调用父类构造函数
 
 **优点:**
-* 避免原型链继承中引用类型的属性被所有实例共享
+* 避免原型链继承中引用类型的属性修改后被共享
 * 可以在子类中向父类传参
 
 **缺点:**
@@ -2512,7 +2513,7 @@ this.colors = ["red", "blue", "green"];
 }
 function SubType() {
 // 继承SuperType
-SuperType.call(this);
+SuperType.call(this, ...arguments);
 }
 let instance1 = new SubType();
 instance1.colors.push("black");
@@ -2594,6 +2595,10 @@ function Student(name, age, price) {
 Student.prototype = new Person();
 // 让原型对象的构造器为子类型
 Student.prototype.constructor = Student;
+
+//优化后的实现建议:
+Child.prototype = Object.create(Parent.prototype); //避免重复调用构造函数
+Child.prototype.constructor = Child
 
 Student.prototype.sayHello = function () {
   console.log(`名字${this.name},年龄${this.age},身价${this.price}`);
