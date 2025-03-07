@@ -4,7 +4,10 @@ alias: 继承
 
 
 
-### 继承
+## 继承
+
+#### 来源
+> https://github.com/mqyqingfeng/Blog/issues/16
 
 
 #### 介绍
@@ -22,15 +25,17 @@ alias: 继承
 
 
 
-#### 原型链继承
+### 原型链继承
+
+#### 是什么
 
 > 子类原型 = 父类实例  Child.prototype = new Parent()
 
 **每个构造函数都有一个原型对象，原型对象都包含一个指向构造函数的指针，而实例都包含一个指向原型对象的内部指针。**通俗点说就是，实例通过内部指针可以访问到原型对象，原型对象通过constructor指针，又可以找到构造函数
 
-缺点: 
-1.引用类型的属性被所有实例共享.(基本类型的值更改后不会被共享, 因为其他实例初始化后,基本类型的值是按值传递的, 引用类型是按引用传递的
-2.子类不能向父类中传参
+#### 缺点
+1.**引用类型的属性被所有实例共享**
+2.**子类不能向父类中传参**
 * 在子类的构造函数中并没有设置与父类的关联，从而导致无法向父类的构造函数传递参数。
 * 无法实现多继承
   * 由于子类构造函数的prototype属性只能设置为一个值，如果同时设置为多个值的话，后面的值会覆盖前面的值，导致Cat只能继承一个父类
@@ -84,152 +89,106 @@ console.log(child2.year); //1010
 
 
 
-#### 借助构造函数(经典继承)
+### 借助构造函数(经典继承)
+#### 是什么
 
 > 在子类构造函数中,通过call()/apply()调用父类构造函数
+
 
 在解决原型对象中包含引用类型值所带来问题的过程中，开发人员开始使用一种叫做**借用构造函数**的技术。实现原理是，在子类的构造函数中，通过 apply ( ) 或 call ( )的形式，调用父类构造函数，以实现继承。
 
 核心: 使用父类的构造函数增强子类实例, 等于是复制父类的实例给子类(没用到原型)
 
-优点:
+#### 优缺点
+**优点:**
 * 避免原型链继承中引用类型的属性被所有实例共享
 * 可以在子类中向父类传参
-
-缺点:
-* 方法都在构造函数中定义,每次创建实例都会创建一遍方法
+**缺点:**
+* 方法都在构造函数中定义,每次创建实例都会重新创建一遍方法,
 * 只能继承父类的实例属性和方法,不能继承原型的属性/方法
 
 ```js
-function Parent() {
-  this.name = ['kevin', 'daisy'];
-}
+//方式1
 
-function Child() {
-  Parent.call(this);
-}
-
-let child1 = new Child();
-child1.name.push('yayu');  //name是child身上的
-console.log(child1.names); //["kevin", "daisy", "yayu"]
-
-let child2 = new Child();
-console.log(child2.names); //["kevin", "daisy"]
-```
-
-
-
-```javascript
-function Parent(name) {
-  this.name = name;
-}
-
-function Child(name) {
-  Parent.call(this, name);
-}
-
-let child1 = new Child('kevin');
-console.log(child1.name); //'kevin'
-
-let child2 = new Child('daisy');
-console.log(child2.name); //'daisy'
-```
-
-
-
-```javascript
-目的: 构造函数/类的实例 使用 方法.可以在构造函数中创建方法
-
-
-## 向类(构造函数)中的实例(对象)添加一个方法(对象的属性是函数)
-function Person(name, age){
-    this.name = name;
-    this.age = age;
-    //给新的对象添加一个方法
-    this.sayHello = function(){
+function Parent(name, age) {
+	this.name = name
+	this.age = age
+	this.sayHello = function(){
         alert('hello, 大家好,我是'+this.name);
     }
 }
 
-let p = new Person('孙悟空', 18);
-let p2 = new Person('猪八戒', 18);
-p.sayHello();
-p2.sayHello();
-
-===========================================================================
-
-## 上面写法的问题: ??
-- 将对象的方法直接定义在构造函数中 
- - 意味着构造函数每执行一次,就会创建一个新的函数对象.
-  //怎么判断是否是同一个对象,使用全等判断
-  //判断两个函数是否为同一个
-  //console.log(p.sayHello === p2.sayHello); //返回false 
- - 也就是说每一个对象都有他自己的sayHello函数
-- 每一个函数的代码和功能是一致的,重复创建非常浪费内存空间
-
-==============================================================================
-## 如何改进? 
-让sayHello这个共享函数放在构造函数外边
-
-function Person(name, age){
-    this.name = name;
-    this.age = age;
-    //给新的对象添加一个方法
-    this.sayHello = fn; //函数直接赋值
-    
-}
-function fn(){
-        alert('hello, 大家好,我是'+this.name);
+function Child(name, age) {
+	Parent.call(this, name, age)
 }
 
-let p = new Person('孙悟空', 18);
-let p2 = new Person('猪八戒', 18);
-p.sayHello();
-p2.sayHello();    
-console.log(p.sayHello === p2.sayHello); //现在只有一个函数,故相等    
-
-=================================================================================
- 上面的解决方法不完美:
-
-1.函数直接定义在全局中,影响命名空间; //
-2.函数定义在外面,每一次都要赋值; //最好的方法是函数只创建一次,值只赋值一次
-
+let c1 = new Child('孙悟空', 18)
+let c2 = new Child('猪八戒', 18)
 ```
 
+以上代码存在的问题是,  实例的方法在父类构造函数中声明的,**每次实例化都会重复创建一次, 浪费空间**.
+解决方法是, 创建一个全局的方法:
+```js
+function gobalSayHello() {
+	alert('hello, 大家好,我是'+this.name);
+}
+function Parent(name, age) {
+	this.name = name
+	this.age = age
+	this.sayHello = globalSayHello
+}
+
+function Child(name, age) {
+	Parent.call(this, name, age)
+}
+
+let c1 = new Child('孙悟空', 18)
+let c2 = new Child('猪八戒', 18)
+```
+
+这种方式虽然说解决了每次实例化都会重复创建一次, 但也会产生新的问题: 
+* 每次实例化都会重新赋值一次
+* 函数在全局中声明会影响命名空间
+
+最好的方式,  函数只创建一次,值只赋值一次
 
 
-#### 组合继承
+### 组合继承
+
+#### 是什么
 
 > https://slbyml.github.io/javascript/extend.html#%E7%BB%84%E5%90%88%E5%BC%8F%E7%BB%A7%E6%89%BF
 
 > 组合继承（有时候也叫伪经典继承）综合了原型链和盗用构造函数，将两者的优点集中了起来。基本的思路是使用原型链继承原型上的属性和方法，而通过盗用构造函数继承实例属性。
 >
-> 这样既可以把方法定义在原型上以实现重用，又可以让每个实例都有自己的属性'
+> 这样既可以把方法定义在原型上以实现重用，又可以让每个实例都有自己的属性
 
-优点: 融合原型链继承和构造函数的优点，是 JavaScript 中最常用的继承模式
+#### 优缺点
+**优点**
+* 融合原型链继承和构造函数的优点
+**缺点**
+* 父类的构造函数执行了两次: 一次在子类的构造函数中call方法执行了一遍; 一次在在子类原型实例化父类的时候执行一遍
 
-缺点: 父类的构造函数执行了两次: 一次在子类的构造函数中call方法执行了一遍; 一次在在子类原型实例化父类的时候执行一遍
+#### 实现方式
+##### 方式一:
+ 1. 借用父类的构造函数: `Parent.call(this,name,age)`
+ 2. 子类原型等于父类的实例 `Child.prototype = new Parent()`
+ 3. 子类原型构造器重新指定为子类型 `Child.prototype.constructor = Child`
+##### 方式二:
+1. 子类继承父类: `class Child extends Parent`;
+2. 子类构造器中调用父类的构造: `super(name,age)`
 
+**构造函数**的实现
+```js
+// 方式一
 
-方式一:
-
- 1.借用父类的构造函数: Person.call(this,name,age)
- 2.子类原型等于父类的实例 Student.prototype = new Person();
- 3.子类原型构造器为子类型 Student.prototype.constructor = Student;
-
-方式二:
-
- 1.子类继承父类: class Student extends Person;
- 2.子类构造器中调用父类的构造: super(name,age)
-
-```javascript
 function Parent(name) {
   this.name = name;
   this.colors = ['red', 'blue', 'green'];
 }
 
 Parent.prototype.getName = function() {
-  console.log(this.name);
+  return this.name
 }
 
 function Child(name, age) {
@@ -251,13 +210,55 @@ console.log(child2.age); //20
 console.log(child2.colors); //["red", "blue", "green"]
 ```
 
+**类**的实现
+```js
+
+//方式2
+
+class Parent {
+	constructor(name) {
+		this.name = name
+		this.colors = ['red', 'blue', 'green']
+	}
+
+	getName() {
+		return this.name
+	}
+}
 
 
-#### 原型式继承
+class Child extends Parent {
+	constructor(name, age) {
+		super(name)
+		this.age = age
+	}
+}
 
-Douglas Crockford的原型式继承. 这个object()函数会创建一个临时构造函数，将传入的对象赋值给这个构造函数的原型，然后返回这个临时类型的一个实例。本质上，object()是对传入的对象执行了一次浅复制.
+const child1 = new Child('Alice', 10)
+child1.colors.push('black')
 
-这种原型式继承适用的情况: 你有一种对象,想在它的基础上再创建一个新对象.就是就是 ES5 Object.create 的模拟实现.
+const child2 = new Child('Bob', 12)
+
+console.log(child1.getName()) // 'Alice'
+console.log(child2.colors) // ['red', 'blue', 'green']
+console.log(child1 instanceof Parent) //true
+```
+
+
+
+#### 类的实现方法的优点
+* `extends`关键字会自动建立**原型链继承**(等价于`Child.prototype=Object.create(Parent.prototype))`
+* `super()`实现了**构造函数继承**(等价于`Parent.call(this, ...args))`
+* 没有组合继承的原型属性冗余问题(比传统组合继承更高效)
+* 方法自动挂载在原型上, 语法更直观
+
+
+
+### 原型式继承
+#### 是什么
+Douglas Crockford的原型式继承. 通过object()函数创建一个临时构造函数，将传入的对象赋值给这个构造函数的原型，然后返回构造函数的实例。本质上，object()是对传入的对象执行了一次浅复制.
+
+这种原型式继承适用的情况: 你有一种对象,想在它的基础上再创建一个新对象.**就是就是 ES5 Object.create 的模拟简化实现.**
 
 ```javascript
 function object(o) {
@@ -267,14 +268,14 @@ function object(o) {
 }
 ```
 
-原型式继承的缺点:
-
-跟原型链继承一样., 包含引用类型的属性值始终都会共享相应的值
+#### 缺点
+* 跟原型链继承一样., 引用类型属性共享
+* 无法传递参数
 
 ```javascript
 let person = {
   name: 'kevin',
-  frineds: ['daisy', 'kelly']
+  friends: ['daisy', 'kelly']
 };
 
 let person1 = object(person);
@@ -289,9 +290,9 @@ console.log(person2.frineds); //["daisy", "kelly", "taylor"]
 
 
 
-#### 寄生式继承
-
-创建一个仅用于封装继承过程的函数,该函数在内部以某种形式来做增强对象(例如添加方法),最后返回对象
+### 寄生式继承
+#### 是什么
+> 创建一个仅用于封装继承过程的函数,该函数在内部以某种形式来增强对象(例如添加方法),最后返回对象
 
 ```javascript
 function createObj(o) {
@@ -309,11 +310,14 @@ function createObj(o) {
 
 
 
-#### 寄生组合式继承
+### 寄生组合式继承
+#### 背景
+* 组合式继承的最大缺点是会调用两次父构造函数. 
+	* 一次是设置子类型实例的原型时: `Child.prototype = new Parent()`
+	* 一次是创建子类实例时. `let child1 = new Child('kevin' 18)`
 
-组合式继承的最大缺点是会调用两次父构造函数. 一次是设置子类型实例的原型时;一次是创建子类实例时.
-
-如何避免在子类构造函数中的重复调用呢?
+#### 是什么
+> 不使用 `Child.prototype = new Parent()` ，而是间接的让 `Child.prototype` 访问到 `Parent.prototype`
 
 ```javascript
 function Parent(name) {
@@ -352,24 +356,19 @@ function prototype(child, parent) {
   prototype.constructor = child;
   child.prototype = prototype;
 }
+
+//使用时
+prototype(Child, Parent)
 ```
 
-> 这种方式的高效率体现它只调用了一次 Parent 构造函数，并且因此避免了在 Parent.prototype 上面创建不必要的、多余的属性。与此同时，原型链还能保持不变；因此，还能够正常使用 instanceof 和 isPrototypeOf。开发人员普遍认为寄生组合式继承是引用类型最理想的继承范式。
+#### 特点
+* 寄生组合式继承是引用类型最理想的继承范式
+* 只调用了一次 Parent 构造函数, 
+* 原型链还能保持不变；因此，还能够正常使用 instanceof 和 isPrototypeOf
 
 
 
-#### ES6中类的继承
-
-
-
-#### 来源
-https://github.com/mqyqingfeng/Blog/issues/16
-
-
-
-
-
-### 原型链
+## 原型链
 
 #### 定义
 
