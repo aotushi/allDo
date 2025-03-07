@@ -753,8 +753,8 @@ BFC是一个独立的布局环境，其中的元素布局是不受外界的影�
 
 
 ### 选择器优先级
-
-CSS中的优先级规则分为两大类，一类称为继承，另一类称为级联。
+[[CSS-CSS选择器#优先级]]
+CSS中的优先级规则分为两大类，一类称为**继承**，另一类称为**级联**。
 * 继承的优先级是最低的;
 * 级联优先级:
 	* 开发者设置的CSS样式；
@@ -1146,7 +1146,7 @@ container.style.color = 'red'
 
 **水平垂直居中**
 * flex
-* absolute+left/top+margin / absolute+left/top+transform
+* absolute+left/top+margin 或者 absolute+left/top+transform
 * absolute+(left/right/top/bottom) + margin
 * tabel-cell + vertical-align
 
@@ -2233,179 +2233,7 @@ function createObject(ctor) {
 
 
 ### JS设计模式
-常见的设计模式有:
-* 创建型模式
-	* 单例模式
-	* 工厂模式
-* 解构型模式
-	* 适配器模式
-	* 装饰器模式
-* 行为型模式
-	* 观察者模式
-	* 策略模式
 
-#### 工厂模式
->**将创建对象的过程单独封装**，同时它的应用场景也非常容易识别：有构造函数的地方，我们就应该想到简单工厂；在写了大量构造函数、调用了大量的 new、自觉非常不爽的情况下，我们就应该思考是不是可以掏出工厂模式重构我们的代码了
-
-```js
-// 给不同工种分配职责说明
-function User(name, age, career, work) {
-    this.name = name;
-    this.age = age;
-    this.career = career;
-    this.work = work;
-}
-
-function Factory(name, age, career) {
-    let work;
-    switch (career) {
-        case 'coder': {
-            work = ['写代码', '写系分', '修bug']
-            break;
-        }
-        case 'product-manager': {
-            work = ['订会议室', '写PRD', '催更']
-            break;
-        }
-        case 'boss': {
-            work = ['喝茶', '看报', '见客户']
-            break;
-        }
-    }
-    return new User(name, age, career, work)
-}
-
-const wang = new Factory('wang', 50, 'boss');
-const sun = new Factory('sun', 25, 'coder');
-const li = new Factory('li', 30, 'product-manager');
-
-console.log(wang)
-console.log(sun)
-console.log(li) 
-```
-
-
-#### 单例模式
-> 保证一个类仅有一个实例，并提供一个访问它的全局访问点。实现的方法为先判断实例存在与否，如果存在则直接返回，如果不存在就创建了再返回，这就确保了一个类只有一个实例对象.
-> 就像一个用户登录界面的弹窗,全局唯一
-
-```js
-// 定义：保证一个类仅有一个实例，并提供一个访问它的全局访问点。
-class Singleton {
-    constructor(name) {
-        this.name = name;
-        this.instance = null;
-    }
-
-    getName(){
-        console.log(this.name);
-    }
-
-    getInstance(name){
-        if(!this.instance){
-            this.instance = new Singleton(name);
-        }
-
-        return this.instance;
-    }
-}
-
-const singleton = new Singleton();
-
-const a = singleton.getInstance('a');
-const b = singleton.getInstance('b');
-
-console.log(a);
-console.log(b);
-console.log(a === b); 
-```
-
-
-
-#### 装饰者模式
-> 装饰器模式，又名装饰者模式。它的定义是“在不改变原对象的基础上，通过对其进行包装拓展，使原有对象可以满足用户的更复杂需求”。
-
-```js
-// 定义打开按钮
-class OpenButton {
-    // 点击后展示弹框（旧逻辑）
-    onClick() {
-        const modal = new Modal()
-    	modal.style.display = 'block'
-    }
-}
-
-// 定义按钮对应的装饰器
-class Decorator {
-    // 将按钮实例传入
-    constructor(open_button) {
-        this.open_button = open_button
-    }
-    
-    onClick() {
-        this.open_button.onClick()
-        // “包装”了一层新逻辑
-        this.changeButtonStatus()
-    }
-    
-    changeButtonStatus() {
-        this.changeButtonText()
-        this.disableButton()
-    }
-    
-    disableButton() {
-        const btn =  document.getElementById('open')
-        btn.setAttribute("disabled", true)
-    }
-    
-    changeButtonText() {
-        const btn = document.getElementById('open')
-        btn.innerText = '快去登录'
-    }
-}
-
-const openButton = new OpenButton()
-const decorator = new Decorator(openButton)
-
-document.getElementById('open').addEventListener('click', function() {
-    // openButton.onClick()
-    // 此处可以分别尝试两个实例的onClick方法，验证装饰器是否生效
-    decorator.onClick()
-}) 
-```
-
-
-#### 适配器模式
->专门为我们**抹平差异**的适配器模式
-
-例如,项目里有两种方案,一种是原始的请求,另一种是fetch请求,现在想要用fetch来兼容旧有的请求,这样旧有的请求入参形式都不需要更改.
-```js
-// Ajax适配器函数，入参与旧接口保持一致
-async function AjaxAdapter(type, url, data, success, failed) {
-    const type = type.toUpperCase()
-    let result
-    try {
-         // 实际的请求全部由新接口发起
-         if(type === 'GET') {
-            result = await HttpUtils.get(url) || {}
-        } else if(type === 'POST') {
-            result = await HttpUtils.post(url, data) || {}
-        }
-        // 假设请求成功对应的状态码是1
-        result.statusCode === 1 && success ? success(result) : failed(result.statusCode)
-    } catch(error) {
-        // 捕捉网络错误
-        if(failed){
-            failed(error.statusCode);
-        }
-    }
-}
-
-// 用适配器适配旧的Ajax方法
-async function Ajax(type, url, data, success, failed) {
-    await AjaxAdapter(type, url, data, success, failed)
-} 
-```
 
 
 
@@ -2714,9 +2542,7 @@ function prototype(child, parent) {
   - js的哪些语法体现了封装性: 函数 ==> 对象 ==> 模块 ==> 组件 ==> 库
   - 封装都要有个特点: 不需要外部看到的必须隐藏起来, 只向外部暴露想让外部使用的功能或数据
 - 继承
-  - 为什么要有继承? 复用代码, 从而减少编码
-  - js中的继承都是基于原型的继承: ES6的类本质也是
-  - 编码实现: 原型链+借用构造函数的组合 / ES6的类继承
+  - JS中的6种继承方式
 - 多态: 多种形态
   - 理解
     - 声明时指定一个类型对象, 并调用其方法,
@@ -3248,12 +3074,12 @@ Promise.then()方法返回一个新的 Promise 对象，它的状态和值取决
 
 #### Promise-API实现
 
-| 静态方法                     | 作用                                                         | 其他 |
-| ---------------------------- | ------------------------------------------------------------ | ---- |
-| Promise.all(iterable)        | 传入一个可迭代对象,返回一个promise<br/>* 当所有promise都resolve的时候, 新的 promise 才会 resolve，并且其结果数组将成为新 promise 的结果。<br/>* 当其中一个promise被reject, 立即返回这个reject,忽略其他promise |      |
-| Promise.allSettled(iterable) | 此静态方法接收一个包含promises的可迭代对象作为入参并返回单个Promise. 当所有入参的promise状态settle(包含空的迭代对象)之后,返回的promise才会解决(fullfill),并带有一个描述每个promise结果的对象数组. |      |
-| Promise.any()                | 接收一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)可迭代对象，只要其中的一个 `promise` 成功，就返回那个已经成功的 `promise` 。 |      |
-| Promise.race                 | 返回一个Promise,一旦迭代器中的某个promise成功或拒绝,返回的promise就会解决或拒绝. |      |
+| 静态方法                         | 作用                                                                                                                                                         | 其他  |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| Promise.all(iterable)        | 传入一个可迭代对象,返回一个promise<br/>* 当入参中所有的promise成功时(包括空迭代对象),返回的Promise才会成功,其值是一个成功状态值组成的数组.<br>> 当入参中由任意一个promise失败,返回的Promise才会失败, 其值是第一个失败的promise的值.         |     |
+| Promise.allSettled(iterable) | 此静态方法接收一个包含promises的可迭代对象作为入参并返回单个Promise. 当所有入参的promise状态settle(包含空的迭代对象)之后,返回的promise才会解决(fullfill),并带有一个描述每个promise结果的对象数组.                             |     |
+| Promise.any()                | 接收一个[`Promise`](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Promise)可迭代对象，只要其中的一个 `promise` 成功，就返回那个已经成功的 `promise` 。 |     |
+| Promise.race                 | 返回一个Promise,一旦迭代器中的某个promise成功或拒绝,返回的promise就会解决或拒绝.                                                                                                       |     |
 
 
 
@@ -3910,6 +3736,7 @@ V8的堆内存回收分为新生代内存和老生代内存，新生代内存是
 * Object.assign(obj1,obj2)
 
 #### 深拷贝实现方式
+* structuredClone
 - JSON.parse(JSON.stringfy(obj)) 
   -  ===> 问题: 方法/函数会丢失(undefined、任意的函数以及 symbol 值，在序列化过程中会被忽略（出现在非数组对象的属性值中时）或者被转换成 null（出现在数组中时)
   -  ===> 问题2: 循环引用会出错(死循环)
@@ -5188,6 +5015,75 @@ console.log(Greetings.sayHello('John'));
 
 
 ```
+
+
+
+
+
+
+# TS面试题
+
+## TS内置数据类型又那些?
+```js
+boolean（布尔类型）
+
+number（数字类型）
+
+string（字符串类型）
+
+null 和 undefined 类型
+
+array（数组类型）object 对象类型
+
+tuple（元组类型）：允许表示一个已知元素数量和类型的数组，各元素的类型不必相同
+
+enum（枚举类型）：`enum`类型是对JavaScript标准数据类型的一个补充，使用枚举类型可以为一组数值赋予友好的名字
+
+any（任意类型）
+
+never 类型
+
+void 类型
+```
+
+
+## any类型介绍
+
+### 作用
+**作用:**
+为编程阶段还不清楚类型的变量指定一个类型。 这些值可能来自于动态的内容，比如来**自用户输入或第三方代码库**（不确定用户输入值的类型，第三方代码库是如何工作的）。 这种情况下，我们不希望类型检查器对这些值进行检查而是直接让它们通过编译阶段的检查。
+
+**any的问题**
+
+1. 类型污染：any`类型的对象会导致后续的属性类型都会变成`any
+2. 使用不存在的属性或方法而不报错
+
+### any和泛型的区别？
+
+泛型有类型推论，编译器会根据传入的参数自动地帮助我们确定T的类型
+
+any则是不检验
+
+### any和unknown有什么区别？
+unknown 和 any 的主要区别是 unknown 类型会更加严格：在对 unknown 类型的值执行大多数操作之前，我们必须进行某种形式的检查。而在对 any 类型的值执行操作之前，我们不必进行任何检查。
+
+
+### any和泛型的比较
+泛型有类型推论，编译器会根据传入的参数自动地帮助我们确定T的类型
+
+any则是不检验
+
+
+
+
+
+### TypeScript 中 any、never、unknown、null & undefined 和 void 有什么区别？
+
+- `any`: 动态的变量类型（失去了类型检查的作用）。
+- `never`: 永不存在的值的类型。例如：never 类型是那些总是会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型。
+- `unknown`: 任何类型的值都可以赋给 unknown 类型，但是 unknown 类型的值只能赋给 unknown 本身和 any 类型。
+- `null & undefined`: 默认情况下 null 和 undefined 是所有类型的子类型。 就是说你可以把 null 和 undefined 赋值给 number 类型的变量。当你指定了 --strictNullChecks 标记，null 和 undefined 只能赋值给 void 和它们各自。
+- `void`: 没有任何类型。例如：一个函数如果没有返回值，那么返回值可以定义为void。
 
 
 

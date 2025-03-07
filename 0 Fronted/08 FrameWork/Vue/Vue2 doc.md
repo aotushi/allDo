@@ -567,6 +567,9 @@ export default {
 
 
 ### 6.高精度权限控制-自定义指令directive
+
+^5b5ab6
+
 #### 背景
 > 通常给一个元素添加v-if / v-show，来判断该用户是否有权限，但如果判断条件繁琐且多个地方需要判断，这种方式的代码不仅不优雅而且冗余。针对这种情况，我们可以封装了一个指令权限，能简单快速的实现按钮级别的权限判断。
 
@@ -5705,6 +5708,8 @@ export default {
 
 
 ##### 高精度权限控制
+
+^f95d30
 
 > https://mp.weixin.qq.com/s/0Yekkc08ozbNxuquHVGveg
 

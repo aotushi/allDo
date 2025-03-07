@@ -513,6 +513,9 @@ document.querySelector('#myId').querySelectorAll(':scope div div');
 
 # 优先级
 
+^0da5c3
+
+
 > CSS中的优先级规则分为两大类，一类称为继承，另一类称为级联。- `<CSS选择器世界(第2版) 2.1 继承与级联`
 
 

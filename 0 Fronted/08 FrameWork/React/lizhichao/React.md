@@ -46,7 +46,7 @@ react-dom 是react的dom包，使用react开发web应用时必须引入
   }, '点我一下')
   
   const div = React.creteElement('div', {}, '我是一个div', button)
-  const root = ReactDOM.createReact(document.querySelector('root'))
+  const root = ReactDOM.createRoot(document.querySelector('root'))
   root.render(div)
   
   function alertFn() {
@@ -61,6 +61,14 @@ react-dom 是react的dom包，使用react开发web应用时必须引入
 ```html
 
 //现在要替换button的内容,只能重新声明一个新的button,然后让react重新渲染.这样只会<<重新渲染button元素>>
+
+
+<body>
+  <button id="btn2">
+    原生按钮
+  </button>
+  <div id="root"></div>
+</body>
 <script>
  const button = React.createElement('button', {
     id: 'btn',
@@ -77,18 +85,17 @@ react-dom 是react的dom包，使用react开发web应用时必须引入
   }
   
   
-  
-  const btnNode = document.getElementById('btn2')  //html中在id为root的元素之外新声明一个button按钮
-    btnNode.addEventListener('click', function(event) {
-      const button = React.createElement('button', {
-      id: 'btn',
-      className: 'btnClass',
-      onClick: alertFn
-    }, 'clickMe')
+  const btnNode = document.getElementById('btn2');
+  btnNode.addEventListener('click', function(event) {
+    const button = React.createElement('button', {
+    id: 'btn',
+    className: 'btnClass',
+    onClick: alertFn
+  }, 'clickMe');
 
     const div = React.creteElement('div', {}, '我是一个div', button)
-    const root = ReactDOM.createReact(document.querySelector('root'))
-    root.render(div) //用新的div替换旧的div.
+    //这里直接使用上面声明的root
+    root.render(div) 
   })
   
 
@@ -104,6 +111,10 @@ react-dom 是react的dom包，使用react开发web应用时必须引入
 - 用来创建React的根容器，容器用来放置React元素
 
 ```html
+<body>
+  <div id="root"></div>
+</body>
+
 <script>
 
 	const button = React.createElement('button', {
@@ -182,15 +193,19 @@ JSX 是 JavaScript 的语法扩展，JSX 使得我们可以以类似于 HTML 的
 ```html
 babel下载地址：https://unpkg.com/babel-standalone@6/babel.min.js
 
+<body>
+  <div id="root"></div>
+  <div id="root2"></div>
+</body>
 <script type="text/babel">
   // 命令式
-  // const button = React.createElement('button', {id: 'btn'}, '按钮')
-  // const root = ReactDOM.createRoot(document.getElementById('root'))
-  // root.render(button)
+  const nativeButton = document.createElement('button')
+  nativeButton.id = 'imp-btn'
+  nativeButton.textContent = '原生按钮'
+  document.getElementById('root').appendChild(nativeButton)
 
   // 声明式
-  const button = <button>我是按钮222</button>
-
+  const button = <button>我是按钮</button>
   const root = ReactDOM.createRoot(document.getElementById('root'))
   root.render(button)
 </script>
@@ -198,15 +213,9 @@ babel下载地址：https://unpkg.com/babel-standalone@6/babel.min.js
 
 
 
-```html
-<script>
-	
-</script>
-```
 
 
-
-#### 注意事项
+#### JSX注意事项
 
 1. 不是字符串,不要加引号
 2. 有且只有一个根标签

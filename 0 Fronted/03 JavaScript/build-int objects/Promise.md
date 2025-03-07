@@ -10,7 +10,7 @@ https://github.com/wangfupeng1988/js-async-tutorial
 
 # 异步编程背景
 
-[[01_HTML&CSS&JS基础#事件循环]]
+[[01_HTML&CSS&JS&TS#事件循环]]
 
 
 

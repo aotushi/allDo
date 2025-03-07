@@ -44,18 +44,6 @@ Vue采用**数据劫持** + **依赖收集** + **发布订阅模式**来实现�
 Vue通过数据劫持（使用Object.defineProperty或Proxy）拦截数据的访问和修改，在数据被访问时进行依赖收集，在数据变化时通过发布订阅模式通知相关依赖进行更新。
 
 
-### 响应式系统的工作流程
-1. **初始化**：
-    - 创建Observer实例观察数据
-    - 创建Dep实例管理依赖
-    - 创建Watcher实例订阅数据变化
-2. **依赖收集**：
-    - 组件渲染时访问响应式数据
-    - 触发getter，将当前Watcher添加到依赖列表
-3. **数据更新**：
-    - 数据变化触发setter
-    - 通知所有依赖进行更新
-    - 重新渲染相关组件
 
 ### Vue的渲染过程
 >https://github.com/Easay/issuesSets/issues/49
@@ -98,7 +86,15 @@ Vue通过数据劫持（使用Object.defineProperty或Proxy）拦截数据的访
    - MVC: View 和 Model 之间可能存在一定程度的耦合。
    - MVVM: View 和 Model 完全解耦，通过 ViewModel 进行通信。
 
-
+### Vue 跟 React 有什么异同
+- 相同
+    - 都是**单向数据流**
+    - 都使用了 **虚拟DOM** 技术
+    - 都是基于**组件化开发** / 都支持 SSR
+- 不同点
+    - 视图实现: vue: template ; react: JSX
+	- 数据改变: vue: 响应式; react: **手动 setState**
+	- 事件绑定: vue: 双向绑定;   react: 单向绑定
 
 
 
@@ -263,12 +259,11 @@ new Vue({
 
 
 
-### 组件间通信的方式
 
 
 ### Vue组件间多种通信方式
 
-#### 1) 组件间通信方式列表
+#### 1) Vue2组件间通信方式列表
 
 ```
 1) props
@@ -282,6 +277,20 @@ new Vue({
 9) Vuex
 10) 插槽 ==> 作用域插槽
 ```
+
+
+#### Vue3组件间通信方式
+```md
+- props
+- $emit
+- expose / ref
+- $attrs
+- v-model
+- provide / inject（原理：原型链）
+- Vuex/pinia
+- mitt
+```
+
 
 #### 2) 通信方式的选择
 
@@ -491,7 +500,7 @@ b)	缺点: state中的数据是动态的，就需要一直要同步到sessionSto
 
 3.	在页面刷新之前获取Vuex的数据，将数据保存在sessionStorage中，页面加载后从sessionStorage中获取
 a)	优点: 减少动态更新sessionStorage的次数，性能好
-b)	重点: 给window绑定beforeupload事件监听
+b)	重点: 给window绑定beforeunload事件监听
 
 4.插件
 使用持久化插件：可以使用Vuex持久化插件如vuex-persistedstate或vuex-along来将Vuex存储在浏览器的localStorage或cookie中，以便在刷新页面时保留数据状态。
@@ -797,6 +806,8 @@ export default {
 
 
 
+
+
 #### 重要生命周期函数（开发中常用） 
 
 - **created / mounted** 
@@ -808,6 +819,36 @@ export default {
 - **beforeDestroy** 
 
   做一些收尾工作：取消AJAX请求，清除定时器等
+
+
+
+#### Vue2与Vue3生命周期比较
+- `beforeCreate` -> 使用 `setup()`
+- `created` -> 使用 `setup()`
+- `beforeMount` -> `onBeforeMount`
+- `mounted` -> `onMounted`
+- `beforeUpdate` -> `onBeforeUpdate`
+- `updated` -> `onUpdated`
+- `beforeDestroy` -> `onBeforeUnmount`
+- `destroyed` -> `onUnmounted`
+- `errorCaptured` -> `onErrorCaptured`
+
+
+#### 父子组件的更新
+**加载渲染过程**
+父 beforeCreate -> 父 created -> 父 beforeMount -> 子 beforeCreate -> 子 created -> 子 beforeMount -> 子 mounted -> 父 mounted
+
+**子组件更新过程**
+父 beforeUpdate -> 子 beforeUpdate -> 子 updated -> 父 updated
+
+**父组件更新过程**
+父 beforeUpdate -> 父 updated
+
+**销毁过程**
+父 beforeDestroy -> 子 beforeDestroy -> 子 destroyed -> 父 destroyed
+
+
+
 
 #### 周期函数补充
 
@@ -1420,6 +1461,10 @@ directives: {
 - 表单防止重复提交
 - 图片懒加载
 - 一键 Copy的功能
+
+
+##### 权限控制
+[[Vue2 doc#^5b5ab6]]
 
 ##### 表单防止重复提交
 ```js
@@ -2044,38 +2089,20 @@ Vuex是一个专为Vue.js应用程序开发的状态管理模式。它可以集�
 - `Proxy` 可以直接监听数组的变化；
 - Proxy有13种拦截方法，不限于apply、ownKeys、deleteProperty、has等等，这是Object.defineProperty不具备的；
 
-  
-## Vue3响应式原理
-- Vue响应式使用的是ES6的`Proxy`和`Reflect`相互配合实现数据响应式，解决了Vue2中试图不能自动更新的问题；
-- `Proxy`是深度监听，所以可以监听对象和数组内的任意元素，从而可以实现视图实时更新；
-- 响应式大致分为三个阶段：
-    - **初始化阶段**：
-        - 初始化阶段通过组件初始化方法形成对应的`proxy`对象，然后形成一个负责渲染的`effct`；
-    - **get依赖收集阶段**：
-        - 通过解析`template`，替换真实`data`属性，来触发`get`，然后通过`satck`方法，通过`proxy对象`和`key`形成对应的`deps`，将负责渲染的`effect`存入`deps`。（这个过程还有其他的effect，比如watchEffect存入deps中 ）。
-    - **set派发更新阶段**：
-        - 当我们 `this[key] = value` 改变属性的时候，首先通过`trigger`方法，通过`proxy对象`和`key`找到对应的`deps`，然后给`deps`分类分成`computedRunners`和`effect`,然后依次执行，如果需要`调度`的，直接放入调度。
-
-> Proxy只会代理对象的第⼀层，那么Vue3⼜是怎样处理这个问题的呢？
-> 
-> - 判断当前Reflect.get的返回值是否为Object，如果是则再通过 reactive ⽅法做代理， 这样就实现了深度观测。
-
-> 监测数组的时候可能触发多次get/set，那么如何防⽌触发多次呢？
-> 
-> - 我们可以判断key是否为当前被代理对象target⾃身属性，也可以判断旧值与新值是否相等，只有满⾜以上两个条件之⼀时，才有可能执⾏trigger。
-
+ 
 
 ## watch和watchEffect区别
-- `watch` 和 `watchEffect` 都是监听器，`watchEffect` 是一个副作用函数，它们之间的区别有：
 
 1. `watch`：既要指明监听数据的源，也要指明监听的回调； `watchEffect`：可以自动监听数据源作为依赖,监听的回调中用到哪个数据，那就监听哪个数据；
-3. `watch` 可以访问改变前后的值，`watchEffect` 只能获取改变后的值；
-4. `watch`运行的时候 不会立即执行，值改变后才会执行，而`watchEffect`运行后可立即执行，这一点可以通过`watch`的配置项`immeriate`改变；
-5. `watchEffect` 有点像 `computed`：
+2. `watch` 可以访问改变前后的值，`watchEffect` 只能获取改变后的值；
+3. `watch`运行的时候 不会立即执行，值改变后才会执行，而`watchEffect`运行后可立即执行，这一点可以通过`watch`的配置项`immeriate`改变；
+
+
+4. `watchEffect` 有点像 `computed`：
     - `computed`注重的是计算出来的值（回调函数的返回值），所以必须写返回值；
     - `watchEffect`注重的是过程（回调函数的函数体），所以不用写返回值；
         - `watchEffect`所指定的回调中用到的数据只要发生变化，则直接重新执行回调；
-6. Vue3与Vue2中的watch配置项一致，但也有两个小坑：
+5. Vue3与Vue2中的watch配置项一致，但也有两个小坑：
     - 监听`reactive`定义的响应式数据时（监听数据整体），`oldVal`无法正确获取到，强制开启深度监听，deep配置项失效；
     - 监听`reactive`定义的响应式数据的某个属性时，deep配置项有效；
 
@@ -2160,11 +2187,280 @@ Vue2.x 组件通信共有12种
 
 
 
+## Pinia简介
+
+### 比较
+- Vuex: State、Getters、Mutations（同步）、Actions（异步）
+- Pinia: State、Getters、Actions（同步异步都支持）
+
+### 优点
+- Pinia 没有 Mutations
+- 没有模块的嵌套结构
+- 更好的 TypeScript 支持
+- Vue2 和 Vuc3 都支持
+- 支持 Vue DevTools
+
+
+### 使用介绍
+#### 安装
+```sh
+npm i pinia
+```
+
+#### 配置
+```js
+import { createApp } from 'vue'
+import './style.css'
+import App from './App.vue'
+import router from './router/index'
+import axios from 'axios'
+import { createPinia } from 'pinia'
+
+const app = createApp(App)
+app.config.globalProperties.$axios = axios
+app
+  .use(router)
+  .use(createPinia())
+  .mount('#app')
+
+
+```
+
+
+### 定义
+```js
+import { defineStore } from 'pinia'
+
+interface IUser {
+  name: string
+  age: number
+}
+export const useUserStore = defineStore('user', {
+  state(): IUser {
+    return {
+      name: '',
+      age: 0,
+    }
+  },
+  getters: {},
+  actions: {
+    updateUser(user: IUser) {
+      this.name = user.name
+      this.age = user.age
+    },
+  },
+})
+
+```
+
+### 使用
+
+##### state基本使用
+```vue
+
+<template>
+  <div>userAge: {{ user.age }}</div>
+</template>
+<script setup lang="ts">
+import { useUserStore } from '../pinia/user'
+const user = useUserStore()
+setTimeout(() => {
+  user.updateUser({
+    name: 'Sherry',
+    age: 30
+  })
+}, 500)
+</script>
+
+```
 
 
 
+#### storeToRefs 使解构也能响应式
+```vue
+
+<template>
+  <div>userAge: {{ age }}</div>
+</template>
+<script setup lang="ts">
+import { useUserStore } from '../pinia/user'
+import { storeToRefs } from 'pinia'
+
+const user = useUserStore()
+// 使解构后的值也能拥有响应式
+const { age } = storeToRefs(user)
+setTimeout(() => {
+  user.updateUser({
+    name: 'Sherry',
+    age: 30
+  })
+}, 500)
+</script>
+
+```
+
+#### 修改state的方式
+```vue
+
+<template>
+  <div>Name: {{ name }}</div>
+  <div>Age: {{ age }}</div>
+</template>
+<script setup lang="ts">
+import { useUserStore } from '../pinia/user'
+import { storeToRefs } from 'pinia'
+
+const user = useUserStore()
+// 使解构后的值也能拥有响应式
+const { age, name } = storeToRefs(user)
+setTimeout(() => {
+  // 1. 直接修改（不建议）
+  // user.age = 200
+  // 2. $patch（传递对象，多个数据修改）（不建议）
+  user.$patch({
+    name: 'Lance',
+    age: 28,
+  })
+  // 3. $patch（传递箭头函数，多个数据修改）（不建议）
+  user.$patch((state) => {
+    state.name = 'GC'
+    state.age = 31
+  })
+  // 4. 直接调用 action （推荐）
+  user.updateInfo({
+    name: 'QB',
+    age: 29,
+  })
+}, 500)
+</script>
+
+```
 
 
+#### getters
+
+无参数传递 vs 有参数传递
+```js
+
+
+import { defineStore } from 'pinia'
+
+interface IUser {
+  name: string
+  age: number
+}
+export const useUserStore = defineStore('user', {
+  state(): IUser {
+    return {
+      name: '',
+      age: 0,
+    }
+  },
+  getters: {
+    getAge(): number {
+      return this.age
+    },
+    // 接受参数
+    getFormatName(state): (value: string) => string {
+      return (value: string) => {
+        return state.name + value
+      }
+    },
+  },
+  actions: {
+    updateInfo(user: IUser) {
+      this.name = user.name
+      this.age = user.age
+    },
+  },
+})
+
+```
+
+```vue
+<template>
+  <div>Name: {{ name }}</div>
+  <div>Age: {{ age }} - {{ getAge }} - {{ getFormatName('Lance') }}</div>
+</template>
+<script setup lang="ts">
+import { useUserStore } from '../pinia/user'
+import { storeToRefs } from 'pinia'
+const user = useUserStore()
+const { age, name, getAge, getFormatName } = storeToRefs(user)
+setTimeout(() => {
+  user.updateInfo({
+    name: 'QB',
+    age: 29,
+  })
+}, 500)
+</script>
+
+```
+
+
+#### 跨模块更新数据
+定义俩模块:
+* user
+* subject
+
+```js
+import { defineStore } from 'pinia'
+
+export const useSubjectStore = defineStore('subject', {
+  state() {
+    return {
+      courseList: ['数学', '语文'],
+      currentIdx: 0,
+    }
+  },
+})
+
+```
+
+然后希望在user模块中修改subject数据:
+```js
+
+import { defineStore } from 'pinia'
+import { useSubjectStore } from './subject'
+const subject = useSubjectStore()
+...
+export const useUserStore = defineStore('user', {
+  state(): IUser {
+    return {
+      ...
+    }
+  },
+  getters: {
+    ...
+  },
+  actions: {
+    ...
+    addCourse(course: string) {
+      subject.courseList.push(course)
+    },
+  },
+})
+
+```
+
+
+页面中使用:
+```vue
+
+<template>
+  ...
+  <div>courseList: {{ subject.courseList.join(',') }}</div>
+</template>
+<script setup lang="ts">
+import { useUserStore } from '../pinia/user'
+import { useSubjectStore } from '../pinia/subject'
+
+const user = useUserStore()
+const subject = useSubjectStore()
+user.addCourse('英语')
+</script>
+
+```
 
 
 
