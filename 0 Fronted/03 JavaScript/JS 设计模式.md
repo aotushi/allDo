@@ -30,7 +30,7 @@ Singleton.prototype.getName = function() {
 Singleton.getInstance = function(name) {
 	if (!this.instance) {
 		this.instance = new Singleton(name)
-	}
+		}
 	return this.instance
 }
 
@@ -117,6 +117,37 @@ let b = new CreateDiv('sven2')
 alert(a === b) // true
 ```
 
+
+```js
+//抽离
+
+function Singleton(config) {
+	if (Singleton.instance) {
+		return Singleton.instance
+	}
+	
+	this.config = config || {}
+	this.init()
+	
+	Singleton.instance = this	
+}
+
+
+Singleton.prototype.init = function() {
+	//执行初始化
+	console.log('init', this.config)
+}
+
+
+const a = new Singleton({name: 'first'})
+const b = new Singleton({name: 'second'})
+a.init() //只会输出 'init {name: 'first'}'
+console.log(a === b) //true
+
+```
+
+
+
 #### 代码存在的问题
 * 构造函数负责了两件事, 违反了'单一职责原则'
 * 如果将来需要利用这个类创建很多div, 即让这个类从单例模式变为普通的类,还必须改写
@@ -132,7 +163,7 @@ alert(a === b) // true
 ### 用代理实现单例模式
 
 #### 背景
-> 解决透明单例模式存在的两个问题: 单一职责+未来
+> 解决透明单例模式存在的两个问题: 单一职责+未来可能存在的扩展
 
 
 #### 代码实现
@@ -308,7 +339,9 @@ Singleton.getInstance = (function() {
 				loginLayer = createLoginLayer()
 			}
 			loginLayer.style.display = 'block'
-			return loginLayer
+			//
+		
+		 return loginLayer
 		}
 	</script>
 </html>
@@ -427,6 +460,8 @@ let render = function() {
 }
 
 
+
+
 render()
 render()
 render()
@@ -452,3 +487,8 @@ render()
 render()
 render()
 ```
+
+
+
+## 策略模式
+

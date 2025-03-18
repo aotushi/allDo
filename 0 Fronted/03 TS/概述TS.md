@@ -100,7 +100,230 @@ TS提供两种静态类型检查模式:
 
 ## 原始类型
 
+### 文档
+> [TypeScript: Documentation - Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#the-primitives-string-number-and-boolean)
 
+
+### TS中的原始类型有哪些?
+有: `boolean`, `string`, `number`, `biginit`, `symbol`, `undefined`, `null`, `void`, `枚举类型`, `字面量类型`.
+
+### 实例
+
+```ts
+//string
+const foo: string = 'foo'
+
+//number
+const bin: number = 0b1010
+
+//boolean
+const yes:boolean = true
+const no: boolean = false
+
+//biginit
+const bin: biginit = 0b1010n;
+```
+
+
+### symbol类型和unique symbol类型
+
+#### symbol类型
+* symbol类型不存在字面量类型. 例如数字字面量'3'就是表示固定数值'3'.
+* symbol类型只能通过`Symbol()`和`Symbol.for()`函数来创建或直接引用某个Symbol值
+
+```ts
+const s0: symbol = Symbol();
+const s1: symbol = Symbol.for('foo');
+const s2: symbol = Symbol.hasInstance;
+const s3: symbol = s0;
+```
+
+
+#### unique symbol类型
+* 将一个Symbol值视作表示固定值的字面量，TypeScript引入了“unique symbol”类型
+* “unique symbol”类型的主要用途是用作接口、类等类型中的可计算属性名
+```ts
+
+const s0: unique symbol = Symbol()
+const s1: unique symbol = Symbol.for('s1')
+```
+
+```ts
+// 使用可计算属性名在接口中添加了一个类型成员，那么必须保证该类型成员的名字是固定的，否则接口定义将失去意义
+
+
+const x: unique symbol = Symbol()
+const y: symbol = Symbol()
+
+
+interface Foo {
+	[x]: string; //正确
+
+	[y]: string; // 错误, 接口中的计算属性名必须引用类型为字面量类型或`unique symbol`的表达式
+}
+
+```
+
+
+##### 注意事项
+* **'unique symbol'的值只允许使用const来声明
+* **'unique symbol'类型的值值允许使用`Symbol()`函数或`Symbol.for()`方法的返回值进行初始化
+* TS无法识别Symbol.for(xxx)相同参数的返参相同的情况,也不会产生编译错误.需要注意.
+* 由于“unique symbol”类型是 symbol类型的子类型，因此可以将“unique symbol”类型的值赋值给symbol类型
+* 如果程序中未使用类型注解来明确定义是symbol类型还是“unique symbol”类型，那么TypeScript会自动地推断类型
+
+```ts
+
+
+//不会报错 需要特别注意
+const a: unique symbol = Symbol.for('same')
+const b: unique symbol = Symbol.for('same')
+
+
+//父子关系
+const a: unique symbol = Symbol();
+const b: symbol = a;
+
+
+//自动推断类型
+// a和b均为'symbol'类型，因为没有使用const声明
+let a = Symbol();
+let b = Symbol.for('');
+
+// c和d均为'unique symbol'类型
+const c = Symbol();
+const d = Symbol.for('');
+
+// e和f均为'symbol'类型，没有使用Symbol()或Symbol.for()初始化
+const e = a;
+const f = a;
+```
+
+
+
+### Nullable
+
+#### 是什么
+> TypeScript中的Nullable类型指的是值可以为undefined或null的类型
+
+
+#### undefined
+> undefined类型只包含一个可能值，即undefined值。undefined类型使用undefined关键字标识
+
+```ts
+
+const foo: undefined = undefined;
+```
+
+
+
+#### null
+
+> null类型只包含一个可能值，即null值。null类型使用null关键字标识
+
+```ts
+const foo: null = null;
+```
+
+#### strictNullChecks
+
+##### 是什么
+> tsconfig.json中从2.0版本增加了这个编译选项. 用来进行严格的undefined和null类型的类型检查.
+> 默认不开启, 此时除尾端类型外的所有类型都是Nullable类型, 所有类型都能接受undefined值和null值, 即允许将其它类型的值赋值为null或undefined.
+
+```ts
+
+/**
+* --strictNullChecks = false
+*/
+
+let m1: boolean = undefined
+let m2: string = undefined
+
+let n1: boolean = null
+let n2: string = null
+```
+
+
+##### 存在的问题
+> 无法检查出空引用的错误
+
+```ts
+/**
+* --strictNullChecks = false
+*/
+
+let foo: string = undefined //正确, 可以通过类型检查
+
+foo.length //运行时, 将产生类型错误
+
+//运行结果
+// Error: TypeError: Cannot read property 'length' of undefined
+```
+
+**如何解决?**
+> 启用“--strictNullChecks”编译选项, undefined值和null值不再能够赋值给不相关的类型, 除了自身类型, 还允许赋值给顶端类型, 同时undefined类型也允许赋值给void类型.
+
+
+```ts
+/**
+* --strictNullChecks = true
+*/
+
+
+let m1: void = undefined
+
+let m2: any = undefined
+let m3: unknown = undefined
+
+let n2: any = null
+let n3: unknown = null
+
+
+//两者互换使用会报错
+const foo: undefined = null //编译错误, 类型null不能赋值给类型undefined
+const bar: null = undeifned //编译错误, 类型undeifned .....
+```
+
+
+### void
+
+#### 是什么
+> void类型表示某个值不存在，该类型用作**函数的返回值类型**. 在其它地方使用void类型是无意义的.
+> 当启用了`--strictNullChecks`时, 只允许将undefined赋值给void类型
+
+
+```ts
+function log(msg: string): void {
+	console.log(msg)
+}
+```
+
+
+```ts
+// --strictNullChecks = true
+
+// 正确
+function foo(): void {
+	return undefined
+}
+
+// 错误
+function bar(): void {
+	return null
+}
+
+
+// --strictNullChecks = false
+// 正确
+function foo(): void {
+	return undefined
+}
+//正确
+function bar(): void {
+	return null
+}
+```
 
 
 
@@ -115,6 +338,29 @@ TS提供两种静态类型检查模式:
 > 枚举类型变量通常用于集中定义和管理一组相关的常量，便于在其他地方引用. 
 >
 > TS支持数值枚举和字符串枚举.
+
+
+#### 是什么
+> 枚举类型由**零个**或**多个枚举成员**构成，每个枚举成员都是一个命名的常量。
+> 是原始类型;
+> 通过`enum`关键字定义
+
+```ts
+enumb Season {
+	Spring,
+	Summer,
+	Fall,
+	Winter
+}
+```
+
+#### 分类
+按照枚举成员的类型可以将枚举类型划分为以下三类：
+* 数值型枚举
+* 字符串枚举
+* 异构型枚举
+
+
 
 #### 枚举带来的好处:
 
@@ -163,13 +409,28 @@ enum UserLevelCode {
 
 
 
+
 #### 数值枚举
 
-> 数值枚举是数值类型的子类型,是默认的枚举类型. 因此可以将数值型枚举类型赋值给number类型. 但数值类型也能赋值给枚举类型,不会报错.
->
-> 数值枚举可以混入计算成员和常量成员. 简单说,没有初始化的枚举要么排在第一位,要么排在初用数值常量或其它常量枚举成员初始化之后.
+##### 描述
 
-其声明如下:
+* 数值枚举是数值类型的子类型, 因此可以将数值型枚举类型赋值给number类型; 注意, number类型也能赋值给枚举类型, 即使number类型的值不在枚举成员值的列表中
+* 数值型枚举成员都表示一个具体的数字. 如果在定义枚举时没有设置枚举成员的值，那么TypeScript将自动计算枚举成员的值, 计算规则是第一个成员的值为0, 其后每个在前一个基础上加1.
+* 数值枚举可以混入计算成员和常量成员. 简单说,没有初始化的枚举要么排在第一位,要么排在初用数值常量或其它常量枚举成员初始化之后.
+
+
+##### 定义及访问
+
+```ts
+enum Direction {
+	Up,
+	Down,
+	Left,
+	Right
+}
+
+const direction: Direction = Direction.Up
+```
 
 ```ts
 enum MonthOfYear {
@@ -230,6 +491,26 @@ if (userType === UserType.Admin) {
   //...
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -550,10 +831,6 @@ function printImportant(key: LogLevelStrings, message: string) {
 }
 printImportant("ERROR", "This is a message");
 ```
-
-
-
-##### 反转映射
 
 
 
@@ -1461,6 +1738,17 @@ foo = true;
 
 ```
 
+
+
+
+
+#### 联合类型和字符串类型的关系
+- `string` 是一个基础类型，代表所有可能的字符串值
+- 任何字符串字面量类型（如 `'a'`）都是 `string` 的子类型
+- 任何字符串字面量的联合类型（如 `'a' | 'b' | 'c'`）也是 `string` 的子类型
+
+
+
 #### 使用场景
 
 联合类型对其中的类型成员并没有限制，你可以混合原始类型，字面量类型，函数类型，对象类型等等等等。而在实际应用中，最常见的应该是**字面量联合类型**，它表示一组精确的字面量类型：
@@ -1494,6 +1782,15 @@ const user: User = {
 
 
 
+
+
+
+
+
+
+
+
+
 ### 字面量类型
 
 #### 是什么
@@ -1515,6 +1812,23 @@ const literalObject: { name: 'linbudu' } = { name: 'linbudu' };
 const literalArray: [1, 2, 3] = [1, 2, 3];
 
 ```
+
+
+
+#### boolean字面量类型
+#### string字面量类型
+##### 相关疑问
+
+###### 1.其length属性的类型为什么是number,而非像数组(元组)一样返回的是数值字面量?
+* 动态性: 字符串在运行时长度可变，TypeScript 无法静态推断所有字符串的字面量长度
+* 设计限制：即使你使用字面量类型字符串（如 "hello"），它的 length 属性仍会被推断为 number，因为 TypeScript 没有为字符串字面量实现长度字面量类型推断
+
+问题: 如何在ts中获取字符串的长度
+
+
+#### 数字字面量类型
+
+#### 枚举成员字面量类型
 
 
 
@@ -1846,6 +2160,18 @@ interface Window {
   //....
 }
 ```
+
+
+## 关键字
+
+### 重映射语法
+
+> `[P in keyof T as ... ]`
+
+会保留原始类型的所有修饰符
+
+
+
 
 
 

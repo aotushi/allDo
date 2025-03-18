@@ -34,13 +34,17 @@
 * babel学习
 * nodejs
 	* b站教程
-* electron
-	* 书籍
+* 客户端
+	* electron
+	* Sciter
 
 
 
 
 
+
+#### 产品经理
+* [前言 | 产品经理的无限游戏](https://jiewang.gitbook.io/chan-pin-jing-li-de-wu-xian-you-xi)
 
 ### 面试题
 
