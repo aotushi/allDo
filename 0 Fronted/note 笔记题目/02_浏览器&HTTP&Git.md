@@ -504,75 +504,7 @@ function axios({url, params={}, data={}, method='GET'}) {
 同源策略是浏览器为了保护用户隐私和安全而实施的一种安全机制，它要求两个 URL 的协议、域名和端口都相同，才能认为是同源，否则就是跨域。
 
 #### 跨域解决方法
-- JSONP
-- CORS
-- 代理服务器
-
-
-##### JSONP原理
-是什么?
->利用 `<script>` 标签没有跨域限制的特点，通过动态创建 `<script>` 标签，发送带有回调函数名的 GET请求，服务器返回包含该回调函数的数据，浏览器执行该函数并获取数据。
->这种方法只能发送 GET 请求，并且需要服务器端配合
-
-
-- 前台:
-  - `<script src="目标url?callback=fn" />`
-  - 声明函数 function fn (data) {}
-- 后台
-  - 处理请求, 产生需要返回的数据data
-  - 读取callback请求参数得到前台处理响应数据的函数名fn
-  - 返回执行函数fn的js代码: 'fn(data)'
-
-- 不足
-  - 只能处理GET请求
-  - 每个请求在后台都要做处理, 麻烦
-  ```js
-  // 发送jsonp请求的函数
-  function jsonp() {
-      var script = document.createElement('script')
-      script.type = 'text/javascript'
-      // 传参并指定回调执行函数为backFn
-      script.src = 'http://localhost:4000/getUserInfo?id=100&callback=cbFn'
-      document.body.appendChild(script)
-  }
-  
-  // 回调函数, 接收响应数据
-  function cbFn(data) {
-  	console.log(data)
-  }
-  ```
-
-  
-
-##### CORS原理
-
->即跨域资源共享，是一种 W3C 标准，它允许浏览器向跨源服务器发出 XMLHttpRequest 请求。它需要浏览器和服务器同时支持，并且在服务器端设置响应头 Access-Control-Allow-Origin 等字段来允许或拒绝跨域请求。
-> 这种方法支持各种类型的请求，并且可以携带 Cookie 等信息。
-
-```js
-// 使用cors, 允许跨域, 且允许携带跨域cookie
-app.use(function (req, res, next) {
-  // console.log('----')
-  // 允许跨域的地址
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5500')  // 不要是*
-  // 允许携带凭证(也就是cookie)
-  res.header('Access-Control-Allow-Credentials', 'true')
-  // 允许跨域的请求头
-  res.set("Access-Control-Allow-Headers", "Content-Type")
-  // 放行
-  next()
-})
-```
-
-
-#### 代理服务器
-
-- 开发环境: 利用webpack-dev-server中的http-proxy-middle  进行正向代理
-  - vue脚手架项目: vue.config.js
-  - react脚手架项目: package.json
-- 生产环境: 利用nigix 进行反向代理
-
-
+[[Browser#跨域10种解决方案]]
 
 
 

@@ -125,6 +125,39 @@ const bin: biginit = 0b1010n;
 ```
 
 
+#### 字符串类型转数组类型
+```ts
+type StringToArr<S extends string, T extends any[] = []> = S extends `${infer F}${infer Rest}`
+	? [F, ...StringToArr<Rest>]
+	: T;
+
+
+type StringToArr2<S extends string, T extends any[] = []> = S extends `${infer F}${infer Rest}`
+	? StringToArr2<Rest, [...T, F]>
+	: T;
+```
+
+#### 数组转字符串
+```ts
+
+
+type ArrToStr<T extends string[], S extends string = ''> = T extends [infer F extends string, ...infer Rest extends string[]]
+  ? `${F}${ArrToStr<Rest>}`
+  : S;
+
+  
+type ArrToStr2<T extends any[], S extends string = ''> = T extends [ infer F extends string , ...infer Rest extends string[]]
+  ? ArrToStr2<Rest, `S${F}`>
+  : S;
+
+```
+
+
+
+
+
+
+
 ### symbol类型和unique symbol类型
 
 #### symbol类型
@@ -1028,7 +1061,7 @@ const user: User = {
 
 
 
-## 对象类型
+## 引用类型
 
 ### 对象类型
 
@@ -1100,6 +1133,37 @@ obj = undefined
 常见错误:
 既然是对象原型的类型,在开发中就不能应用这个类型.TS中明确指出不应该使用此类型,应使用object(小写)来代替.
 
+
+#### 实例
+
+##### 1.表示1个空对象
+```ts
+const nullObj = {[index:string]: never}
+```
+
+为什么不能直接使用`{}`来表示空对象呢?
+* `{}`并不严格表示“空对象". 在TS中, 其表示一个具有零个已知属性, 但可能**包含任意未知属性**的对象
+* 
+
+```ts
+const obj: {} = {a:1}; //合法, **包含任意未知属性**的对象
+```
+
+
+
+### 函数类型
+
+
+
+
+### 接口类型
+
+
+
+#### 注意事项
+##### 1. 接口和别名的区别
+* 类型别名不能重新开放来新增新属性, 而接口可以. 类型别名通过交集来新增属性.
+* 两者很像,基本上可以自由选择使用
 
 
 
@@ -2042,6 +2106,15 @@ type CT<T> = 02 T extends { a: infer M; b: infer N } ? [M, N] : never;
 
 type T = CT<{ a: string; b: number }>; // [string, number]
 ```
+
+
+
+##### 3.infer 与extends联合使用
+
+
+
+
+
 
 
 

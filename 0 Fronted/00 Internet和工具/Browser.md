@@ -1282,7 +1282,7 @@ xhr.widthCredentials = true
 
 
 
-#### CORS
+#### 1.CORS
 
 跨域资源共享([CORS](https://link.segmentfault.com/?enc=CoF6bP66m7RAhbD54WQ9YA%3D%3D.459wt2d1S%2Bh3Ur0M2GGneKg3owiaAlqNtwue4IEi76DgGiB%2FmIGv7g7Wa0CjBh7Ja5KGeB1evP%2BbyUlM4%2Fnvbw%3D%3D)) 是一种机制，它使用额外的[HTTP](https://link.segmentfault.com/?enc=3jZ7zsnXFglRSbHnv6SJSQ%3D%3D.TTQ0f7DMeEM5WMJfK3aatpaDdQDvO9%2BxycIzDAhkfFulyEvfCA1TBbyIDiFqtTdLIIBb%2BsLHE2UNQceyKImVhQ%3D%3D)头来告诉浏览器 让运行在一个 origin (domain) 上的 Web 应用被准许访问来自不同源服务器上的指定的资源。当一个资源从与该资源本身所在的服务器**不同的域、协议或端口**请求一个资源时，资源会发起一个**跨域 HTTP 请求**。
 
@@ -1294,7 +1294,7 @@ xhr.widthCredentials = true
 
 
 
-##### 1).简单请求
+##### a).简单请求
 
 不会触发 [CORS 预检请求](https://link.juejin.cn/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FHTTP%2FAccess_control_CORS%23Preflighted_requests)。这样的请求为“简单请求”，请注意，该术语并不属于 [Fetch](https://link.juejin.cn/?target=https%3A%2F%2Ffetch.spec.whatwg.org%2F) （其中定义了 CORS）规范。若请求满足所有下述条件，则该请求可视为“简单请求”：
 
@@ -1332,7 +1332,7 @@ xhr.widthCredentials = true
 
 
 
-##### 2).非简单请求
+##### b).非简单请求
 
 除以上情况外的。 非简单请求会多触发一次预检请求.
 
@@ -1455,7 +1455,7 @@ Access to XMLHttpRequest at 'http://127.0.0.1:8080/api/corslist' from origin 'ht
 
 
 
-#### Node正向代理
+#### 2.Node正向代理
 
 代理的思路为，利用服务端请求不会跨域的特性，让接口和当前站点同域。
 
