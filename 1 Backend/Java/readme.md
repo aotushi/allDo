@@ -2347,13 +2347,592 @@ public class SwitchCaseTest04 {
 
 
 ### 3.循环语句
+**循环结构分类**
+- for 循环
+- while 循环
+- do-while 循环 
+
+**循环结构`四要素`：**
+  - 初始化部分
+  - 循环条件部分
+  - 循环体部分
+  - 迭代部分
+
+
+
+
 #### 3.1 for循环
 
 ##### 1.语法
+```java
+for (①初始化部分; ②循环条件部分; ④迭代部分)｛
+         	③循环体部分;
+｝
+```
+
+**说明：**
+- `for(;;)`中的两个`；`不能多也不能少
+- ①初始化部分可以声明多个变量，但必须是同一个类型，用逗号分隔
+- ②循环条件部分为boolean类型表达式，当值为false时，退出循环
+- ④可以有多个变量更新，用逗号分隔
 
 ##### 2.举例
+1.格式多样性
+```java
+public class ForTest2() {
+	public static void main(String[] args) {
+		int num = 1;
+		for (System.out.print('a'); num<3; System.out.print('c'), num++) {
+			System.out.print('b');
+		}
+	}
+}
+```
 
-##### 3.练习
+
+2.累加: 遍历1-100以内的偶数，并获取偶数的个数，获取所有的偶数的和
+```java
+public class ForTest2 {
+  public static void main(String[] args) {
+    int count = 0;
+    int sum = 0;
+    for (int i = 1; i<= 100; i++) {
+      if ((i & 1) == 0) {  //按位与 运算符
+        count++;
+        sum += i;
+      }
+    }
+    System.out.print("偶数的个数是:" + count + ",偶数的和是:" + sum);
+  }
+}
+
+
+//打印1~100之间所有是7的倍数的整数的个数及总和
+    int count2 = 0;
+    int sum2 = 0;
+    for (int i = 7; i<=100; i+=7) {
+      count2++;
+      sum2 += i;
+    }
+    System.out.print(",7的倍数的个数是:" + count2 + ",7的倍数的和是:" + sum2);
+
+```
+
+3.结合分支结构使用
+题目：输出所有的水仙花数，所谓水仙花数是指一个3位数，其各个位上数字立方和等于其本身。例如： `153 = 1*1*1 + 3*3*3 + 5*5*5`
+```java
+public class ForTest4 {
+	public static void main(String[] args) {
+		//定义统计变量，初始化值是0
+		int count = 0;
+		
+		//获取三位数，用for循环实现
+		for(int x = 100; x < 1000; x++) {
+			//获取三位数的个位，十位，百位
+			int ge = x % 10;
+			int shi = x / 10 % 10;
+			int bai = x / 100;
+			
+			//判断这个三位数是否是水仙花数，如果是，统计变量++
+			if((ge*ge*ge+shi*shi*shi+bai*bai*bai) == x) {
+                System.out.println("水仙花数：" + x);
+				count++;
+			}
+		}
+		
+		//输出统计结果就可以了
+		System.out.println("水仙花数共有"+count+"个");
+	}
+}
+```
+
+4.结合break使用
+说明：输入两个正整数m和n，求其最大公约数和最小公倍数。
+
+比如：12和20的最大公约数是4，最小公倍数是60。
+```java
+/**
+ * @author 尚硅谷-宋红康
+ * @create 17:43
+ */
+public class ForTest5 {
+    public static void main(String[] args) {
+        //需求1：最大公约数
+        int m = 12, n = 20;
+        //取出两个数中的较小值
+        int min = (m < n) ? m : n;
+
+        for (int i = min; i >= 1; i--) {//for(int i = 1;i <= min;i++){
+            if (m % i == 0 && n % i == 0) {
+                System.out.println("最大公约数是：" + i); //公约数
+                break; //跳出当前循环结构
+            }
+        }
+
+
+        //需求2：最小公倍数
+        //取出两个数中的较大值
+        int max = (m > n) ? m : n;
+
+        for (int i = max; i <= m * n; i++) {
+
+            if (i % m == 0 && i % n == 0) {
+
+                System.out.println("最小公倍数是：" + i);//公倍数
+
+                break;
+            }
+        }
+
+    }
+}
+```
+
+
+
+#### 3.2 while循环
+##### 3.2.1 基本语法
+```java
+①初始化部分
+while(②循环条件部分)｛
+    ③循环体部分;
+    ④迭代部分;
+}
+```
+**说明：**
+- while(循环条件)中循环条件必须是boolean类型。
+- 注意不要忘记声明④迭代部分。否则，循环将不能结束，变成死循环。
+- for循环和while循环可以相互转换。二者没有性能上的差别。实际开发中，根据具体结构的情况，选择哪个格式更合适、美观。
+- for循环与while循环的区别：初始化条件部分的作用域不同。
+
+##### 3.2.2 例子
+
+
+#### 3.3 do-while
+##### 1.语法
+```java
+①初始化部分;
+do{
+	③循环体部分
+	④迭代部分
+}while(②循环条件部分); 
+```
+**说明：**
+- 结尾while(循环条件)中循环条件必须是boolean类型
+- do{}while();最后有一个分号
+- do-while结构的循环体语句是至少会执行一次，这个和for和while是不一样的
+- 循环的三个结构for、while、do-while三者是可以相互转换的。
+
+
+##### 2.例子
+
+
+
+#### 3种循环比较
+- **三种循环结构都具有四个要素：**
+  - 循环变量的初始化条件
+  - 循环条件
+  - 循环体语句块
+  - 循环变量的修改的迭代表达式
+
+* **从循环次数角度分析**
+  * do-while循环至少执行一次循环体语句。
+  * for和while循环先判断循环条件语句是否成立，然后决定是否执行循环体。
+* **如何选择**
+  * 遍历有明显的循环次数（范围）的需求，选择for循环
+  * 遍历没有明显的循环次数（范围）的需求，选择while循环
+  * 如果循环体语句块至少执行一次，可以考虑使用do-while循环
+  * 本质上：三种循环之间完全可以互相转换，都能实现循环的功能
+
+#### 无限循环
+**语法格式：**
+- 最简单"无限"循环格式：`while(true)` , `for(;;)` 
+
+**适用场景：**
+- 开发中，有时并不确定需要循环多少次，需要根据循环体内部某些条件，来控制循环的结束（使用break）。
+- 如果此循环结构不能终止，则构成了死循环！开发中要避免出现死循环。
+
+**例子**
+实现爱你到永远...
+
+```java
+public class EndlessFor1 {
+    public static void main(String[] args) {
+        for (;;){
+            System.out.println("我爱你！");
+        }
+//        System.out.println("end");//永远无法到达的语句，编译报错
+    }
+}
+```
+
+```java
+public class EndlessFor2 {
+    public static void main(String[] args) {
+        for (; true;){ //条件永远成立，死循环
+            System.out.println("我爱你！");
+        }
+    }
+}
+```
+
+```java
+public class EndlessFor3 {
+    public static void main(String[] args) {
+        for (int i=1; i<=10; ){ //循环变量没有修改，条件永远成立，死循环
+            System.out.println("我爱你！");
+        }
+    }
+}
+```
+
+思考：如下代码执行效果
+
+```java
+public class EndlessFor4 {
+    public static void main(String[] args) {
+        for (int i=1; i>=10; ){ //一次都不执行
+            System.out.println("我爱你！");
+        }
+    }
+}
+```
+
+
+#### 嵌套循环(多重循环)
+##### 使用说明
+- **所谓嵌套循环**，是指一个循环结构A的循环体是另一个循环结构B。比如，for循环里面还有一个for循环，就是嵌套循环。其中，for ,while ,do-while均可以作为外层循环或内层循环。
+  - 外层循环：循环结构A
+  - 内层循环：循环结构B
+- 实质上，`嵌套循环就是把内层循环当成外层循环的循环体`。只有当内层循环的循环条件为false时，才会完全跳出内层循环，才可结束外层的当次循环，开始下一次的外层循环。
+- 设外层循环次数为`m`次，内层为`n`次，则内层循环体实际上需要执行`m*n`次。
+- **技巧：**从二维图形的角度看，外层循环控制`行数`，内层循环控制`列数`。
+- **开发经验：**实际开发中，我们最多见到的嵌套循环是两层。一般不会出现超过三层的嵌套循环。如果将要出现，一定要停下来重新梳理业务逻辑，重新思考算法的实现，控制在三层以内。否则，可读性会很差。
+
+```java
+for(初始化语句①; 循环条件语句②; 迭代语句⑦) {
+    for(初始化语句③; 循环条件语句④; 迭代语句⑥) {
+      	循环体语句⑤;
+    }
+}
+
+//执行过程：① - ② - ③ - ④ - ⑤ - ⑥ - ④ - ⑤ - ⑥ - ... - ④ - ⑦ - ② - ③ - ④ - ⑤ - ⑥ - ④..
+```
+
+**执行特点：**外层循环执行一次，内层循环执行一轮。
+
+##### 例子
+案例1: 打印5行6各`*`号
+```java
+public class doubleFor {
+  public static void main(String[] args) {
+    for (int i = 0; i<5; i++) {
+      for (int j=0; j<6; j++) {
+        System.out.print('*');
+      }
+      System.out.println('\n');
+    }
+  }
+}
+```
+
+案例2:打印5行直角三角形
+```
+*
+**
+***
+****
+*****
+```
+
+```java
+//方案1 繁琐
+public class doubleFor {
+  public static void main(String[] args) {
+    for (int i = 0; i<5; i++) {
+      for (int j=0; j<6; j++) {
+        System.out.print('*');
+        if(i == j) {
+          break;
+        }
+      }
+      System.out.println('\n');
+    }
+  }
+}
+
+//方案2 简单
+public class ForForTest2 {
+    public static void main(String[] args){
+        for (int i = 1; i <= 5; i++) {
+            for (int j = 1; j <= i; j++) {
+                System.out.print("*");
+            }
+            System.out.println();
+        }
+    }
+}	
+```
+
+案例3: 打印菱形
+```java
+        * 
+      * * * 
+    * * * * * 
+  * * * * * * * 
+* * * * * * * * * 
+  * * * * * * * 
+    * * * * * 
+      * * * 
+        * 
+```
+
+```java
+public class ForForTest4 {
+
+    public static void main(String[] args) {
+    /*
+        上半部分		i		m(表示-的个数)    n(表示*的个数)关系式：2*i + m = 10 --> m = 10 - 2*i
+    --------*		   1	   8			   1							n = 2 * i - 1
+    ------* * *		   2	   6			   3
+    ----* * * * *	   3	   4			   5
+    --* * * * * * *	   4	   2		       7
+    * * * * * * * * *  5	   0			   9
+
+        下半部分         i      m                n              关系式： m = 2 * i
+    --* * * * * * *    1       2                7                     n = 9 - 2 * i
+    ----* * * * *      2       4                5
+    ------* * *        3       6                3
+    --------*          4       8                1
+
+            */
+        //上半部分
+        for (int i = 1; i <= 5; i++) {
+            //-
+            for (int j = 1; j <= 10 - 2 * i; j++) {
+                System.out.print(" ");
+            }
+            //*
+            for (int k = 1; k <= 2 * i - 1; k++) {
+                System.out.print("* ");
+            }
+            System.out.println();
+        }
+        //下半部分
+        for (int i = 1; i <= 4; i++) {
+            //-
+            for (int j = 1; j <= 2 * i; j++) {
+                System.out.print(" ");
+            }
+
+            //*
+            for (int k = 1; k <= 9 - 2 * i; k++) {
+                System.out.print("* ");
+            }
+            System.out.println();
+        }
+    }
+
+}
+```
+
+案例5: 99乘法表
+![[image-20221113193013204.png]]
+```java
+public class ForForTest5 {
+    public static void main(String[] args) {
+        for (int i = 1; i <= 9; i++) {
+            for (int j = 1; j <= i; j++) {
+                System.out.print(i + "*" + j + "=" + (i * j) + "\t");
+            }
+            System.out.println();
+        }
+    }
+}
+```
+
+
+### break和continue关键字
+#### 概述
+
+|          | 适用范围                | 在循环结构中的作用            | 相同点               |
+| -------- | ------------------- | -------------------- | ----------------- |
+| break    | switch-case<br>循环结构 | 一旦执行, 就结束(或跳出)当前循环结构 | 此关键字后面,不能声明语句<br> |
+| continue | 循环结构                | 一旦执行,就结束(或跳出)当次循环结构  | 此关键字后面,不能声明语句     |
+
+
+#### 实例-带标签的适用
+```java
+
+break语句用于终止某个语句块的执行
+{    ……	 
+	break;
+	 ……
+}
+
+break语句出现在多层嵌套的语句块中时，可以通过标签指明要终止的是哪一层语句块 
+	label1: {   ……        
+	label2:	     {   ……
+	label3:			 {   ……
+				           break label2;
+				           ……
+					 }
+			     }
+			} 
+```
+
+- continue语句出现在多层嵌套的循环语句体中时，也可以通过标签指明要跳过的是哪一层循环。
+- 标号语句必须紧接在循环的头部。标号语句不能用在非循环语句的前面。
+
+- 举例：
+```java
+class BreakContinueTest2 {
+	public static void main(String[] args) {
+		l:for(int i = 1;i <= 4;i++){
+		
+			for(int j = 1;j <= 10;j++){
+				if(j % 4 == 0){
+					//break l;
+					continue l;
+				}
+				System.out.print(j);
+			}
+			System.out.println();
+		}
+	}
+}
+```
+
+#### 练习
+
+**1.题目：找出100以内所有的素数（质数）？100000以内的呢？**
+
+目的：不同的代码的实现方式，可以效率差别很大。
+
+分析：素数（质数）：只能被1和它本身整除的自然数。 ---> 从2开始，到这个数-1为止，此范围内没有这个数的约数。则此数是一个质数。 比如：2、3、5、7、11、13、17、19、23、...
+
+```java
+//方式1
+
+class PrimeNumberTest {
+	public static void main(String[] args) {
+		
+		
+		//boolean isFlag = true; //用于标识i是否被除尽过
+
+		long start = System.currentTimeMillis(); //记录当前时间距离1970-1-1 00:00:00的毫秒数
+			
+		int count = 0;//记录质数的个数
+
+
+		for(int i = 2;i <= 100000;i++){  //i
+
+			boolean isFlag = true; //用于标识i是否被除尽过
+		
+			for(int j = 2;j <= i - 1;j++){
+				
+				if(i % j == 0){ //表明i有约数
+					isFlag = false;
+				}
+			
+			}
+
+			//判断i是否是质数
+			if(isFlag){ //如果isFlag变量没有给修改过值，就意味着i没有被j除尽过。则i是一个质数
+				//System.out.println(i);
+				count++;
+			}
+
+			//重置isFlag
+			//isFlag = true;
+		
+		}
+
+		long end = System.currentTimeMillis();
+		System.out.println("质数的个数为：" + count);
+		System.out.println("执行此程序花费的毫秒数为：" + (end - start)); //16628
+
+	}
+}
+
+
+
+```
+
+```java
+//方式2 对实现方式1进行优化
+
+class PrimeNumberTest1 {
+	public static void main(String[] args) {
+		
+		long start = System.currentTimeMillis(); //记录当前时间距离1970-1-1 00:00:00的毫秒数
+
+		int count = 0;//记录质数的个数
+
+		for(int i = 2;i <= 100000;i++){  //i
+
+			boolean isFlag = true; //用于标识i是否被除尽过
+		
+			for(int j = 2;j <= Math.sqrt(i);j++){ //优化2：将循环条件中的i改为Math.sqrt(i)
+				
+				if(i % j == 0){ //表明i有约数
+					isFlag = false;
+					break;//优化1：主要针对非质数起作用
+				}
+			
+			}
+
+			//判断i是否是质数
+			if(isFlag){ //如果isFlag变量没有给修改过值，就意味着i没有被j除尽过。则i是一个质数
+				//System.out.println(i);
+				count++;
+			}
+		
+		}
+
+		long end = System.currentTimeMillis();
+		System.out.println("质数的个数为：" + count);
+		System.out.println("执行此程序花费的毫秒数为：" + (end - start));//1062
+
+	}
+}
+```
+
+
+```java
+//方式3 使用continue + 标签
+
+class PrimeNumberTest2 {
+	public static void main(String[] args) {
+		
+		long start = System.currentTimeMillis(); //记录当前时间距离1970-1-1 00:00:00的毫秒数
+
+		int count = 0;//记录质数的个数
+
+		label:for(int i = 2;i <= 100000;i++){  //i
+		
+			for(int j = 2;j <= Math.sqrt(i);j++){ //优化2：将循环条件中的i改为Math.sqrt(i)
+				
+				if(i % j == 0){ //表明i有约数
+					continue label;
+				}
+			
+			}
+			//一旦程序能执行到此位置，说明i就是一个质数
+			System.out.println(i);
+			count++;
+		}
+		
+
+		long end = System.currentTimeMillis();
+		System.out.println("质数的个数为：" + count);
+		System.out.println("执行此程序花费的毫秒数为：" + (end - start));//1062
+
+	}
+}
+
+
+```
 
 
 

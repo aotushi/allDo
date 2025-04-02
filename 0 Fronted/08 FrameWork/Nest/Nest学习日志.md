@@ -311,15 +311,57 @@ Nest中最为常见的是HTTP异常过滤器，通常用于在后端服务发生
 菜单点菜->服务员->厨师
 
 
+>通过IoC，我们从主动创建和维护对象转变为被动等待依赖注入，实现了从主动下厨到等待服务员上菜的转变，这就是IoC控制反转的精髓。??
 
 
 
+#### IOC在Nest中的应用
+
+```js
+//app.controller.ts
+     @Controller()
+     export class AppController {
+       constructor(private readonly appService: AppService) {}
+
+       @Get()
+       getHello(): string {
+         return this.appService.getHello();
+       } 
+     } 
+```
 
 
+AppController类通过@Controller装饰器来修饰，表示它可以进行依赖注入，由Nest内置的IoC容器接管
 
+```js
+//app.service.ts
+ import { Injectable } from '@nestjs/common';
 
+ @Injectable()
+ export class AppService {
+   getHello(): string {
+	 return 'Hello World!';
+   } 
+ } 
+```
 
+AppService类通过@Injectable进行装饰，表示这个类(class)可以被注入，同时也可以注入其他对象中。
 
+#### 控制器的作用
+
+* 控制器(Controller)只用于处理请求，不作为依赖对象被其他对象组件注入。
+* 可以把控制器看作是消费者，而服务(Service)和中间件(Middleware)则是提供者。
+
+#### 哪些组件适用装饰`@Injectable`?
+> 殊情况下，Nest中所有需要依赖注入的模块都可以使用@Injectable进行标记，以便IoC容器进行收集和管理。
+
+* 服务Service
+* 中间件middleware
+* 过滤器Filter
+* 拦截器Interceptor
+* 提供者Provider
+* 网关Gateway
+* 等
 
 
 
@@ -328,26 +370,69 @@ Nest中最为常见的是HTTP异常过滤器，通常用于在后端服务发生
 
 ## 调试Nest应用
 
+### 1.在浏览器中调试
+
+#### 两种调试方式
+* 启动应用,并开启热重载+调试模式
+* 访问WebSocket端口9229
+
+#### 1.启动应用+热重载+调试
+```sh
+npm run start:debug
+
+//修改端口
+(npx) nest start --watch --debug 8083
+```
+启动之后, 访问`http://localhost:3000`即可看到正常返回的内容
 
 
-## 装饰器
+#### 2.使用websocket接口调试
+Nest启动了一个默认端口为9229的WebSocket服务. 只需连接这个端口就可以进行调试.
+1. Chrome中输入`chrome://inspect`后按下enter键, 会显示已经连接上远程目标
+2. 点击`inspect`, 可以在`资源`栏目下找到当前项目的资源, 即可添加断点,刷新前端页面, 即可调试.
 
 
 
-## 模块化
+### 2.在VSCode中调试
+
+#### 3种方式
+* 直接在代码中打断点
+* package.json中添加命令行启动方式(不需要每次输入参数, nest已经配置)
+* 使用vscode的自动附加模式
+
+#### 3.自动附加模式
+
+1. 按快捷键Ctrl+Shift+P(windows)​，在弹出的命令面板中输入“Toggle Auto Attach”​，接着选择“总是”选项，以自动附加调试器到Node.js进程
+2. 重新打开控制台并运行: `pnpm run start:dev`命令, 此时vscode自动启动应用时,还会自动创建一个调试器(debugger)服务.
+
+#### 4.扩展调试
+1. 在调试面板中单击创建`launch.json`文件
+2. 选择Node.js作为调试器, 配置相关调试信息, 将launch.json中,将program字段的值修改为应用程序的入口点,例如`main.ts`
+3. 配置完成后, 即可在项目中添加断点,启动'调试'按钮.
+
+![[Pasted image 20250402185836.png]]
+此种方式优点就是避免了每次启动都需要创建一个新的websocket调试服务,从而节省了运行时的内存消耗. 这是最常用的调试方式, 适用于Vue, React, Node.js等多种应用调试.
+
+
+## Nest核心概念概述
+### 装饰器
 
 
 
-## 控制器与服务
+### 模块化
 
 
 
-## 中间件
+### 控制器与服务
+
+
+
+### 中间件
 
 
 
 
-## 拦截器与RxJS
+### 拦截器与RxJS
 
 
 

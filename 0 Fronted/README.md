@@ -42,26 +42,6 @@
 
 
 
-
-#### 产品经理
-* [前言 | 产品经理的无限游戏](https://jiewang.gitbook.io/chan-pin-jing-li-de-wu-xian-you-xi)
-
-### 面试题
-
-* 手写代码-BFE网站
-* 设计模式- 微信读书
-* 收集vue/react面试问题
-* 
-
-### 外语
-* 每天需要翻译一点 你不知道的js
-* 听说读写译
-
-### 书籍推荐
-* https://software-engineering-books.com/#personal_development
-* https://www.douban.com/doulist/1204928/
-
-
 #### 日常练习
 - [ ] 张鑫旭博客每日n篇
 - [ ] 大漠博客每日n篇
@@ -70,7 +50,6 @@
 - [ ] [30 seconds of code](https://www.30secondsofcode.org/)
 - [ ] [CSS-Tricks - Tips, Tricks, and Techniques on using Cascading Style Sheets.](https://css-tricks.com/)
 https://exercism.org/
-* 
 
 #### 书籍集合
 
