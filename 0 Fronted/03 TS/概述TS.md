@@ -2888,6 +2888,125 @@ if ((() => true)()) {
 
 
 
+## TS类型深入
+
+
+### 1.子类型兼容性
+
+
+
+### 2.赋值兼容性
+
+
+
+
+### 类型推断
+
+
+
+
+
+### 4.类型放宽
+
+
+### 5.命名空间
+
+
+
+
+### 6.模块
+
+
+
+
+
+### 7.外部声明及使用声明文件
+
+> 外部类型声明通过declare关键字来定义，包含外部变量声明、外部函数声明、外部类声明、外部枚举声明和外部命名空间声明。
+
+
+
+#### 1.外部变量声明
+**注意**:
+* 外部变量声明不允许定义初始值
+* 如果没有使用类型注解, 则为any类型
+
+#### 2.外部函数声明
+**语法**
+```ts
+//**.d.ts
+declare function f(a:string, b:boolean): void;
+```
+
+**注意**
+*  使用`declare function`关键字来定义
+*  不允许带有函数实现, 只能定义函数类型
+
+
+
+
+#### 3.外部类声明
+**语法**
+```ts
+
+declare class C {
+	//静态成员声明
+	public static s0() : string;
+	private static s1: string;
+
+	//属性声明
+	public  a:number;
+	public  b:number;
+
+	//构造函数声明
+	constructor(arg: number);
+
+	//方法声明
+	m(x:number, y:number):number
+
+	//存取器声明
+	get c(): number;
+	set c(value: number);
+
+	//索引签名声明
+	[index: string]: any;
+}
+
+```
+
+
+**注意**
+*  使用`declare class`来定义
+*  类声明中的成员不允许带有具体实现, 只允许定义类型
+
+
+
+
+#### 4.外部枚举声明
+
+
+#### 5.外部命名空间声明
+
+
+
+
+
+
+
+
+### 8.模块解析
+
+
+
+
+### 9.声明合并
+
+
+
+
+
+
+
 
 
 ## 配置TypeScript

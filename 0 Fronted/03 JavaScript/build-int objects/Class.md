@@ -168,7 +168,7 @@ let P = class { }
 console.log(P.name) //'P'
 ```
 命名类表达式
-声明时，在关键字class后添加一个标识符即可定义为命名类表达式
+声明时，在关键字class后添加一个标识符即可定义为**命名类表达式**
 ```js
 let P = class P2 {}
 console.log(P.name) //'P2'

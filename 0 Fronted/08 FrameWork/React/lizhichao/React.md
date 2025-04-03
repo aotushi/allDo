@@ -476,8 +476,8 @@ npx react-scripts build
 首先实现其中一个的样式
 
 
-
-##### 引入组件
+### React语法
+#### 引入组件
 
 **介绍**
 
@@ -527,7 +527,7 @@ class App extends React.Component {
 
 
 
-##### 事件
+#### 事件
 
 > [事件 – 李立超 | lilichao.com](https://lilichao.com/?p=5730)
 
@@ -568,7 +568,7 @@ const ele = <button onClick={clickHandler}>点击这个按钮</button>
 
 
 
-##### 事件对象
+#### 事件对象
 
 React事件也会产生事件对象，在事件的响应函数中可以定义第一个参数来获取事件对象：
 
@@ -582,7 +582,7 @@ const clickHandler = (e) => {
 
 
 
-##### props
+#### props
 
 > [props – 李立超 | lilichao.com](https://lilichao.com/?p=5734)
 
@@ -640,7 +640,7 @@ const Logs = () => {
 
 
 
-##### state
+#### state
 
 > [state – 李立超 | lilichao.com](https://lilichao.com/?p=5597)
 >
@@ -677,10 +677,9 @@ const add = () => {
 
 
 
-##### state注意事项
+#### state注意事项
 
 如果修改的state是一个对象, 然后只修改对象的某个属性,那么这个对象在更改之后,不会触发渲染.
-
 setState会触发组件的重新渲染,但如果是在原对象上更改, 调用setState不会触发重新渲染.
 
 ```jsx
@@ -715,11 +714,11 @@ export default App
 
 
 
-##### state问题
+#### state问题
 
 setState()会触发组件的重新渲染,它是异步的. 所以当调用setState(),需要用旧state的值时,要注意,可能会出现计算错误的情况. 
 
-为了避免这种情况, 为setState传递回调函数的形式来修改state
+为了避免这种情况, 为setState传递<span style="color: blue; font-weight: bold;">回调函数</span>的形式来修改state
 
 ```jsx
 const App = () => {
@@ -748,9 +747,8 @@ export default App
 
 
 
-##### 获取原生的dom对象-useRef()
-
- 获取原生dom对象
+#### useRef()
+ **获取原生dom对象**
 
 - 原生dom操作
 - 从react中获取dom对象
@@ -793,8 +791,7 @@ export default App
 
 
 
-useRef()
-
+##### useRef特点
 - 返回一个普通对象, 对象的current属性是一个DOM对象  {current: undefined}
 - 我们可以创建一个对象,来代替useRef()返回的对象
 - 两者区别: 我们创建的对象,组件每次重新渲染都会创建一个新对象; useRef()创建的对象, 可以确保每次渲染获取到的都是同一个对象
@@ -802,7 +799,7 @@ useRef()
 
 
 
-##### 类组件
+#### 类组件
 
 类组件的props的是存储到类的实例对象中,可以直接通过实例对象访问.
 
@@ -1236,8 +1233,10 @@ filter筛选
 
 使用包来创建react项目
 
-```bash
+```sh
 npx create-react-app  名字
+
+npx create-react-app@latest my-app
 ```
 
 
@@ -1303,8 +1302,6 @@ react中的`React.Fragment`起到这个作用.
 
 3.简写`React.Fragment` ==> `<>`
 
-
-
 ```jsx
 
 const Out = (props) => {
@@ -1338,7 +1335,7 @@ root.render(
 
 #### 开发
 
-![20220506173307498-1536x831](C:\PersonalData\F2E\Notes\F2E Notes\08 FrameWork\React\lizhichao\assets\20220506173307498-1536x831.png)
+![aaabbb](./assets/20220506173307498-1536x831.png)
 
 
 
@@ -2064,6 +2061,57 @@ root.render(
 ```
 
 
+#### Reducer+immer
+##### 注意:
+* Reducer(reducerFn, initialArg)中, 如果initialArg是个对象, 则reducerFn中返回值必须是一个对象, 否则不会触发重新渲染
+* 如果对象解构非常复杂, 每次返回都需要重写很浪费事件, 需要使用immutable相关库: `immer`
+* **在 react 里，只要涉及到 state 的修改，就必须返回新的对象，不管是 useState 还是 useReducer。**
+
+```js
+
+const reducerFn = (state: Data, action: Action) {
+	switch(action.type) {
+		case 'add':
+			state.result += action.num
+			return state;
+			// return {
+			//	result: state.result + action.num
+			//}
+		case 'minus':
+			return {
+				result: state.result - action.num
+			}
+	}
+}
+
+```
+
+
+```ts
+//npm i immer -S
+//使用方法简单, 只有一个produce的api
+
+function reducer(state: Data, action: Action) {
+
+    switch(action.type) {
+        case 'add':
+	        return produce(state, state => {
+		        state.a.c.e += action.num
+	        })
+            //return {
+            //    ...state,
+            //    a: {
+            //        ...state.a,
+            //        c: {
+            //            ...state.a.c,
+            //           e: state.a.c.e + action.num,
+            //        },
+            //    },
+            //}
+    }
+    return state;
+}
+```
 
 ### React.memo
 
@@ -3538,7 +3586,7 @@ const xxxApi = createApi({
 
 > useMemo和useCallback十分相似，useCallback用来缓存函数对象，useMemo用来缓存函数的执行结果。在组件中，会有一些函数具有十分的复杂的逻辑，执行速度比较慢。闭了避免这些执行速度慢的函数返回执行，可以通过useMemo来缓存它们的执行结果，像是这样：
 
-```react
+```js
 const result = useMemo(()=>{
     return 复杂逻辑函数();
 },[依赖项])
@@ -3548,7 +3596,7 @@ useMemo中的函数会在依赖项发生变化时执行，注意！是执行，�
 
 useMemo也能缓存组件:
 
-```react
+```js
 const someEle = useMemo(() => {
   return <Som a={a} b={b} />
 }, [a,b])
@@ -3557,14 +3605,77 @@ const someEle = useMemo(() => {
 ```
 
 
+#### forwardRef
+
+##### **概述**
+> 把 ref 从子组件传递到父组件呢, 把组件内的 ref 转发一下
+
+* 被 forwardRef 包裹的组件的类型就要用 ==React.forwardRefRenderFunction==
+
+```ts
+//App6.tsx
+
+const Guang: React.ForwardRefRenderFunction<HTMLInputElement> = (props, ref) => {
+  return (
+    <div>
+      <input ref={ref}></input>
+    </div>
+  );
+};
+
+const WrappedGuang = React.forwardRef(Guang);
+
+function App() {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    console.log("ref", ref.current);
+    ref.current?.focus();
+  }, []);
+  return (
+    <div className="App">
+      <WrappedGuang ref={ref} />
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+
+##### React.forwardRefRenderFunction
+```ts
+
+    interface ForwardRefRenderFunction<T, P = {}> {
+        (props: P, ref: ForwardedRef<T>): ReactNode;
+        /**
+         * Used in debugging messages. You might want to set it
+         * explicitly if you want to display a different name for
+         * debugging purposes.
+         *
+         * Will show `ForwardRef(${Component.displayName || Component.name})`
+         * in devtools by default, but can be given its own specific name.
+         *
+         * @see {@link https://legacy.reactjs.org/docs/react-component.html#displayname Legacy React Docs}
+         */
+        displayName?: string | undefined;
+        /**
+         * Ignored by React.
+         * @deprecated Only kept in types for backwards compatibility. Will be removed in a future major release.
+         */
+        propTypes?: any;
+    }
+```
+
 
 
 
 #### useImperativeHandle
+##### 概述
+* 在React中可以通过forwardRef来指定要暴露给外部组件的ref
+* 
 
-> 在React中可以通过forwardRef来指定要暴露给外部组件的ref：
-
-```react
+```js
 
 //暴露Some组件中某个ref
 
@@ -3599,7 +3710,7 @@ function App() {
 
 通过useImperativeHandle可以手动的指定ref要暴露的对象,回调函数的返回值一般是一个对象包含的方法.
 
-```react
+```js
 //Some组件
 const Some = React.forwardRef((props, ref) => {
   
@@ -3653,7 +3764,13 @@ export default App;
 
 React18中useEffect, useLayoutEffect差别很小, 只有在低版本中才有明显区别. 
 
-![20220622111732278](C:\PersonalData\F2E\Notes\F2E Notes\08 FrameWork\React\lizhichao\assets\20220622111732278.png)
+![ababab](./assets/20220622111732278.png)
+
+
+
+
+
+
 
 #### useDebugValue
 
@@ -3677,7 +3794,7 @@ React18中useEffect, useLayoutEffect差别很小, 只有在低版本中才有明
 
 延迟值, 总会比原版state,慢一步更新.
 
-```react
+```js
 const [queryStr, setQueryStr] = useState('');
 const deferredQueryStr = useDeferredValue(queryStr);
 
@@ -3687,7 +3804,7 @@ const deferredQueryStr = useDeferredValue(queryStr);
 
 使用场景: 当多个组件依赖一个state时候, 组件可能会互相影响,一个组件卡顿,会导致所有组件卡顿. 此时就可以使用延迟值
 
-```react
+```js
 //list.js
 import React from 'react';
 
@@ -3751,7 +3868,7 @@ export default App;
 
 但是没有. 还是受到inputVal2的影响.
 
-```react
+```js
 import React from "react";
 import List from "./List";
 import {useDeferredValue} from 'react'
@@ -3783,7 +3900,7 @@ export default App;
 
 使用startTransition, 其回调函数中设置的setState会在其它setState生效后才执行.
 
-```react
+```js
 import React from "react";
 import List from "./List";
 import {useDeferredValue} from 'react'
@@ -3818,7 +3935,7 @@ export default App;
 
 > useTransition会返回一个数组，数组中有两个元素，第一个元素是isPending，它是一个变量用来记录transition是否在执行中。第二个元素是startTransition，它是一个函数，可以将setState在其回调函数中调用，这样setState方法会被标记为transition并不会立即执行，而是在其他优先级更高的方法执行完毕，才会执行。
 
-```react
+```js
 // isPending, 执行startTransition时为true, 执行完成为false
 
 
