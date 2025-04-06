@@ -2935,11 +2935,253 @@ class PrimeNumberTest2 {
 ```
 
 
+### Scanner 键盘输入功能实现
+
+#### 1.概述
+- 如何从键盘获取不同类型（基本数据类型、String类型）的变量：使用Scanner类。
+
+- 键盘输入代码的四个步骤：
+  1. 导包：`import java.util.Scanner;`
+  2. 创建Scanner类型的对象：`Scanner scan = new Scanner(System.in);`
+  3. 调用Scanner类的相关方法（`next() / nextXxx()`），来获取指定类型的变量
+  4. 释放资源：`scan.close();`
+- 注意：需要根据相应的方法，来输入指定类型的值。如果输入的数据类型与要求的类型不匹配时，会报异常 导致程序终止。
+
+
+#### 2.各种类型的数据输入
+案例: 小明注册某交友网站，要求录入个人相关信息。如下：
+请输入你的网名、你的年龄、你的体重、你是否单身、你的性别等情况。
+```java
+//① 导包
+import java.util.Scanner;
+
+public class ScannerTest1 {
+
+    public static void main(String[] args) {
+        //② 创建Scanner的对象
+        //Scanner是一个引用数据类型，它的全名称是java.util.Scanner
+        //scanner就是一个引用数据类型的变量了，赋给它的值是一个对象（对象的概念我们后面学习，暂时先这么叫）
+        //new Scanner(System.in)是一个new表达式，该表达式的结果是一个对象
+        //引用数据类型  变量 = 对象;
+        //这个等式的意思可以理解为用一个引用数据类型的变量代表一个对象，所以这个变量的名称又称为对象名
+        //我们也把scanner变量叫做scanner对象
+        Scanner scanner = new Scanner(System.in);//System.in默认代表键盘输入
+        
+        //③根据提示，调用Scanner的方法，获取不同类型的变量
+        System.out.println("欢迎光临你好我好交友网站！");
+        System.out.print("请输入你的网名：");
+        String name = scanner.next();
+
+        System.out.print("请输入你的年龄：");
+        int age = scanner.nextInt();
+
+        System.out.print("请输入你的体重：");
+        double weight = scanner.nextDouble();
+
+        System.out.print("你是否单身（true/false)：");
+        boolean isSingle = scanner.nextBoolean();
+
+        System.out.print("请输入你的性别：");
+        char gender = scanner.next().charAt(0);//先按照字符串接收，然后再取字符串的第一个字符（下标为0）
+
+        System.out.println("你的基本情况如下：");
+        System.out.println("网名：" + name + "\n年龄：" + age + "\n体重：" + weight + 
+                           "\n单身：" + isSingle + "\n性别：" + gender);
+        
+        //④ 关闭资源
+        scanner.close();
+    }
+}
+
+```
+
+
+### 如何获取一个随机数?
+
+如何产生一个指定范围的随机整数？
+1、Math类的random()的调用，会返回一个`[0,1)`范围的一个double型值
+
+2、Math.random() * 100  --->  `[0,100)`
+      (int)(Math.random() * 100)	---> `[0,99]`
+      (int)(Math.random() * 100) + 5  ----> `[5,104]`
+
+3、如何获取`[a,b]`范围内的随机整数呢？`(int)(Math.random() * (b - a + 1)) + a`
 
 
 
 
 ## 03章-IDEA安装与适用
+
+### 1.安装使用
+省略
+
+### 2.相关设置
+
+#### 2.1 项目JDK设置
+`   File-->Project Structure...-->Platform Settings -->SDKs`
+![[image-20221019174847921.png]]
+
+
+![[image-20221019175030852.png]]
+
+
+- 注1：SDKs全称是Software Development Kit ，这里一定是选择JDK的安装根目录，不是JRE的目录。
+    
+- 注2：这里还可以从本地添加多个JDK。使用“+”即可实现。
+
+
+#### 2-2 out目录和编译版本
+`File-->Project Structure...-->Project Settings -->Project`
+
+![[image-20221019175358200.png]]
+
+
+#### 2-3 打开详细配置界面
+
+1.显示工具栏
+![[image-20221019175536721.png]]
+
+
+
+2.选择详细配置菜单或按钮
+![[image-20221019175620422.png]]
+
+![[image-20221019175953767.png]]
+
+
+3.默认启动项目配置
+![[image-20221019180050832.png]]
+
+启动IDEA时，默认自动打开上次开发的项目？还是自己选择？
+
+如果去掉Reopen projects on startup前面的对勾，每次启动IDEA就会出现如下界面：
+![[image-20221019180304644.png]]
+
+
+
+4.取消自动更新
+`Settings-->Appearance & Behavior->System Settings -> Updates`
+默认都打√了，建议检查IDE更新的√去掉，检查插件更新的√选上。
+
+![[image-20221019180428323.png]]
+
+
+5.选择主题
+`appearance>theme`
+
+6.设置菜单和窗口字体大小
+`appearance>use custom font`
+
+7.设置idea背景图
+`appearance>UI options> background Images`
+
+8.编辑器主题
+`settings>Editor>Color Scheme`
+
+9.编辑器字体大小
+`settings>Editor>General>Mouse Control>Change font size with Ctrl + Mouse Wheel in;`
+
+更详细的字体与颜色如下:
+![[image-20221019182625234.png]]
+
+
+10.编辑器中注释的字体颜色设置
+![[image-20220616121435182.png]]
+
+
+- Block comment：修改多行注释的字体颜色
+- Doc Comment –> Text：修改文档注释的字体颜色
+- Line comment：修改单行注释的字体颜色
+
+
+11.编辑器中显示行号与方法分隔符
+![[1655137441471.png]]
+
+
+12.编辑器中代码提示功能
+IntelliJ IDEA 的代码提示和补充功能有一个特性：`区分大小写`。 如果想不区分大小写的话，就把这个对勾去掉。`建议去掉勾选`。
+![[1655137649491.png]]
+
+13.自动导包配置
+- 默认需要自己手动导包，Alt+Enter快捷键
+* 自动导包设置
+	* 动态导入明确的包：Add unambiguous imports on the fly，该设置具有全局性；
+	* 优化动态导入的包：Optimize imports on the fly，该设置只对当前项目有效；
+![[1655138465774.png]]
+
+
+
+14.设置项目文件编码(必须设置)
+说明： Transparent native-to-ascii conversion主要用于转换ascii，显式原生内容。一般都要勾选。
+![[image-20220615190832482.png]]
+
+
+15.设置控制台的字符编码
+![[image-20221019003153265.png]]
+
+
+16.修改类头的文档注释信息
+![[image-20221018114632127.png]]
+
+
+17.设置自动编译
+`Settings-->Build,Execution,Deployment-->Compiler`
+
+![[1655109415450.png]]
+
+
+18.设置位省电模式(可忽略)
+IntelliJ IDEA 有一种叫做`省电模式`的状态，开启这种模式之后 IntelliJ IDEA 会`关掉代码检查`和`代码提示`等功能。所以一般也可认为这是一种`阅读模式`，如果你在开发过程中遇到突然代码文件不能进行检查和提示，可以来看看这里是否有开启该功能。
+
+![[image-20220616121851207.png]]
+
+
+
+19.取消双击shift搜索
+因为我们按shift切换中英文输入方式，经常被按到，总是弹出搜索框，太麻烦了。可以取消它。
+在2022.1版本中，采用如下方式消双击shift出现搜索框：搜索double即可，勾选Disable double modifier key shortcuts，禁用这个选项。
+
+![[1659191272699.png]]
+
+![[1659190132458.png]]
+
+
+
+
+### 3.工程与模块管理
+
+#### 1.IDEA项目结构
+**层级关系：**
+```md
+project(工程) - module(模块) - package(包) - class(类)
+```
+
+
+**具体的：**
+```md
+一个project中可以创建多个module  
+​  
+一个module中可以创建多个package  
+​  
+一个package中可以创建多个class
+```
+
+
+> 这些结构的划分，是为了方便管理功能代码。
+
+#### 2.Project和Module的概念
+在 IntelliJ IDEA 中，提出了Project和Module这两个概念。
+![[image-20220523014358169.png]]
+
+
+在 IntelliJ IDEA 中Project是`最顶级的结构单元`，然后就是Module。目前，主流的大型项目结构基本都是多Module的结构，这类项目一般是`按功能划分`的，比如：user-core-module、user-facade-module和user-hessian-module等等，模块之间彼此可以`相互依赖`，有着不可分割的业务关系。因此，对于一个Project来说：
+- 当为单Module项目的时候，这个单独的Module实际上就是一个Project。
+- 当为多Module项目的时候，多个模块处于同一个Project之中，此时彼此之间具有`互相依赖`的关联关系。
+- 当然多个模块没有建立依赖关系的话，也可以作为单独一个“小项目”运行。
+
+
+
+
 
 
 

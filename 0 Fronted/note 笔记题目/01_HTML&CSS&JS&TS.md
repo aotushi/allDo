@@ -1029,13 +1029,7 @@ position有四个常用属性值：relative、absolute、fixed、static。三个
 * 重排往往有重绘。因此，在优化页面性能时，应该尽量减少重排和重绘的次数和范围。
 
 #### 哪些操作导致重排
-回流主要计算节点的位置和几何信息，那么当页面布局和几何信息发生变化时，就需要回流。
-* 浏览器一开始渲染的时候
-- 元素位置和尺寸发生改变的时候
-- 新增和删除可见的DOM元素
-- 内容发生改变（文字数量或图片大小等等）
-- 元素字体大小变化。
-- 频繁查询布局信息的属性。比如说： offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、scrollWidth、scrollHeight、clientTop、clientLeft、clientWidth、clientHeight
+[[六 性能优化#2.重排和重绘的优化#1.触发布局与重绘的操作有哪些?]]
 
 
 #### 哪些操作会导致重绘
@@ -1067,19 +1061,25 @@ position有四个常用属性值：relative、absolute、fixed、static。三个
 * 复制节点,副本操作,然后替换
 
 ```js
-//一般操作
-const container = document.getElementById('container')
-container.style.width = '100px'
-container.style.height = '200px'
-container.style.border = '10px solid red'
-container.style.color = 'red'
 
-//离线后操作
-const container = document.getElementById('container')
-container.style.width = '100px'
-container.style.height = '200px'
-container.style.border = '10px solid red'
-container.style.color = 'red'
+
+// 缓存 DOM 元素（只获取一次）
+const container = document.getElementById('container');
+
+// 合并样式操作（减少回流）
+Object.assign(container.style, {
+  width: '100px',
+  height: '200px',
+  border: '10px solid red',
+  color: 'red'
+});
+
+// 离线后的操作（复用缓存对象）
+// 假设后续需要修改部分属性
+Object.assign(container.style, {
+  width: '200px',     // 覆盖原有宽度
+  backgroundColor: 'blue' // 新增背景色
+});
 ```
 
 **优化动画**
