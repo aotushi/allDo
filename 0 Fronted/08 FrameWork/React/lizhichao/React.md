@@ -1417,7 +1417,7 @@ import {faPlus, faMinus} from '@fortawesome/free-solid-svg-icons'
 
 
 
-##### Context的使用
+#### Context的使用
 
 组件之间的通信:
 在React中组件间的数据通信是通过props进行的，父组件给子组件设置props，子组件给后代组件设置props，props在组件间自上向下（父传子）的逐层传递数据。但并不是所有的数据都适合这种传递方式
@@ -1426,7 +1426,7 @@ Context为我们提供了一种在不同组件间共享数据的方式，它不�
 
 
 
-创建Context:
+**1.创建Context:**
 
 ```js
 const myContext = React.createContext(defaultValue)
@@ -1436,7 +1436,7 @@ defaultValue可以是任意类型的值.
 
 
 
-两种使用方式:
+**2.两种使用方式:**
 
 首先,使用Xxx.Consumer组件来创建元素
 
@@ -3964,3 +3964,54 @@ export default App;
 - **useContext**：跨层组件之间传递数据可以用 Context。用 createContext 创建 context 对象，用 Provider 修改其中的值， function 组件使用 useContext 的 hook 来取值，class 组件使用 Consumer 来取值
     
 - **memo + useMemo + useCallback**：memo 包裹的组件只有在 props 变的时候才会重新渲染，useMemo、useCallback 可以防止 props 不必要的变化，两者一般是结合用。不过当用来缓存计算结果等场景的时候，也可以单独用 useMemo、useCallback
+
+
+
+
+
+
+
+## 实例
+### 1.复合组件
+#### 1.来源
+> https://mp.weixin.qq.com/s/7K_HXKmax-M0lEQMdKE45A
+
+#### 2.作用
+* 解决同一个 React 组件在不同场景下需要呈现完全不同的布局或样式
+
+设想你在做一个通讯录管理应用，你会遇到：
+* 在单独的页面编辑联系人信息。
+* 在模态框（Modal）中编辑联系人信息。
+
+尽管这两种界面拥有类似的输入框、保存/取消按钮和标题，但布局却完全不同：
+* 页面模式：整页布局，标题和按钮位于顶部区域。
+* 模态框模式：紧凑布局，需遵循模态框的样式限制。
+
+过去，你可能会选择：
+* 创建两个单独的组件，产生大量重复代码。
+* 创建一个复杂的组件，根据传入的属性条件渲染。
+但以上方式都存在缺陷，代码难以维护且扩展性差。
+
+
+#### 3.复合组件(Compound Components)模式
+
+> **复合组件模式** 是一种组合式的组件设计方法。你会创建一个父组件管理状态和行为，并暴露一系列子组件用于渲染不同的 UI 部分。
+
+你可以将它理解为类似于 HTML 的 `<select>` 和 `<option>`，各个组件共同协作，但具体排列方式可以自由组合。
+
+
+**实现复合组件的核心要素**
+* 使用 Context 共享状态。
+* 父组件管理逻辑并暴露给子组件。
+* 子组件通过 Context 消费共享状态
+
+
+
+**代码示例**
+<iframe src="https://codesandbox.io/embed/md7rp7?view=editor+%2B+preview&module=%2Fsrc%2Fcomponents%2FModal.tsx&hidenavigation=1"
+     style="width:100%; height: 500px; border:0; border-radius: 4px; overflow:hidden;"
+     title="react-1-复合组件"
+     allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+     sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
+   ></iframe>
+   >
