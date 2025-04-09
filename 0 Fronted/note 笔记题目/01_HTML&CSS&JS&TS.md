@@ -1759,7 +1759,7 @@ var expressionFunc = function() {
 
 Function.prototype.bind2 = function(...restArgs) {
 	
-	let obj = [].call.unshift(restArgs) || globalThis
+	let obj = [].call.shift(restArgs) || globalThis
 	let fn = this;
 
 	return function() {

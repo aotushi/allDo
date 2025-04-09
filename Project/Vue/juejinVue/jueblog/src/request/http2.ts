@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type {
-  Axios,
+  // Axios,
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
