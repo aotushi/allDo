@@ -8,6 +8,7 @@ function handleChangeRequestHeader(config: CustomAxiosRequestConfig) {
 }
 
 function handleRequestHeaderAuth(config: CustomAxiosRequestConfig) {
+  if (localStorage.getItem("token") === null) return config;
   config.headers.Authorization = "Bearer " + localStorage.getItem("token");
   return config;
 }

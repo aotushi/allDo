@@ -88,7 +88,7 @@ export default class HttpRequest {
   private setupInterceptors() {
     this._instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // 放置重复请求
+        // 防止重复请求
         this.addPendingRequest(config);
 
         // 处理请求头
@@ -111,6 +111,7 @@ export default class HttpRequest {
         if (response.status !== 200) {
           return Promise.reject(response.data);
         }
+
         handleAuthError(response.data.errno);
         handleGeneralError(response.data.errno, response.data.errmsg);
         return response;
@@ -125,6 +126,7 @@ export default class HttpRequest {
           console.log('请求已取消:', error.message);
           return Promise.reject(new Error('请求已取消'));
         }
+        console.log('response>', error)
         
         if (error.response) {
           handleNetworkError(error.response.status);
@@ -138,12 +140,10 @@ export default class HttpRequest {
 
   public async get<T>(
     url: string,
-    params?: any,
     config?: ExpandAxiosRequestConfig
-  ): Promise<FormatResponse<T>> {
+  ): Promise<AxiosResponse<FormatResponse<T>>> {
     return this._instance.get(url, {
       ...config,
-      params,
     });
   }
 
@@ -151,7 +151,7 @@ export default class HttpRequest {
     url: string,
     data?: any,
     config?: ExpandAxiosRequestConfig
-  ): Promise<FormatResponse<T>> {
+  ): Promise<AxiosResponse<FormatResponse<T>>> {
     return this._instance.post(url, data, config);
   }
 
@@ -159,7 +159,7 @@ export default class HttpRequest {
     url: string,
     data?: any,
     config?: ExpandAxiosRequestConfig
-  ): Promise<FormatResponse<T>> {
+  ): Promise<AxiosResponse<FormatResponse<T>>> {
     return this._instance.put(url, data, config);
   }
 
@@ -167,7 +167,7 @@ export default class HttpRequest {
     url: string,
     data?: any,
     config?: ExpandAxiosRequestConfig
-  ): Promise<FormatResponse<T>> {
+  ): Promise<AxiosResponse<FormatResponse<T>>> {
     return this._instance.delete(url, {
       ...config,
       data,
@@ -178,7 +178,7 @@ export default class HttpRequest {
     url: string,
     data?: any,
     config?: ExpandAxiosRequestConfig
-  ): Promise<FormatResponse<T>> {
+  ): Promise<AxiosResponse<FormatResponse<T>>> {
     return this._instance.patch(url, data, config);
   }
 }

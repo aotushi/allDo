@@ -1,0 +1,32 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tests",
+  "info": {
+    "singularName": "test",
+    "pluralName": "tests",
+    "displayName": "test"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "gender": {
+      "type": "boolean"
+    },
+    "desc": {
+      "type": "blocks"
+    },
+    "salary": {
+      "type": "decimal"
+    },
+    "email": {
+      "type": "email"
+    },
+    "workdate": {
+      "type": "date"
+    }
+  }
+}
