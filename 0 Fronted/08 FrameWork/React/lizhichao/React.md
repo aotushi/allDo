@@ -1278,7 +1278,7 @@ App.css中的样式是全局的,没有作用域, 存在样式覆盖问题. 使�
 
 2.在组件中引入css
 
-3.通过classes设置类 `<p className={claess.p1} />`  会生成唯一的class值
+3.通过classes设置类 `<p className={class.p1} />`  会生成唯一的class值
 
 ```jsx
 import classes from './App.module.css'
@@ -1426,20 +1426,14 @@ Context为我们提供了一种在不同组件间共享数据的方式，它不�
 
 
 
-**1.创建Context:**
-
-```js
+##### **1.创建Context:**
+语法:
+```tsx
+//defaultValue可以是任意类型的值.
 const myContext = React.createContext(defaultValue)
 ```
 
-defaultValue可以是任意类型的值.
-
-
-
-**2.两种使用方式:**
-
-首先,使用Xxx.Consumer组件来创建元素
-
+创建:
 ```js
 // src/store/Xxx.js
 
@@ -1450,43 +1444,9 @@ export default Xxx
 
 
 
-1.使用`组件+回调函数+入参`的形式来创建
 
-```jsx
-import Xxx from './stroe/Xxxd'
-
-
-
-(
-	<Xxx.Consumer>
-  	{
-      (ctx) => {   
-        return <div>
-        	{ctx.}  //可以访问ctx中的内容
-        </div>
-      }
-    }
-  </Xxx.Consumer>
-)
-```
-
-
-
-2.使用钩子函数`useContext(导入的内容)`  推荐使用
-
-```jsx
-import Xxx from '../strore/Xxx'
-
-const B = () => {
-  return <>
-  	const cusContext = useContext(Xxx)
-  </>
-}
-```
-
-
-
-以上是使用消费者的内容,, 但是使用前是需要生产者`Xxx.provider`来提供响应数据的. 
+##### **2.父组件提供context.Provider**
+生产者`Xxx.provider`来提供响应数据的. 
 
 ```jsx
 import Xxx from '../store/Xxx'
@@ -1505,11 +1465,57 @@ const App = () => {
 ```
 
 
+##### **3.子组件接收数据**
 
-context的嵌套
+**方式1** 使用`Xxx.Consumer`组件来创建元素
 
+```tsx
+// 使用`组件+回调函数+入参`的形式来创建子组件
+
+// B.tsx
+import Xxx from './stroe/Xxxd'
+(
+	<Xxx.Consumer>
+  	{
+      (ctx) => {   
+        return <div>
+        	{ctx.}  //可以访问ctx中的内容
+        </div>
+      }
+    }
+  </Xxx.Consumer>
+)
+```
+
+
+
+
+**方式2(推荐使用)** 使用钩子函数`useContext(导入的内容)`  
+只需要将Context对象作为参数传递给钩子函数，它就会直接给我们返回Context对象中存储的数据。
+```jsx
+import React, {useContext} from 'react';
+import Xxx from '../store/Xxx';
+
+const MyComponent = () => {
+
+    const ctx = useContext(Xxx);
+
+    return (
+        <ul>
+            <li>{ctx.name}</li>
+            <li>{ctx.age}</li>
+            <li>{ctx.gender}</li>
+        </ul>
+    );
+};
+
+export default MyComponent;
+```
+
+
+
+##### **context的嵌套**
 * 组件访问context时遵循就近原则
-
 * 如果没有Provider, 则读取Context的初始化属性
 
 ```jsx

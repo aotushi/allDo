@@ -2960,13 +2960,13 @@ if ((() => true)()) {
 > 外部类型声明通过declare关键字来定义，包含外部变量声明、外部函数声明、外部类声明、外部枚举声明和外部命名空间声明。
 
 
-
-#### 1.外部变量声明
+#### 1.外部类型声明
+##### 1.外部变量声明
 **注意**:
 * 外部变量声明不允许定义初始值
 * 如果没有使用类型注解, 则为any类型
 
-#### 2.外部函数声明
+##### 2.外部函数声明
 **语法**
 ```ts
 //**.d.ts
@@ -2980,7 +2980,7 @@ declare function f(a:string, b:boolean): void;
 
 
 
-#### 3.外部类声明
+##### 3.外部类声明
 **语法**
 ```ts
 
@@ -3017,15 +3017,109 @@ declare class C {
 
 
 
-#### 4.外部枚举声明
+##### 4.外部枚举声明
+外部枚举声明与常规的枚举声明的语法是相同的
+```ts
+declare enum Foo {
+A,
+B
+}
+
+declare enum Bar {
+A=0,
+B=1
+}
+
+declare const enum Baz {
+A,
+B
+}
+declare const enum Qux {
+A=0,
+B=1
+}
+
+```
+
+外部枚举声明与常规枚举声明主要有以下两点不同
+
+* 在外部枚举声明中，枚举成员的值必须为常量枚举表达式，例如数字字面量、字符串字面量或简单算术运算等。
+* 在使用了“declare enum”的外部枚举中，若枚举成员省略了初始值，则会被视为计算枚举成员，因此不会被赋予一个自增长的初始值，如0、1和2等。
+```ts
+
+enum NormalEnum {
+  Up,        // 0（自动递增）
+  Down = 3,  // 显式赋值为3
+  Left,      // 4（继续递增）
+}
+
+console.log(NormalEnum.Up);   // 0
+console.log(NormalEnum.Left); // 4
+```
+
+```ts
+declare enum ExternalEnum {
+  A = 1,          // 常量表达式
+  B = "Hello",    // 字符串字面量
+  C = A + 1,      // 允许（A是常量，结果为2）
+  D,              // 视为计算成员，需外部提供值
+  // E            // 错误：必须显式初始化或由环境提供
+}
+
+// 假设运行时存在定义：
+// const ExternalEnum = { A: 1, B: "Hello", C: 2, D: 100 };
+
+```
+##### 5.外部命名空间声明
+定义了一个命名空间类型:
+> 外部命名空间的成员默认为导出成员，不需要使用export关键字来明确地导出它们，但使用了export关键字也没有错误
+```ts
+declare namespace Foo {
+	//外部变量声明
+	export var a: boolean;
+	let b: boolean;
+	cosnt c: boolean;
+
+	//外部函数声明
+	function foo(bar: string, baz: boolean): boid;
+
+	//外部类型声明
+	class C {
+		x: number
+		constructor(x:number);
+		y(): void
+	}
+
+	//接口声明
+	interface I {
+		x: number
+		y: number
+	}
+
+	//外部枚举声明
+	enum E {
+		a,
+		b
+	}
+
+	//嵌套的外部命名空间声明
+	namespace Inner {
+		var a: boolean;
+	}
+}
+```
 
 
-#### 5.外部命名空间声明
+使用
+```ts
+c: \app
+--index.ts
+--typings.d.ts
+--tsconfig.json
 
 
 
-
-
+```
 
 
 
