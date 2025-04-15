@@ -3974,10 +3974,84 @@ export default App;
 
 
 
+### hooks闭包陷阱
+> [React 通关秘籍 - zxg_神说要有光 - 掘金小册](https://juejin.cn/book/7294082310658326565/section/7298292751051784230?enter_from=course_center&utm_source=course_center)
 
 
+
+#### 1.是什么
+> 闭包陷阱就是 effect 函数等引用了 state，形成了闭包，但是并没有把 state 加到依赖数组里，导致执行 effect 时用的 state 还是之前的。
+
+
+#### 2. 3种解决方案
+* 使用setState函数形式或者用 useReducer，直接 dispatch action
+* 把使用到的state添加到useEffect依赖数组种
+* 使用useRef保存每次渲染的值,用的时候从ref.current种取
+
+
+#### 3.其它
+> 关于要不要在渲染函数里直接修改 ref.current，其实都可以，直接改也行，包一层 useLayoutEffect 或者 useEffect 也行。
 
 ## 实例
+
+### 0.React中如何写Typescript类型(未完成)
+> [React 通关秘籍 - zxg_神说要有光 - 掘金小册](https://juejin.cn/book/7294082310658326565/section/7298568416409944101?enter_from=course_center&utm_source=course_center)
+
+#### JSX的类型
+* React 函数组件默认返回值就是 JSX.Element
+* `JSX.Element`中Element的类型是: `interface Element extends React.ReactElement<any, any> {}`, 也就是`React.ReactElement`
+* 在声明类型时,使用ReactElement来标识JSX类型
+* JSX类型只能接收JSX类型, 如果变更类型例如数值/字符串/null等等,则需要将其类型更改为ReactNode类型
+* 3个类型之间的关系: ReactNode > ReactElement > JSX
+
+
+
+#### 函数组件的类型
+
+* 函数组件的类型可声明为: `React.FunctionComponent<customProps>`
+
+
+
+#### hook类型
+
+* useEffect, useLayoutEffect没有类型参数
+* useState一般使用推导的类型, 也可以手动声明类型
+* useRef可以保存dom或其它内容,所以类型有两种
+	* 引用dom时, 类型为`HTMLDivElement`, 初始值为null
+	* 引用其它内容, 不能传null. (版本18, 19则没有这个报错
+* useImperativeHandle: forwardRef 包裹的组件会额外传入 ref 参数，所以它不是 FunctionComponent 类型，而是专门的 ForwardRefRenderFunction 类型
+* useReducer: 可以传一个类型参数也可以传两个
+	* 当传一个的时候，是 Reducer<xx,yy> 类型，xx 是 state 的类型，yy 是 action 的类型
+	* 当传了第二个的时候，就是传入的初始化函数参数的类型
+* useCallback 的类型参数是传入的函数的类型
+* useMemo 的类型参数是传入的函数的返回值类型
+* useContext 的类型参数是 Context 内容的类型
+* memo
+	* 它可以直接用包裹的函数组件的参数类型
+	* 也可以在类型参数里声明
+
+
+
+![[App4.tsx]]
+
+
+
+
+
+
+
+#### 参数类型
+
+
+#### HTMLAttributes
+
+
+
+#### EventHandler
+
+
+
+
 ### 1.复合组件
 #### 1.来源
 > https://mp.weixin.qq.com/s/7K_HXKmax-M0lEQMdKE45A
@@ -4020,4 +4094,129 @@ export default App;
      allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
      sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"
    ></iframe>
-   >
+
+
+
+
+### 2.受控组件和非受控组件
+
+#### 是什么
+> **vlaue由用户控制就是非受控模式，由代码控制就是受控模式**
+
+假设一个表单input组件, 改变表单值只有两种情况: 用户取改变value或者代码去改变value.
+![[Pasted image 20250415153122.png]]
+
+**非受控模式**
+* 代码不能改变表单的value
+* 代码设置表单的初始 value，但是能改变 value 的只有用户，代码通过监听 onChange 来拿到最新的值，或者通过 ref 拿到 dom 之后读取 value
+![[Pasted image 20250415153209.png]]
+
+![[code/reactdemo/src/App5.tsx]]
+
+```tsx
+import{ ChangeEvent, useRef, useEffect} from "react";
+// 非受控模式
+
+function App() {
+
+  // 非受控模式 onChange事件获取用户输入
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log('e.target.value', e.target.value);
+    
+  }
+
+  // 非受控模式 ref获取用户输入
+  /**
+   * 注意, inputRef的值, 只有在定时器执行前改变的才会被打印, 定时器执行后的改变不会被打印.
+   */
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() =>  {
+  setTimeout(() => {
+      console.log('inputRef.current.value', inputRef.current?.value);
+    }, 2000)
+  }, [])
+
+  return (
+    <div>
+      <input defaultValue={'guang'} onChange={onChange} />
+      <br />
+      {/* <input ref={inputRef} defaultValue={'guang'} /> */}
+    </div>
+  );
+}
+
+export default App;
+```
+
+
+
+
+**受控模式**
+* 代码可以改变value
+* - `defaultValue` 只是表单的 **初始值**，用户可以修改它，最终的值是 `value`。
+- `value` 是 **受控的**，如果你给 `input` 直接设置了 `value`，那么用户输入不会改变它，表单的值固定不变。但敲击键盘的内容可以通过onChange事件获取, 然后通过代码再去设置value
+- 受控模式的需求场景:
+	- 需要对输入的值做处理之后设置到表单的时候.但这种场景很少.
+	- 或者是你想实时同步状态值到父组件
+![[Pasted image 20250415153224.png]]
+
+
+![[code/reactdemo/src/App6.tsx]]
+
+
+```tsx
+import{ ChangeEvent, useRef, useEffect, useState} from "react";
+// 受控模式和非受控模式
+
+function App() {
+// 受控模式
+/**
+ * 这种写法不推荐. 
+ * - 不让用户自己控制,而是通过代码控制,饶了一圈也没有改变value的值,还是原封不动
+ * - 受控模式每次setValue都会重新渲染. 而非受控模式只会渲染一次
+ */
+const [value, setValue] = useState('guang');
+const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+  console.log('e.target.value', e.target.value);
+  setValue(e.target.value);
+}
+  return (
+    <div>
+      <input value={value} onChange={onChange} />
+    </div>
+  );
+}
+
+
+/**
+ * 受控模式,实现场景
+ * - 需要对输入的值做处理之后设置到表单的时候.但这种场景很少.
+ * - 或者是你想实时同步状态值到父组件。
+ * 
+ */
+
+function App2() {
+  const [value, setValue] = useState('guang');
+  function onChange(e: ChangeEvent<HTMLInputElement>) {
+    console.log('e.target.value', e.target.value);
+    setValue(e.target.value);
+  }
+  return (
+    <div>
+      <input value={value} onChange={onChange} />
+    </div>)
+}
+
+
+e
+```
+
+
+**两种模式的选择**
+* 大多数情况下, 非受控模式即可
+* 使用受控模式: 需要拿到用户输入或同步表单的值到另一个地方如Form 组件,
+* 基础组件, 需都支持受控和非受控模式
+
+**基础组件+两种受控模式实现**
+
+

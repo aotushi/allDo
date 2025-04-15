@@ -195,7 +195,7 @@ class HttpRequest {
     this.setupInterceptors()
   }
   
-    //取消所有请求
+   //取消所有请求
 	public cancelAllRequests() {
     this.pendingRequests.forEach(controller => controller.abort())
     this.pendingRequests.clear()
