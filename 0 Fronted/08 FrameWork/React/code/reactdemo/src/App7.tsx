@@ -1,5 +1,5 @@
 import { ChangeEvent, useRef, useEffect, useState } from "react";
-// 提供了两种模式的基础组件-非受控组件
+// 基础组件-非受控组件
 
 interface CalendarProps {
   defaultValue?: Date;

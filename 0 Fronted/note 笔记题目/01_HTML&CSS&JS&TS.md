@@ -235,12 +235,11 @@ document.getElementById('myEle').tagName
 
 **元素介绍**
 ```sh
-span
+
 img
 input
 button 
 select
-label
 textarea
 ```
 
@@ -766,7 +765,7 @@ CSS中的优先级规则分为两大类，一类称为**继承**，另一类称�
 
 计算公式:
 * 0级 通配符,选择符,逻辑伪类
-* 1级 标签
+* 1级 元素
 * 2级 类 属性 伪类
 * 3级 ID
 * 4级 行内样式
@@ -785,7 +784,7 @@ CSS中的优先级规则分为两大类，一类称为**继承**，另一类称�
 ### flex弹性布局
 
 #### 是什么?
-Flexbox是一种用于布局的CSS3模块，它提供了一种灵活的方式来组织和对齐网页中的元素。通过定义容器和其子项的属性，可以轻松地实现各种布局，如水平和垂直居中、等高列、响应式布局等。
+是一种一维布局模型，它提供了强大的空间分布和对齐能力，能够有效地处理不同尺寸的元素布局。Flexbox布局是CSS3中引入的一种新的布局模式，特别适用于响应式设计和不确定内容尺寸的情况。
 
 #### flex容器6属性及作用
 * **flex-direction**  主轴的方向（即子元素的排列方向: row | row-reverse | column | column-reverse。默认row。
@@ -2045,74 +2044,6 @@ foo.identify(); //'FOO MODULE'
 
 其他后续内容, 笔记中记录的比较详细, 面试就说到这里吧
 
-### 高阶函数
-#### 实现一个currying函数
-> https://bigfrontend.dev/problem/implement-curry
-```js
-//错误方法
-function curry(fn) {
-	let args = []
-	return function curried() {
-		args.push(...arguments)
-		if (args < fn.length) {
-			return curried
-		} else {
-			return fn(...args)
-		}
-	}
-}
-
-//正确方法
-function curry(fn) {
-	return curried(...args) {
-		let fnArgsLen = fn.length
-		if (args.length < fnArgsLen) {
-			return function(...moreArgs) {
-				return curried.apply(this, args.concat(moreArgs))
-			}
-		} else {
-			return fn.apply(this, args)
-		}
-	}
-}
-```
-
-#### 按需求实现一个debounce函数
-> https://bigfrontend.dev/problem/implement-basic-debounce
-
-```js
-
-let currentTime = 0
-const run = (input) => {
-  currentTime = 0
-  const calls = []
-  const func = (arg) => {
-     calls.push(`${arg}@${currentTime}`)
-  }
-  const debounced = debounce(func, 3)
-  input.forEach((call) => {
-     const [arg, time] = call.split('@')
-     setTimeout(() => debounced(arg), time)
-  })
-  return calls
-}
-expect(run(['A@0', 'B@2', 'C@3'])).toEqual(['C@5'])
-
-
-
-function debounce(fn, delay) {
-	let timeout
-	return function(...args) {
-		if (timeout) {
-			clearTimeout(timeout)
-		}
-
-		
-	}
-}
-```
-
-
 
 ### this
 
@@ -2230,14 +2161,6 @@ function createObject(ctor) {
   - 利用函数的bind()
   - 利用箭头函数
   - 也可以用外部保存了this的变量
-
-
-### JS设计模式
-
-
-
-
-
 
 
 
@@ -4330,6 +4253,74 @@ function curry() {
 
 
 
+### 高阶函数
+#### 实现一个currying函数
+> https://bigfrontend.dev/problem/implement-curry
+```js
+//错误方法
+function curry(fn) {
+	let args = []
+	return function curried() {
+		args.push(...arguments)
+		if (args < fn.length) {
+			return curried
+		} else {
+			return fn(...args)
+		}
+	}
+}
+
+//正确方法
+function curry(fn) {
+	return curried(...args) {
+		let fnArgsLen = fn.length
+		if (args.length < fnArgsLen) {
+			return function(...moreArgs) {
+				return curried.apply(this, args.concat(moreArgs))
+			}
+		} else {
+			return fn.apply(this, args)
+		}
+	}
+}
+```
+
+#### 按需求实现一个debounce函数
+> https://bigfrontend.dev/problem/implement-basic-debounce
+
+```js
+
+let currentTime = 0
+const run = (input) => {
+  currentTime = 0
+  const calls = []
+  const func = (arg) => {
+     calls.push(`${arg}@${currentTime}`)
+  }
+  const debounced = debounce(func, 3)
+  input.forEach((call) => {
+     const [arg, time] = call.split('@')
+     setTimeout(() => debounced(arg), time)
+  })
+  return calls
+}
+expect(run(['A@0', 'B@2', 'C@3'])).toEqual(['C@5'])
+
+
+
+function debounce(fn, delay) {
+	let timeout
+	return function(...args) {
+		if (timeout) {
+			clearTimeout(timeout)
+		}
+
+		
+	}
+}
+```
+
+
 
 
 
@@ -4785,5 +4776,9 @@ any则是不检验
 
 
 
+## 设计模式
 
+
+
+## 数据结构和算法
 

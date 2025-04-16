@@ -3133,8 +3133,19 @@ c: \app
 
 
 
+### 装饰器
+> [Announcing TypeScript 5.0 - TypeScript](https://devblogs.microsoft.com/typescript/announcing-typescript-5-0/#decorators)
 
+#### 是什么
+* 允许我们以重用的方式自定义类和它们的成员
 
+#### 使用范例
+
+![[decorater.ts]]
+#### 注意事项
+* 装饰器入参及类型
+* 多装饰器的执行顺序
+* tsconfig的相关配置
 
 
 
