@@ -4,13 +4,7 @@
 
 ## 资料收集
 
-* 
-
-
-
-
-
-
+* [如何自建Shopify独立站，一篇就够(完整教程) - 知乎](https://zhuanlan.zhihu.com/p/379992485)
 
 ## 建站前提条件
 #### 1.域名
@@ -225,6 +219,39 @@
 
 
 
+### 4.收付款设置
+
+
+![[Pasted image 20250417160211.png]]
+
+![[Pasted image 20250417160232.png]]
+
+
+
+#### 收付款方式有哪些?
+* shopifyPayments  使用strapi的网关,如果有香港身份可以采用此种方式,收款方便
+* PayPal
+	* 大陆需要企业版,
+	* 香港暂时不需要上传文件认证(2021) 汇率互换2.5%
+* 第三方支付
+	* 2%居多
+	* 有支付宝
+* 手动支付方式
+
+
+
+### 运费设置 set shipping rates
+1.点击Shipping区域,进入具体配置页面
+2.设置配送区域(shipping zone),
+
+![[Pasted image 20250417161630.png]]
+
+![[Pasted image 20250417162239.png]]
+
+![[Pasted image 20250417162350.png]]
+
+
+
 
 
 
@@ -246,7 +273,11 @@
 
 
 
+## 主题更改
 
+### 资料收集
+* https://www.zzbaimaozi.com/shopify%E4%BA%8C%E6%AC%A1%E5%BC%80%E5%8F%91%E5%85%A8%E9%9D%A2%E6%8C%87%E5%8D%97/
+* 
 
 
 ## 竞品网站

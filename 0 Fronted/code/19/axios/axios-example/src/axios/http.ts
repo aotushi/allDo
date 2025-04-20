@@ -63,18 +63,26 @@ export default class HttpRequest {
 
   private addPendingRequest(config: InternalAxiosRequestConfig): void {
     const requestKey = this.getRequestKey(config);
+    console.log('requestKey', requestKey);
+    
     this.removePendingRequest(requestKey);
     
     const controller = new AbortController();
     config.signal = controller.signal;
     this.pendingRequests.set(requestKey, controller);
+    console.log('PendingRequest', this.pendingRequests);
+    
   }
 
   private removePendingRequest(requestKey: string): void {
+    console.log('PendingRequest', this.pendingRequests);
+    
     if (this.pendingRequests.has(requestKey)) {
       const controller = this.pendingRequests.get(requestKey);
       controller?.abort();
       this.pendingRequests.delete(requestKey);
+      console.log('删除PendingRequest', this.pendingRequests);
+      
     }
   }
 
@@ -117,6 +125,8 @@ export default class HttpRequest {
         return response;
       },
       (error) => {
+        console.log('aaaa', error);
+        
         if (error.config) {
           const requestKey = this.getRequestKey(error.config);
           this.removePendingRequest(requestKey);

@@ -1,17 +1,54 @@
 
 # axios二次封装
 
-### 如何优雅的封装axios
-希望做到如下几点,来源 ([如何优雅地封装 axios | Jack Chou's blog](https://jackchoumine.github.io/web/js/%E5%B0%81%E8%A3%85axios.html)):
-* 在项目中引用方便, vue2中可以绑定到原型上, vue3可以
-* 兼容REST封装,提供常用方法get/post/put/delete
-* 统一入参, 统一处理错误, 统一返回格式
-* 可取消重复请求, 用户切换路径取消请求
-* 文件下载及上传
-* 指定是否走mock服务,例如提供了本地strapi服务,则本地开发时仅使用proxy地址即可,也不用指定特别路径
 
-### axios中如何取消请求
-#### Axios请求取消实现方法
+
+### axios封装方案了解
+
+#### 1.前端请求流程图
+[[前端请求流程图]]
+
+#### 封装方案
+##### 方案1
+> https://juejin.cn/post/7124573626161954823
+##### 封装2
+> 来源: [blog/docs/ts/axios.md at master · kvchen95/blog](https://github.com/kvchen95/blog/blob/master/docs/ts/axios.md)
+
+
+### 如何优雅的封装axios
+- [x] 全局消息提示
+- [ ] axios二次封装
+  - [x] 请求拦截器+响应拦截器的基础设置
+  - [x] 处理重复请求
+  - [x] 取消全部请求
+  - [ ] 一键配置本地开发请求是否走代理
+  - [ ] 组件可以获取返参response的类型
+  - [ ] 下载
+  - [ ] 上传
+  - [ ] 组件请求时配置后端返参格式?
+  - [ ] 接口缓存策略
+  - [ ] 请求超时重复机制
+
+- [x] mock数据服务: strapi
+
+
+
+
+### 1.请求拦截器+响应拦截器基础设置
+* 基础请求(get, post, put, del等请求的封装)
+* 拦截器的基本封装
+  * 请求拦截器: 
+    * 请求头设置
+    * 用户标识添加
+  * 响应拦截器
+    * 网络错误处理
+    * 授权错误处理
+    * 普通错误处理
+    * 代码异常处理
+
+
+### 2.axios中如何取消请求
+#### 2.1Axios请求取消实现方法
 
 ##### 使用AbortController（推荐，现代API）
 1. 创建AbortController实例
@@ -26,18 +63,19 @@
 3. 调用source.cancel()方法取消请求
 4. 处理取消请求的异常
 
-##### 请求取消的实现步骤
-1. 维护请求队列，用Map存储当前请求和对应的取消控制器
-2. 为每个请求生成唯一标识符（结合URL、方法、参数等）
-3. 发送请求前检查是否有相同请求，有则取消旧请求
-4. 请求完成后从队列中移除
-5. 在特定场景（路由切换、组件卸载等）清空队列并取消所有请求
+#### 2.2实现方案
+ * 重复请求取消的实现步骤
+ * 实现重复取消机制的关键代码
 
-##### 实现取消机制的关键代码
-1. 添加请求到队列：使用Map存储请求标识和控制器
-2. 移除已完成请求：响应后删除对应请求标识
-3. 批量取消请求：遍历Map并调用取消方法
-4. 处理取消异常：使用axios.isCancel()区分取消和其他错误
+#### 2.3 实现方案
+1. 整体思路是将请求中的`url,method,params,data`字符串拼接形式作为唯一的键, 将axios的取消方法实例作为值.
+2. 在**请求拦截器**中将请求添加到map中:
+   * 如果已经存在相同请求, 则取消此请求
+   * 如果不存在相同请求, 则正常添加到map中
+1. 在**响应拦截器**中
+   *  在成功和失败的回调中, 调用移除请求的方法
+4. 声明取消全部请求的方法
+
 
 ##### 适用场景
 * 页面切换
@@ -59,34 +97,143 @@
 4. 批量取消请求时需保证取消操作的幂等性
 
 
-## 封装-1
-### 来源
-> https://juejin.cn/post/7124573626161954823
+```ts
+// src/axios/http.ts  简化版
+
+class HttpRequest {
+  private _instace
+  private _defaultConfig = {
+    baseURL: import.env.VUE_APP_BASE_URL || 'api',
+    timeout: 1000*6
+  }
+	private pendingRequests
+  
+  constructor(config) {
+    this._instance = axios.create(Object.assign(this._defaultConfig, config))
+    
+    this.pendingRequests = new Map()
+    this.setupInterceptors()
+  }
 
 
-### 前端请求流程图
+	private getRequestsKey(config) {
+    const {method, url, params, data} = config
+    return [method, url, JSON.stringify(params), JSON.stringify(data)].join('&')
+  }
 
-[[前端请求流程图]]
+	private removePendingRequest(requestKey) {
+    if (this.pendingRequests.has(requestKey)) {
+      const controller = this.pendingRequests.get(requestKey)
+      controller.abort()
+      this.pendingRequests.delete(requestKey)
+    }
+  }
 
-### 整体结构概述
-封装axios,可以将其分成两大类: 基础请求流程+拦截器.
-基础请求流程包括, 对所有接口的处理(GET, POST, PUT, DEL等)
-拦截器包括: 
-* 请求拦截
-	* 请求调整
-	* 用户标识
-* 响应拦截
-	* 网络错误处理
-	* 授权错误处理
-	* 普通错误处理
-	* 代码异常处理
+	private addPendingRequest(config) {
+    const requestKey = this.getRequestsKey(config)
+    this.removeRequestKey(requestKey)
+    
+    const controller = new AbortController()
+    config.signal = controlller.signal
+    this.pendingRequests.set(requestKey, controller)
+  }
+  //取消所有请求
+	public cancelAllRequests() {
+    this.pendingRequests.forEach(controller => controller.abort())
+    this.pendingRequests.clear()
+  }
+
+	setupInterceptors() {
+    this._instance.interceptor.request.use(
+    	config => {
+        // 防止重复请求
+        this.addPendingRequest(config)
+        
+        //处理请求头
+        //...
+        return config
+      },
+      error => {
+        return Promise.reject(error)
+      }
+    )
+    this._instance.interceptor.response.use(
+    	response => {
+        const requestKey = this.getReuqestKey(response.config)
+        this.removePendingRequest(requestKey)
+        
+        if (response.status !== 200) {
+          return Promise.reject(response.data)
+        }
+        handleAuthError(response.data.errno)
+        handleGeneralError(response.data.errno, response.data.errmsg)
+        return response
+      },
+      err => {
+        if (error.config) {
+          const requestKey = this.getRequestKey(error.config)
+          this.removePendingRequest(requestKey)
+        }
+        
+        if (axios.isCancel(err)) {
+          return Pormise.reject(new Error('请求已取消'))
+        }
+        
+        if (error.response) {
+          handleNetworkError(error.response.status);
+        } else {
+          message.error('网络异常，请稍后重试');
+        }
+        return Promise.reject(error);
+      }
+    )
+  }
+	
+}
+```
 
 
 
+![image-20250413135453209](assets/image-20250413135453209.png)
 
-## 封装-2
-> 来源: [blog/docs/ts/axios.md at master · kvchen95/blog](https://github.com/kvchen95/blog/blob/master/docs/ts/axios.md)
+### 3.取消全部请求
+
+ 声明一个方法, 在页面上调用即可.
 
 ```ts
-// src/reqeust
+// src/api/http.ts
+
+
+class HttpRequest {
+  private _instance;
+  private _defaultConfig = {
+    baseURL:import.env.VUE_APP_BASE_URL || '/api',
+    timeout: 1000*6
+  }
+  
+  private pendingRequests
+  
+  constructor(config) {
+    this._instance = axios.create(Object.assign(this._defaultConfig, config))
+    
+    this.pendingRequests = new Map()
+    this.setupInterceptors()
+  }
+  
+   //取消所有请求
+	public cancelAllRequests() {
+    this.pendingRequests.forEach(controller => controller.abort())
+    this.pendingRequests.clear()
+  }
+}
 ```
+
+
+
+### 4.一键配置代理
+
+
+
+
+### 5.xxxx
+
