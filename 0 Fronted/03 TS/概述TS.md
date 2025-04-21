@@ -931,16 +931,82 @@ type EndpointUrls = typeof ApiEndpoints[keyof typeof ApiEndpoints];
 
 
 
+### 实例
+
+#### 1.ts不推荐使用枚举类型, 那如何优雅定义枚举?
+> https://mp.weixin.qq.com/s/cLExI2DBEIRBjayvEHJypQ
 
 
+**1.联合类型+常量对象**
+```ts
+type Color = 'red'|'green'|'blue'
+
+const Colors = {
+	Red: 'red',
+	Green: 'green',
+	Blue: 'blue'
+} as const
+
+//使用
+function setColor(color: Color) {
+	console.log(color)
+}
+
+setColor(Colors.Red)
+
+setColor('blue')
+```
+
+**2.常量对象+ keyof 动态推导**
+```ts
+const Direction = {
+	Up: 'up',
+	Down: 'down',
+	Left: 'left',
+	Right: 'right'
+} as const
+
+type Direction = typeof Direction[keyof typeof  Direction]
+
+function move(dir: Direction) {
+	//..
+}
+
+move(Dicretion.Up)
+move('DOWN')
+```
 
 
+**3.只读对象+类型断言**
+```ts
+const Status = {
+	Idle: 0,
+	Loading: 1,
+	Success: 2,
+	Error: 3
+} as const
+
+type Status = typeof Status[keyof typeof Status]
+
+let currentStatus: Status = Status.Success
+
+```
 
 
+**4.使用const enum(谨慎使用)**
+```ts
+const enum Size {
+	Small = 'S'
+	Medium = 'M'
+	Large = 'L'
+}
+
+const mySize = Size.Medium
+```
 
 
-
-
+**4种方法的比较**
+![[5cf1c4f4e46dbafcf984b73dcc87571d.png]]
 
 
 

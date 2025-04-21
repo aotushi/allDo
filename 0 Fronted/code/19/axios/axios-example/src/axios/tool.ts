@@ -1,13 +1,14 @@
+import type { InternalAxiosRequestConfig } from "axios";
 import message from "../plugins/message";
 
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, CustomAxiosRequestConfig } from "./http";
 
-function handleChangeRequestHeader(config: CustomAxiosRequestConfig) {
+
+function handleChangeRequestHeader(config: InternalAxiosRequestConfig) {
   config.headers["Content-Type"] = "application/json";
   return config;
 }
 
-function handleRequestHeaderAuth(config: CustomAxiosRequestConfig) {
+function handleRequestHeaderAuth(config: InternalAxiosRequestConfig) {
   if (localStorage.getItem("token") === null) return config;
   config.headers.Authorization = "Bearer " + localStorage.getItem("token");
   return config;

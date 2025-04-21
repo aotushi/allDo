@@ -102,7 +102,9 @@ const sendNewRequest = () => {
   }, 300);
 
   $http
-    .get<TestInfo[]>("/tests")
+    .get<TestInfo[]>("/tests", {
+      allowDuplicate: true
+    })
     .then((res) => {
       console.log("请求成功:", res);
       clearInterval(progressInterval);
@@ -132,12 +134,74 @@ const handleBtnClick = () => {
 
 // 发送多个测试请求
 const sendMultipleRequests = () => {
-  // 发送3个请求
+  // 发送3个请求，使用setTimeout是为了让UI有时间渲染每个请求项
   for (let i = 0; i < 3; i++) {
     setTimeout(() => {
       sendNewRequest();
-    }, i * 500); // 每隔4s发送一个请求
+    }, i * 200); // 每隔200ms发送一个请求
   }
+};
+
+// 发送多个真正并发的请求
+const sendConcurrentRequests = () => {
+  const requestPromises: Promise<any>[] = [];
+  const requestIds: string[] = [];
+  
+  // 立即创建多个请求项
+  for (let i = 0; i < 5; i++) {
+    const id = generateId();
+    requestIds.push(id);
+    
+    const requestItem: RequestItem = {
+      id,
+      url: "/tests",
+      method: "GET",
+      status: "pending",
+      progress: 0,
+      startTime: Date.now(),
+    };
+    
+    addRequestToList(requestItem);
+    
+    // 为每个请求添加进度模拟
+    const progressInterval = setInterval(() => {
+      const index = requestList.value.findIndex((item) => item.id === id);
+      if (index !== -1 && requestList.value[index].status === "pending") {
+        requestList.value[index].progress = Math.min(95, requestList.value[index].progress + 10);
+      } else {
+        clearInterval(progressInterval);
+      }
+    }, 300);
+    
+    // 创建请求Promise
+    const requestPromise = $http
+      .get<TestInfo[]>("/tests", {
+        allowDuplicate: true
+      })
+      .then((res) => {
+        clearInterval(progressInterval);
+        updateRequestStatus(id, "success");
+        return res;
+      })
+      .catch((err) => {
+        clearInterval(progressInterval);
+        if (axios.isCancel && axios.isCancel(err)) {
+          updateRequestStatus(id, "canceled");
+        } else {
+          updateRequestStatus(id, "error");
+        }
+        throw err;
+      });
+    
+    requestPromises.push(requestPromise);
+  }
+  
+  // 等待所有请求完成
+  Promise.allSettled(requestPromises).then((results) => {
+    console.log("所有并发请求已完成", results);
+    const successCount = results.filter(r => r.status === "fulfilled").length;
+    message.success(`完成 ${successCount}/${requestPromises.length} 个请求`);
+  });
 };
 
 // 演示用，一开始加载一些请求
@@ -151,6 +215,7 @@ onMounted(() => {
     <div class="actions">
       <button @click="handleBtnClick">发送单个请求</button>
       <button @click="sendMultipleRequests" class="multi-btn">发送多个请求</button>
+      <button @click="sendConcurrentRequests" class="multi-btn">发送并发请求</button>
       <button @click="cancelAllRequests" class="cancel-btn">取消全部请求</button>
       <button @click="InitRequests" class="multi-btn">重置所有请求</button>
     </div>

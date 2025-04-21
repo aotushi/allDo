@@ -9,11 +9,18 @@ import axios, {
   AxiosError,
 } from "axios";
 
+// 扩展 InternalAxiosRequestConfig 类型
+declare module "axios" {
+  interface InternalAxiosRequestConfig {
+    allowDuplicate?: boolean;
+  }
+}
+
 export type {
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
-  InternalAxiosRequestConfig as CustomAxiosRequestConfig,
+  InternalAxiosRequestConfig,
   AxiosError,
   CancelTokenSource,
 };
@@ -32,7 +39,8 @@ interface RequestOptions {
 }
 
 
-interface ExpandAxiosRequestConfig<D = any> extends AxiosRequestConfig<D> {
+export interface ExpandAxiosRequestConfig<D = any> extends AxiosRequestConfig<D> {
+  allowDuplicate?: boolean; // 是否允许重复请求
 }
 
 interface FormatResponse<T> {
@@ -56,33 +64,34 @@ export default class HttpRequest {
     this.setupInterceptors();
   }
 
-  private getRequestKey(config: InternalAxiosRequestConfig): string {
-    const { method, url, params, data } = config;
-    return [method, url, JSON.stringify(params), JSON.stringify(data)].join("&");
+  private getUniqueId() {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
 
-  private addPendingRequest(config: InternalAxiosRequestConfig): void {
+  private getRequestKey(config: ExpandAxiosRequestConfig): string {
+    const { method, url, params, data } = config;
+    const uniqueId = this.getUniqueId();
+    return [method, url, JSON.stringify(params), JSON.stringify(data), uniqueId].join("&");
+  }
+
+  private addPendingRequest(config: ExpandAxiosRequestConfig): void {
+
     const requestKey = this.getRequestKey(config);
-    console.log('requestKey', requestKey);
-    
-    this.removePendingRequest(requestKey);
+    if (config.allowDuplicate) {
+      this.removePendingRequest(requestKey);
+    }
     
     const controller = new AbortController();
     config.signal = controller.signal;
     this.pendingRequests.set(requestKey, controller);
-    console.log('PendingRequest', this.pendingRequests);
     
   }
 
-  private removePendingRequest(requestKey: string): void {
-    console.log('PendingRequest', this.pendingRequests);
-    
+  private removePendingRequest(requestKey: string): void {    
     if (this.pendingRequests.has(requestKey)) {
       const controller = this.pendingRequests.get(requestKey);
       controller?.abort();
-      this.pendingRequests.delete(requestKey);
-      console.log('删除PendingRequest', this.pendingRequests);
-      
+      this.pendingRequests.delete(requestKey);      
     }
   }
 
@@ -96,8 +105,7 @@ export default class HttpRequest {
   private setupInterceptors() {
     this._instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-        // 防止重复请求
-        this.addPendingRequest(config);
+          this.addPendingRequest(config);
 
         // 处理请求头
         config = handleChangeRequestHeader(config);
@@ -125,7 +133,6 @@ export default class HttpRequest {
         return response;
       },
       (error) => {
-        console.log('aaaa', error);
         
         if (error.config) {
           const requestKey = this.getRequestKey(error.config);
@@ -133,10 +140,8 @@ export default class HttpRequest {
         }
         
         if (axios.isCancel(error)) {
-          console.log('请求已取消:', error.message);
           return Promise.reject(new Error('请求已取消'));
         }
-        console.log('response>', error)
         
         if (error.response) {
           handleNetworkError(error.response.status);
