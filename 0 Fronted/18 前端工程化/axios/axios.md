@@ -8,10 +8,10 @@
 #### 1.前端请求流程图
 [[前端请求流程图]]
 
-#### 封装方案
+#### 封装方案了解
 ##### 方案1
 > https://juejin.cn/post/7124573626161954823
-##### 封装2
+##### 方案2
 > 来源: [blog/docs/ts/axios.md at master · kvchen95/blog](https://github.com/kvchen95/blog/blob/master/docs/ts/axios.md)
 
 
@@ -22,10 +22,8 @@
   - [x] 取消全部请求
   - [x] 允许重复请求
   - [x] 本地开发切换代理
-  - [ ] 组件可以获取返参response的类型
-  - [ ] 下载
-  - [ ] 上传
-  - [ ] 组件请求时配置后端返参格式?
+  - [x] 推导出response的类型
+  - [ ] 下载/上传
   - [ ] 接口缓存策略
   - [ ] 请求超时重复机制
 - [x] mock数据服务: strapi
@@ -274,6 +272,182 @@ class HttpRequest {
 
 
 
+### 5.自动推导返参response的类型
 
-### 5.xxxx
+在 Axios + TypeScript 项目中自动推导返回数据类型有手动设置和自动推导两种形式, 完全自动化的类型推导在目前的TypeScript和API交互中还是存在困难.
+
+
+
+#### 手动声明类型
+
+> 前提是知道返参的类型
+
+
+
+##### 1.axios[封装]+泛型接口
+
+这里概述为2种形式:
+
+* 类型接口+请求函数
+* 类型接口+封装的axios实例
+  * 使用拦截器
+  * 使用axios的配置对象config
+
+
+
+**类型接口+请求函数**
+
+```ts
+//类型接口+请求函数
+
+import axios, { AxiosResponse } from 'axios';
+
+// 定义数据类型接口
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// 定义响应数据结构接口
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+// 使用泛型请求函数
+async function getUsers(): Promise<AxiosResponse<ApiResponse<User[]>>> {
+  return axios.get<ApiResponse<User[]>>('/api/users');
+}
+
+// 使用时
+getUsers().then(response => {
+  const users: User[] = response.data.data; // 自动推导出User[]类型
+});
+
+```
+
+
+
+**类型接口+封装的axios实例-拦截器**
+
+这种方案就是第一种方案的复杂版本而已.
+
+```ts
+// 定义通用响应结构
+interface ApiResponse<T> {
+  code: number;
+  data: T;
+  message: string;
+}
+
+// 创建带类型的 axios 实例
+const api = axios.create();
+
+// 响应拦截器
+api.interceptors.response.use(response => {
+  return response.data;
+});
+
+// 封装带类型的请求方法
+function get<T>(url: string, config) {
+  return api.get<AxiosResponse<ApiResponse<T>>>(url, {...config});
+}
+
+
+
+
+
+// 使用
+interface User {
+  id: number;
+  name: string;
+}
+
+get<User>('/api/user/1').then(response => {
+  // response 被推导为 ApiResponse<User> 类型
+  const user = response.data; // user 被推导为 User 类型
+});
+```
+
+
+
+**类型接口+封装的axios实例-config配置**
+
+> 这种方案是有问题的, 在拦截器中定义返参类型会失效.
+
+```ts
+import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+
+// 扩展AxiosRequestConfig
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    responseType?: 'json' | 'arraybuffer' | 'blob' | 'document' | 'text' | 'stream';
+    meta?: {
+      responseType?: any;
+    };
+  }
+}
+
+// 请求拦截器
+axios.interceptors.request.use((config) => {
+  if (config.meta?.responseType) {
+    config.responseType = config.meta.responseType;
+  }
+  return config;
+});
+
+// 响应拦截器
+axios.interceptors.response.use((response: AxiosResponse) => {
+  if (response.config.meta?.responseType) {
+    response.data = response.data as typeof response.config.meta.responseType;
+  }
+  return response;
+});
+
+// 使用
+interface Comment {
+  id: number;
+  content: string;
+}
+
+async function getComments(postId: number) {
+  const response = await axios.get(`/posts/${postId}/comments`, {
+    meta: { responseType: [] as Comment[] }
+  });
+  return response.data; // 自动推导为Comment[]
+}
+```
+
+这里有个重要的问题, 就是泛型为什么不能在拦截器函数中给response添加呢?
+
+> - Axios 方法的泛型 `<T>` 是在**调用函数的特定位置**，由 TypeScript 在**编译时**直接将泛型参数 (`Comment[]`) 应用到函数签名定义的返回类型 (`Promise<AxiosResponse<T>>`) 上，从而确定了结果变量的静态类型。这是一种**静态的、局部的类型确定**。
+> - 你尝试在拦截器中做的事情，是希望通过检查一个**运行时的配置值**，来**动态地影响**一个在**拦截器内部**进行的类型断言，并期望这个断言能够将**外部调用时传入的类型信息**重新关联起来。这超出了 TypeScript 静态类型系统在不进行大量额外映射工作的情况下能直接处理的能力范围。TypeScript 无法轻易地在编译时建立起“如果 `config.meta.responseType` 的运行时值是 `[]`，那么 `response.data` 的类型就是 `Comment[]`”这样的动态关联。
+>
+> 所以，即使泛型在运行时被擦除，它们在**编译时**的作用是告诉 TypeScript **在函数调用这个特定点**，数据的类型是什么。而拦截器中的方法试图根据一个**运行时的值**来决定**静态的类型**，这是类型系统不容易做到的。
+
+
+
+
+
+#### 自动推断类型
+
+> 待办
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
