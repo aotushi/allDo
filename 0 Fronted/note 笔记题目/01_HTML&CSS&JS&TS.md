@@ -3536,8 +3536,8 @@ function flat(arr) {
 }
 //
 function flat(arr) {
-  return arr.reudce((pre, crt) => {
-    return pre.concat(Array.isArray(crt) ? flat(crt) : crt
+  return arr.reduce((pre, crt) => {
+    return pre.concat(Array.isArray(crt) ? flat(crt) : pre.concat(crt)
   }, [])
 }
                     

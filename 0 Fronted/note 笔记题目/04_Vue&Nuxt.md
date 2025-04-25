@@ -985,24 +985,33 @@ export default {
   缓存的组件停用时调用，可替代destroyed
 
 
+#### 父子组件的生命周期
 
-#### 父子组件生命周期
+```js
+子组件初始化: 在父组件beforeMount-->mounted之间 执行beforeCreated->mounted4个钩子
+子组件更新: 在父组件beforeUpdate->updated之间 执行2个钩子
+子组件死亡: 在父组件beforeDestroy->destroyed之间 执行2个钩子
+```
 
-加载渲染过程
-
-父 beforeCreate -> 父 created -> <span style="color:blue">父 beforeMount -></span><span style="color:red"> 子 beforeCreate -> 子 created -> 子 beforeMount -> 子 mounted </span>-> <span style="color:blue">父 mounted</span>
-
-子组件更新过程
-
-父 beforeUpdate -> 子 beforeUpdate -> 子 updated -> 父 updated
-
-父组件更新过程
-
-父 beforeUpdate -> 父 updated
-
-销毁过程
-
-父 beforeDestroy -> 子 beforeDestroy -> 子 destroyed -> 父 destroyed
+- 初始化:
+  - beforeCreate
+  - created
+  - beforeMount
+  - *--child beforeCreate*
+  - *--child created*
+  - *--child beforeMount*
+  - *--child mounted*
+  - mounted
+- 更新:
+  - beforeUpdate
+  - *--child beforeUpdate*
+  - *--child updated*
+  - updated
+- 死亡:
+  - beforeDestroy
+  - *-- child beforeDestroy*
+  - *-- child destroyed*
+  - destroyed
 
 
 #### 父组件可以监听到子组件的生命周期吗？
@@ -1658,35 +1667,6 @@ export default {
 
 
 
-
-
-### 父子组件的生命周期
-
-```js
-子组件初始化: 在父组件beforeMount-->mounted之间 执行beforeCreated->mounted4个钩子
-子组件更新: 在父组件beforeUpdate->updated之间 执行2个钩子
-子组件死亡: 在父组件beforeDestroy->destroyed之间 执行2个钩子
-```
-
-- 初始化:
-  - beforeCreate
-  - created
-  - beforeMount
-  - *--child beforeCreate*
-  - *--child created*
-  - *--child beforeMount*
-  - *--child mounted*
-  - mounted
-- 更新:
-  - beforeUpdate
-  - *--child beforeUpdate*
-  - *--child updated*
-  - updated
-- 死亡:
-  - beforeDestroy
-  - *-- child beforeDestroy*
-  - *-- child destroyed*
-  - destroyed
 
 ### 带缓存的路由组件生命周期keep-alive
 

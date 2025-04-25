@@ -32,13 +32,6 @@ import { handleChangeRequestHeader, handleRequestHeaderAuth,
  } from "./tool";
 
 import message from "../plugins/message";
-
-interface RequestOptions {
-  globalErrorMessage?: boolean;
-  globalSuccessMessage?: boolean;
-}
-
-
 export interface ExpandAxiosRequestConfig<D = any> extends AxiosRequestConfig<D> {
   allowDuplicate?: boolean; // 是否允许重复请求
 }
@@ -51,6 +44,7 @@ interface FormatResponse<T> {
 
 export default class HttpRequest {
   private _instance: AxiosInstance;
+  
   private _defaultConfig: ExpandAxiosRequestConfig = {
     baseURL: import.meta.env.VUE_APP_BASE_URL || "/api",
     timeout: 1000 * 6

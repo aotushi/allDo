@@ -1609,7 +1609,7 @@ cors_proxy
 
 
 
-#### Nginx反向代理
+#### 3.Nginx反向代理
 
 Nginx 则是通过反向代理的方式，（这里也需要自定义一个域名）这里就是保证我当前域，能获取到静态资源和接口，不关心是怎么获取的。[nginx 安装教程](https://link.juejin.cn/?target=https%3A%2F%2Fblog.csdn.net%2Fdiaojw090%2Farticle%2Fdetails%2F89135073)
 
@@ -1619,7 +1619,7 @@ Nginx 则是通过反向代理的方式，（这里也需要自定义一个域�
 
 
 
-#### JSONP
+#### 4.JSONP
 
 >  script 标签 src 属性中的链 接却可以访问跨域的 js 脚本，利用这个特性，服务端不再返回 JSON 格式的数据，而是 返回一段调用某个函数的 js 代码，在 src 中进行了调用，这样实现了跨域。
 
@@ -1697,7 +1697,7 @@ JQuery Ajax示例
 
 
 
-#### websocket
+#### 5.websocket
 
 [WebSocket](https://link.juejin.cn/?target=http%3A%2F%2Fdev.w3.org%2Fhtml5%2Fwebsockets%2F) 规范定义了一种 API，可在网络浏览器和服务器之间建立“套接字”连接。简单地说：客户端和服务器之间存在持久的连接，而且双方都可以随时开始发送数据。详细教程可以看 https://www.html5rocks.com/zh/tutorials/websockets/basics/
 
@@ -1733,7 +1733,7 @@ server.on("connection", function(socket) {
 
 
 
-#### window.postMessage
+#### 6.window.postMessage
 
 **「window.postMessage()」** 方法可以安全地实现跨源通信。通常，对于两个不同页面的脚本，只有当执行它们的页面位于具有相同的协议（通常为 https），端口号（443 为 https 的默认值），以及主机 (两个页面的模数 [`Document.domain`](https://link.juejin.cn/?target=https%3A%2F%2Fdeveloper.mozilla.org%2Fzh-CN%2Fdocs%2FWeb%2FAPI%2FDocument%2Fdomain)设置为相同的值) 时，这两个脚本才能相互通信。**「window.postMessage()」** 方法提供了一种受控机制来规避此限制，只要正确的使用，这种方法就很安全。
 
@@ -1794,7 +1794,7 @@ otherWindow.postMessage(message, targetOrigin, [transfer]);
 
 
 
-#### document.domain + Iframe
+#### 7.document.domain + Iframe
 
 **该方式只能用于二级域名相同的情况下，比如`a.test.com`和`b.test.com`适用于该方式**。 只需要给页面添加`document.domain ='test.com'`表示二级域名都相同就可以实现跨域。
 
@@ -1834,7 +1834,7 @@ otherWindow.postMessage(message, targetOrigin, [transfer]);
 
 
 
-#### window.location.hash + Iframe
+#### 8.window.location.hash + Iframe
 
 原理就是通过 url 带 hash ，通过一个非跨域的中间页面来传递数据。
 
@@ -1871,7 +1871,7 @@ otherWindow.postMessage(message, targetOrigin, [transfer]);
 
 
 
-#### window.name + Iframe
+#### 9.window.name + Iframe
 
 window 对象的 name 属性是一个很特别的属性，当该 window 的 location 变化，然后重新加载，它的 name 属性可以依然保持不变。
 
@@ -1916,7 +1916,7 @@ b.html 为中间代理页，与 a.html 同域，内容为空。
 
 
 
-#### 浏览器开启跨域(终极方案)
+#### 10.浏览器开启跨域(终极方案)
 
 关闭浏览器跨域功能
 

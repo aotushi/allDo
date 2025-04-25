@@ -4122,7 +4122,7 @@ function App() {
   // 非受控模式 onChange事件获取用户输入
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     console.log('e.target.value', e.target.value);
-    
+    setValue(e.target.value)
   }
 
   // 非受控模式 ref获取用户输入
@@ -4138,7 +4138,7 @@ function App() {
 
   return (
     <div>
-      <input defaultValue={'guang'} onChange={onChange} />
+      <input value={'guang'} onChange={onChange} />
       <br />
       {/* <input ref={inputRef} defaultValue={'guang'} /> */}
     </div>
@@ -4147,6 +4147,8 @@ function App() {
 
 export default App;
 ```
+
+
 
 
 

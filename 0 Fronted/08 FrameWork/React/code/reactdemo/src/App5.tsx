@@ -1,4 +1,4 @@
-import{ ChangeEvent, useRef, useEffect} from "react";
+import{ ChangeEvent, useRef, useEffect, useState} from "react";
 // 受控模式和非受控模式
 
 
@@ -6,10 +6,12 @@ import{ ChangeEvent, useRef, useEffect} from "react";
 
 function App() {
 
+  const [value, setValue] = useState('guang')
+
   // 非受控模式 onChange事件获取用户输入
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     console.log('e.target.value', e.target.value);
-    
+    setValue(e.target.value);
   }
 
 
