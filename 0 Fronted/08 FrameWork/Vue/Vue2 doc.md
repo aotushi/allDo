@@ -48,6 +48,142 @@ div.appendChild(p)
 
 
 
+#### 1.5 [项目中定义全局(变量/函数)](https://juejin.cn/post/6844903505832968199)
+
+> 在项目中，经常有些函数和变量是需要复用，比如说网站服务器地址，从后台拿到的：用户的登录token,用户的地址信息等，这时候就需要设置一波全局变量和全局函数
+
+> 存疑,为什么没有直接暴露js文件而暴露的是vue文件 没限制
+
+#### 1.5.1 定义全局变量
+
+**原理**  设置一个专用的的全局变量模块文件，模块里面定义一些变量初始状态，用export default 暴露出去，在main.js里面使用Vue.prototype挂载到vue实例上面或者在其它地方需要使用时，引入该模块便可。
+
+全局变量模块文件: Global.vue文件
+
+```js
+<script>
+const serverSrc='www.baidu.com';
+const token='12345678';
+const hasEnter=false;
+const userSite="中国钓鱼岛";
+  export default
+  {
+    userSite,//用户地址
+    token,//用户token身份
+    serverSrc,//服务器地址
+    hasEnter,//用户登录状态
+  }
+</script>
+```
+
+
+
+**使用方式1**
+
+在需要的地方引用进全局变量模块文件，然后通过文件里面的变量名字获取全局变量参数值
+
+```vue
+<template>
+    <div>{{ token }}</div>
+</template>
+
+<script>
+import global_ from '../../components/Global'//引用模块进来
+export default {
+ name: 'text',
+data () {
+    return {
+         token:global_.token,//将全局变量赋值到data里面，也可以直接使用global_.token
+        }
+    }
+}
+</script>
+<style lang="scss" scoped>
+
+</style>
+```
+
+
+
+**使用方式2**
+
+在程序入口的main.js文件里面，将上面那个Global.vue文件挂载到Vue.prototype
+
+```js
+import global_ from './component/Global'
+
+Vue.prototype.GLOBAL = global_ //挂载到vue实例上
+```
+
+接着在整个项目中不需要再通过引用Global.vue模块文件，直接通过this就可以直接访问Global文件里面定义的全局变量。
+
+```js
+<template>
+    <div>{{ token }}</div>
+</template>
+
+<script>
+export default {
+ name: 'text',
+data () {
+    return {
+         token:this.GLOBAL.token,//直接通过this访问全局变量。
+        }
+    }
+}
+</script>
+<style lang="scss" scoped>
+</style>
+```
+
+
+
+#### 1.5.2 定义全局函数
+
+**原理**  新建一个模块文件，然后在main.js里面通过Vue.prototype将函数挂载到Vue实例上面，通过this.函数名，来运行函数。
+
+**1.main.js里面直接写函数**
+
+简单的函数可以直接在main.js里面直接写
+
+```js
+Vue.prototype.changeData = function() {
+  //...
+}
+```
+
+
+
+**2.写一个模块文件,挂载到main.js上**
+
+base.js文件，文件位置可以放在跟main.js同一级，方便引用
+
+```js
+export.install = funtion(Vue,options) {
+  Vue.prototype.text1 = function() {
+    //全局函数1
+  };
+  Vue.prototype.text2 = function() {
+    //全局函数2
+  }
+}
+```
+
+main.js入口文件:
+
+```js
+import base from './base'
+Vue.use(base);
+```
+
+组件里调用
+
+```js
+this.text1();
+this.text2();
+```
+
+
 
 
 
@@ -175,20 +311,6 @@ pnpm create vite my-vue-app --template vue
 
 # Vue实例和选项
 
-### [[202302171119|vue选项]]
-文档位置: https://v2.cn.vuejs.org/v2/api
-
-
-### [[202302171122|vue实例]]
-> 一个 Vue 应用由一个通过 `new Vue` 创建的**根 Vue 实例**，以及可选的嵌套的、可复用的组件树组成。
-
-```javascript
-let vm = new Vue({
-  //选项
-})
-```
-
-当创建一个 Vue 实例时，你可以传入一个**选项对象**。作为参考，你也可以在 [API 文档](https://cn.vuejs.org/v2/api/#选项-数据)中浏览完整的选项列表
 
 
 

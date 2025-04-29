@@ -41,7 +41,7 @@ Vue 的 MVVM 实现主要由以下四个核心部分构成:
 > https://github.com/Easay/issuesSets/issues/41
 
 Vue采用**数据劫持** + **依赖收集** + **发布订阅模式**来实现响应式. 
-Vue通过**数据劫持**（使用Object.defineProperty或Proxy）拦截数据的访问和修改，在数据被访问时进行**依赖收集**，在数据变化时通过发布订阅模式通知相关依赖进行更新。
+Vue通过**数据劫持**（使用Object.defineProperty或Proxy）拦截数据的访问和修改，在数据被访问时进行**依赖收集**，在数据变化时通过**发布订阅模式**通知相关依赖进行更新。
 
 
 
@@ -53,17 +53,42 @@ Vue通过**数据劫持**（使用Object.defineProperty或Proxy）拦截数据�
 
 ### MVVM和MVC的区别?
 在前端开发领域，MVVM (Model-View-ViewModel) 和 MVC (Model-View-Controller) 是两种常见的架构模式。它们有一些关键的区别：
-1. 结构组成：
-   - MVC: 由 Model（模型）、View（视图）和 Controller（控制器）组成。
-   - MVVM: 由 Model（模型）、View（视图）和 ViewModel（视图模型）组成。
+#### **1. 核心角色与交互方式​**​
+- ​**​MVC​**​：
+    - ​**​Model​**​：数据层，负责业务逻辑和数据操作。
+    - ​**​View​**​：UI层，直接展示数据（用户可见的界面）。
+    - ​**​Controller​**​：协调层，接收用户输入，更新Model，并通知View刷新。
+    - ​**​交互方式​**​:
+        View触发事件 → Controller处理 → 更新Model → Model通知View更新（可能通过Controller或直接观察）。
+- ​**​MVVM​**​：
+    - ​**​Model​**​：数据层，与MVC相同。
+    - ​**​View​**​：UI层，仅负责展示，不处理逻辑。
+    - ​**​ViewModel​**​：中间层，将Model数据转换为View可用的形式（如格式化数据、命令绑定），并处理View的交互逻辑。
+    - ​**​交互方式​**​：  
+        View通过数据绑定（Data Binding）与ViewModel同步，ViewModel监听Model变化并自动更新View，无需手动操作DOM。
 
-2. 数据流向:
-   - MVC: 通常需要手动更新视图，数据流是单向的。
-   - MVVM: 通常采用双向数据绑定，视图和模型可以自动同步。
+#### ​**​2. 数据流与控制方式​**​
+- ​**​MVC​**​：
+    - ​**​单向数据流​**​：用户操作 → Controller → Model → View（需要手动更新）。
+    - ​**​Controller主导​**​：需要显式编写代码来更新View（如`document.getElementById().innerHTML`）。
+- ​**​MVVM​**​：
+    - ​**​双向数据绑定​**​：View和ViewModel自动同步（例如输入框修改数据，ViewModel中的属性即时更新，反之亦然）。
+    - ​**​ViewModel驱动​**​：通过绑定机制（如Vue的`v-model`、Angular的`ngModel`）实现自动化，减少手动DOM操作。
+#### ​**​3. 职责划分​**​
+- ​**​MVC​**​：
+    - View可能包含部分逻辑（如事件监听），Controller容易变得臃肿（尤其是复杂交互时）。
+    - 需要开发者手动维护View和Model的一致性。
+- ​**​MVVM​**​：
+    - View完全被动，ViewModel处理所有展示逻辑和状态管理。
+    - 解耦更彻底，适合数据驱动的UI（如表单、动态列表）。
 
-4. 耦合度：
-   - MVC: View 和 Model 之间可能存在一定程度的耦合。
-   - MVVM: View 和 Model 完全解耦，通过 ViewModel 进行通信。
+#### ​**​4. 典型应用场景​**​
+- ​**​MVC​**​：
+    - 传统服务端渲染应用（如Ruby on Rails、Spring MVC）。
+    - 需要直接操作DOM的场合（如jQuery项目）。
+- ​**​MVVM​**​：
+    - 现代前端框架（如Vue.js、Angular、Knockout）。
+    - 需要频繁交互的动态页面（如实时表单验证、复杂SPA）。
 
 ### Vue 跟 React 有什么异同
 - 相同
@@ -1148,6 +1173,34 @@ keep-alive是vue的内置组件，能在组件切换过程中将状态保留在�
 
 > 使用修饰符时，顺序很重要；相应的代码会以同样的顺序产生。因此，用 `v-on:click.prevent.self` 会阻止**所有的点击**，而 `v-on:click.self.prevent` 只会阻止对元素自身的点击
 
+event.target vs. event.currentTarget
+
+| ​**​属性​**​                    | ​**​描述​**​                  | ​**​示例场景​**​                                                         |
+| ----------------------------- | --------------------------- | -------------------------------------------------------------------- |
+| ​**​`event.target`​**​        | 触发事件的​**​实际元素​**​（事件起源的元素）。 | 点击 `<button>` 内部的 `<span>`，`target` 是 `<span>`。                      |
+| ​**​`event.currentTarget`​**​ | 当前正在处理事件的元素（绑定事件监听器的元素）。    | 点击 `<button>` 内部的 `<span>`，`currentTarget` 是 `<button>`（如果事件绑定在按钮上）。 |
+
+Vue 的事件修饰符 `.self` 用于确保事件​**​仅在 `event.currentTarget` 是触发元素时才执行​**​（即事件不是从子元素冒泡上来的）。
+
+​**​作用​**​：
+- 只有当用户​**​直接点击绑定事件的元素本身​**​（而非子元素）时，事件才会触发。
+- 本质是通过检查 `event.target === event.currentTarget` 实现的。
+
+
+**使用场景**
+* 避免意外冒泡​​：
+当父容器有事件逻辑，但子元素（如按钮、图标）不应触发时，使用 .self。
+```html
+<div @click.self="closeModal">
+  <button>我不触发closeModal</button>
+</div>
+```
+
+* 精确控制事件源​​：
+仅在点击特定区域（如遮罩层）时执行操作，忽略内部内容。
+
+
+
 #### [once](https://vue3js.cn/interview/vue/modifier.html#once)
 
 绑定了事件以后只能触发一次，第二次就不会触发
@@ -1228,6 +1281,10 @@ v-bind修饰符主要是为属性进行操作，用来分别有如下：
 - `.prop` - 作为一个 DOM property 绑定而不是作为 attribute 绑定。([差别在哪里？](https://stackoverflow.com/questions/6003819/properties-and-attributes-in-html#answer-6004028))
 - `.camel` - (2.1.0+) 将 kebab-case attribute 名转换为 camelCase。(从 2.1.0 开始支持)
 - `.sync` (2.3.0+) 语法糖，会扩展成一个更新父组件绑定值的 `v-on` 侦听器。
+
+
+
+
 
 ##### [#](https://vue3js.cn/interview/vue/modifier.html#async)sync
 
@@ -1445,10 +1502,12 @@ directives: {
 
 
 #### 应用场景
-这里给出几个自定义指令的案例：
 - 表单防止重复提交
 - 图片懒加载
 - 一键 Copy的功能
+- 实现v-bind
+* 实现v-for
+* 实现v-if/show等等
 
 
 ##### 权限控制

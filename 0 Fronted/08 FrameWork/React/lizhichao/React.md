@@ -748,15 +748,16 @@ export default App
 
 
 #### useRef()
- **获取原生dom对象**
 
-- 原生dom操作
-- 从react中获取dom对象
-  -  1.创建一个存储Dom对象的容器
-    -  使用useRef()钩子函数
-      - 钩子函数注意事项:
-        - React中的钩子函数只能用于函数组件或自定义钩子
-        -  钩子函数只能直接在函数中调用
+**用法**
+ 1. 保存dom的引用
+ 2. 保存其它内容
+
+
+**1.保存dom的引用**
+* 1.<span style="color: red;">钩子函数注意事项:</span>
+	- React中的钩子函数只能用于函数组件或自定义钩子中
+	- 钩子函数只能直接在函数中调用
   - 2.将容器设置为想要获取DOM对象元素的ref属性 //react会自动获取当前元素的dom对象,设置为容器的current属性
 
 ```jsx
@@ -788,7 +789,24 @@ export default App
 ```
 
 
+**2.保存其它内容,但不会触发重新渲染**
+如果想触发重新渲染, 还需要配合state.
+useRef一般用来存一些不是用于渲染的内容的.
+```tsx
+import {useRef} from 'react'
 
+function App() {
+	const numRef = useRef<number>(0)
+
+	return (
+		<div onClick={
+			numRef.current += 1
+		}>{numRef.current}</div>
+	)
+}
+
+export default App
+```
 
 
 ##### useRef特点
@@ -3586,9 +3604,9 @@ const xxxApi = createApi({
 
 
 
-### hooks介绍
+## hooks介绍
 
-#### useMemo
+### useMemo
 
 > useMemo和useCallback十分相似，useCallback用来缓存函数对象，useMemo用来缓存函数的执行结果。在组件中，会有一些函数具有十分的复杂的逻辑，执行速度比较慢。闭了避免这些执行速度慢的函数返回执行，可以通过useMemo来缓存它们的执行结果，像是这样：
 
@@ -3611,12 +3629,12 @@ const someEle = useMemo(() => {
 ```
 
 
-#### forwardRef
+### forwardRef
 
-##### **概述**
-> 把 ref 从子组件传递到父组件呢, 把组件内的 ref 转发一下
+#### **概述**
+> 把 ref 从子组件传递到父组件, 把组件内的 ref 转发一下
 
-* 被 forwardRef 包裹的组件的类型就要用 ==React.forwardRefRenderFunction==
+* 被 forwardRef 包裹的组件的类型是 ==React.forwardRefRenderFunction==
 
 ```ts
 //App6.tsx
@@ -3649,34 +3667,33 @@ export default App;
 ```
 
 
-##### React.forwardRefRenderFunction
+#### React.forwardRefRenderFunction
 ```ts
-
-    interface ForwardRefRenderFunction<T, P = {}> {
-        (props: P, ref: ForwardedRef<T>): ReactNode;
-        /**
-         * Used in debugging messages. You might want to set it
-         * explicitly if you want to display a different name for
-         * debugging purposes.
-         *
-         * Will show `ForwardRef(${Component.displayName || Component.name})`
-         * in devtools by default, but can be given its own specific name.
-         *
-         * @see {@link https://legacy.reactjs.org/docs/react-component.html#displayname Legacy React Docs}
-         */
-        displayName?: string | undefined;
-        /**
-         * Ignored by React.
-         * @deprecated Only kept in types for backwards compatibility. Will be removed in a future major release.
-         */
-        propTypes?: any;
-    }
+interface ForwardRefRenderFunction<T, P = {}> {
+	(props: P, ref: ForwardedRef<T>): ReactNode;
+	/**
+	 * Used in debugging messages. You might want to set it
+	 * explicitly if you want to display a different name for
+	 * debugging purposes.
+	 *
+	 * Will show `ForwardRef(${Component.displayName || Component.name})`
+	 * in devtools by default, but can be given its own specific name.
+	 *
+	 * @see {@link https://legacy.reactjs.org/docs/react-component.html#displayname Legacy React Docs}
+	 */
+	displayName?: string | undefined;
+	/**
+	 * Ignored by React.
+	 * @deprecated Only kept in types for backwards compatibility. Will be removed in a future major release.
+	 */
+	propTypes?: any;
+}
 ```
 
 
 
 
-#### useImperativeHandle
+### useImperativeHandle
 ##### 概述
 * 在React中可以通过forwardRef来指定要暴露给外部组件的ref
 * 
@@ -4101,129 +4118,101 @@ export default App;
 ### 2.受控组件和非受控组件
 
 #### 是什么
-> **vlaue由用户控制就是非受控模式，由代码控制就是受控模式**
+> 受控和非受控组件的核心区别在于, **谁持有并管理最终的状态值​**
 
-假设一个表单input组件, 改变表单值只有两种情况: 用户取改变value或者代码去改变value.
-![[Pasted image 20250415153122.png]]
+|模式|数据管理权|数据更新触发方|典型代码特征|
+|---|---|---|---|
+|​**​受控组件​**​|父组件/外部代码|父组件必须通过`onChange`处理|`<Component value={外部值} onChange={处理函数}/>`|
+|​**​非受控组件​**​|组件内部|组件内部自主管理|`<Component defaultValue={初始值} ref={获取值}/>`|
 
-**非受控模式**
-* 代码不能改变表单的value
-* 代码设置表单的初始 value，但是能改变 value 的只有用户，代码通过监听 onChange 来拿到最新的值，或者通过 ref 拿到 dom 之后读取 value
-![[Pasted image 20250415153209.png]]
 
-![[code/reactdemo/src/App5.tsx]]
 
+#### **受控组件和非受控组件的比较**
+##### 受控组件 (Controlled Components)
+
+- **状态位置**：状态存在于父组件中
+- **值传递**：父组件通过props（如`value`）将状态值传给子组件
+- **更新机制**：子组件不直接修改状态，而是通过调用父组件传入的函数（如`onChange`）请求状态更新
+- **数据流向**：父组件 → 子组件 → 事件回调 → 父组件更新状态 → 重新渲染子组件
+
+简单来说：**"受控"意味着组件的值受外部（父组件）控制，组件自己不维护状态**
+
+##### 非受控组件 (Uncontrolled Components)
+
+- **状态位置**：状态存在于DOM元素内部，React组件不直接管理
+- **初始值**：可通过`defaultValue`等属性设置初始值，之后由DOM元素自行管理
+- **值获取**：父组件需要通过ref直接访问DOM元素来获取当前值
+- **数据流向**：初始渲染时父组件可设置默认值，之后用户交互直接与DOM交互无需经过React状态系统
+
+简单来说：**"非受控"意味着组件的值不受React状态控制，而是由DOM自己管理**
+
+
+#### 代码展示
 ```tsx
-import{ ChangeEvent, useRef, useEffect} from "react";
-// 非受控模式
-
-function App() {
-
-  // 非受控模式 onChange事件获取用户输入
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('e.target.value', e.target.value);
-    setValue(e.target.value)
-  }
-
-  // 非受控模式 ref获取用户输入
-  /**
-   * 注意, inputRef的值, 只有在定时器执行前改变的才会被打印, 定时器执行后的改变不会被打印.
-   */
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() =>  {
-  setTimeout(() => {
-      console.log('inputRef.current.value', inputRef.current?.value);
-    }, 2000)
-  }, [])
-
+// 受控组件示例
+function Parent() {
+  const [value, setValue] = useState("");
+  
   return (
-    <div>
-      <input value={'guang'} onChange={onChange} />
-      <br />
-      {/* <input ref={inputRef} defaultValue={'guang'} /> */}
-    </div>
+    <ControlledInput 
+      value={value}                     // 父组件状态传递给子组件
+      onChange={(newValue) => {         // 提供更新机制给子组件
+        setValue(newValue);
+      }} 
+    />
   );
 }
 
-export default App;
-```
-
-
-
-
-
-
-**受控模式**
-* 代码可以改变value
-* - `defaultValue` 只是表单的 **初始值**，用户可以修改它，最终的值是 `value`。
-- `value` 是 **受控的**，如果你给 `input` 直接设置了 `value`，那么用户输入不会改变它，表单的值固定不变。但敲击键盘的内容可以通过onChange事件获取, 然后通过代码再去设置value
-- 受控模式的需求场景:
-	- 需要对输入的值做处理之后设置到表单的时候.但这种场景很少.
-	- 或者是你想实时同步状态值到父组件
-![[Pasted image 20250415153224.png]]
-
-
-![[code/reactdemo/src/App6.tsx]]
-
-
-```tsx
-import{ ChangeEvent, useRef, useEffect, useState} from "react";
-// 受控模式和非受控模式
-
-function App() {
-// 受控模式
-/**
- * 这种写法不推荐. 
- * - 不让用户自己控制,而是通过代码控制,饶了一圈也没有改变value的值,还是原封不动
- * - 受控模式每次setValue都会重新渲染. 而非受控模式只会渲染一次
- */
-const [value, setValue] = useState('guang');
-const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-  console.log('e.target.value', e.target.value);
-  setValue(e.target.value);
-}
+function ControlledInput({ value, onChange }) {
+  // 没有内部状态！值完全由props控制
   return (
-    <div>
-      <input value={value} onChange={onChange} />
-    </div>
+    <input 
+      value={value}                     // 值由props决定
+      onChange={(e) => {                // 变更时通知父组件
+        onChange(e.target.value);
+      }} 
+    />
   );
 }
 
-
-/**
- * 受控模式,实现场景
- * - 需要对输入的值做处理之后设置到表单的时候.但这种场景很少.
- * - 或者是你想实时同步状态值到父组件。
- * 
- */
-
-function App2() {
-  const [value, setValue] = useState('guang');
-  function onChange(e: ChangeEvent<HTMLInputElement>) {
-    console.log('e.target.value', e.target.value);
-    setValue(e.target.value);
-  }
+// 非受控组件示例
+function Parent() {
+  const inputRef = useRef(null);
+  
+  const handleSubmit = () => {
+    // 需要值时，直接从DOM获取
+    console.log(inputRef.current.value);
+  };
+  
   return (
-    <div>
-      <input value={value} onChange={onChange} />
-    </div>)
+    <>
+      <UncontrolledInput 
+        ref={inputRef}                  // 用ref获取DOM引用
+        defaultValue="初始值"            // 只提供初始值
+      />
+      <button onClick={handleSubmit}>提交</button>
+    </>
+  );
 }
 
-
-e
+function UncontrolledInput(props, ref) {
+  // 内部无需React状态，直接使用DOM管理值
+  return <input ref={ref} defaultValue={props.defaultValue} />;
+}
+UncontrolledInput = forwardRef(UncontrolledInput);
 ```
 
+[[App82.tsx]]
 
-**两种模式的选择**
-* 大多数情况下, 非受控模式即可
-* 使用受控模式: 需要拿到用户输入或同步表单的值到另一个地方如Form 组件,
-* 基础组件, 需都支持受控和非受控模式
 
-**基础组件+两种受控模式实现**
+
+#### 日历组件(受控+非受控)
 以日历组件为模板, 来展示两种模式.
 
-![[reactdemo/src/App9.tsx]]
+[[reactdemo/src/App10.tsx]]
 
-```tsx
 
-```
+[[reactdemo/src/App12.tsx]]
+
+
+

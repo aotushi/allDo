@@ -8,10 +8,9 @@ function App() {
 
   const [value, setValue] = useState('guang')
 
-  // 非受控模式 onChange事件获取用户输入
+  // 非受控模式 defaultValue + onChange事件获取用户输入
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     console.log('e.target.value', e.target.value);
-    setValue(e.target.value);
   }
 
 
