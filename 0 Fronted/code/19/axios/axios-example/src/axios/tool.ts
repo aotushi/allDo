@@ -1,7 +1,5 @@
-import type { InternalAxiosRequestConfig } from "axios";
+import type { InternalAxiosRequestConfig, AxiosError, AxiosResponse, AxiosInstance } from "axios";
 import message from "../plugins/message";
-
-
 
 function handleChangeRequestHeader(config: InternalAxiosRequestConfig) {
   config.headers["Content-Type"] = "application/json";
@@ -9,8 +7,11 @@ function handleChangeRequestHeader(config: InternalAxiosRequestConfig) {
 }
 
 function handleRequestHeaderAuth(config: InternalAxiosRequestConfig) {
-  if (localStorage.getItem("token") === null) return config;
-  config.headers.Authorization = "Bearer " + localStorage.getItem("token");
+  const accessToken = localStorage.getItem("access_token");
+  if (accessToken) {
+    config.headers.Authorization = "Bearer " + accessToken;
+  }
+
   return config;
 }
 
@@ -66,4 +67,40 @@ function handleNetworkError(errStatus?: number): void {
   message.error("无法连接到服务器，请检查网络连接");
 }
 
-export { handleChangeRequestHeader, handleRequestHeaderAuth, handleAuthError, handleGeneralError, handleNetworkError };
+function handleTokenRefresh(
+  error: AxiosError,
+  axiosInstance: AxiosInstance
+): Promise<AxiosResponse<any, any>> {
+  const config = error.config!;
+  const refreshToken = localStorage.getItem("refresh_token");
+  if (!refreshToken) {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "/login";
+    return Promise.reject(new Error("没有刷新令牌"));
+  }
+
+  return axiosInstance
+    .get("/auth/refresh", {
+      params: {
+        token: refreshToken,
+      },
+    })
+    .then((res: AxiosResponse) => {
+      const { access_token, refresh_token } = res.data.data;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("refresh_token", refresh_token);
+
+      // 更新请求头并重新发送请求
+      config.headers.Authorization = `Bearer ${access_token}`;
+      return axiosInstance(config);
+    })
+    .catch((err: Error) => {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      window.location.href = "/login";
+      return Promise.reject(err);
+    });
+}
+
+export { handleChangeRequestHeader, handleRequestHeaderAuth, handleAuthError, handleGeneralError, handleNetworkError, handleTokenRefresh };

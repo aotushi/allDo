@@ -6,7 +6,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
   type CancelTokenSource,
-  AxiosError,
+  type AxiosError,
 } from "axios";
 
 // 扩展 InternalAxiosRequestConfig 类型
@@ -28,7 +28,8 @@ export type {
 import { handleChangeRequestHeader, handleRequestHeaderAuth,
   handleAuthError,
   handleGeneralError,
-  handleNetworkError
+  handleNetworkError,
+  handleTokenRefresh
  } from "./tool";
 
 import message from "../plugins/message";
@@ -50,11 +51,15 @@ export default class HttpRequest {
     timeout: 1000 * 6
   };
   private pendingRequests: Map<string, AbortController>;
+  private isRefreshing: boolean;
+  private refreshSubscribers: ((token: string) => void)[];
 
   constructor(config: ExpandAxiosRequestConfig) {
     this._instance = axios.create(Object.assign(this._defaultConfig, config));
 
     this.pendingRequests = new Map();
+    this.isRefreshing = false;
+    this.refreshSubscribers = [];
     this.setupInterceptors();
   }
 
@@ -99,13 +104,9 @@ export default class HttpRequest {
   private setupInterceptors() {
     this._instance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
-          this.addPendingRequest(config);
-
-        // 处理请求头
+        this.addPendingRequest(config);
         config = handleChangeRequestHeader(config);
-        // 为请求头添加验证信息
         config = handleRequestHeaderAuth(config);
-
         return config;
       },
       (error: AxiosError) => {
@@ -126,8 +127,7 @@ export default class HttpRequest {
         handleGeneralError(response.data.errno, response.data.errmsg);
         return response;
       },
-      (error) => {
-        
+      async (error) => {
         if (error.config) {
           const requestKey = this.getRequestKey(error.config);
           this.removePendingRequest(requestKey);
@@ -139,6 +139,32 @@ export default class HttpRequest {
         
         if (error.response) {
           handleNetworkError(error.response.status);
+          
+          if (error.response.status === 401 && !error.response.config.url?.includes('/refresh')) {
+            if (!this.isRefreshing) {
+              this.isRefreshing = true;
+              try {
+                await handleTokenRefresh(error, this._instance);
+                // 通知所有等待中的请求
+                this.refreshSubscribers.forEach(cb => {
+                  const newToken = localStorage.getItem('access_token')!;
+                  cb(newToken);
+                });
+                this.refreshSubscribers = [];
+              } finally {
+                this.isRefreshing = false;
+              }
+            } else {
+              // 正在刷新token，将请求加入队列
+              new Promise((resolve) => {
+                this.refreshSubscribers.push((newToken) => {
+                  const config = error.config!;
+                  config.headers.Authorization = `Bearer ${newToken}`;
+                  resolve(this._instance(config));
+                });
+              });
+            }
+          }
         } else {
           message.error('网络异常，请稍后重试');
         }

@@ -23,10 +23,10 @@
   - [x] 允许重复请求
   - [x] 本地开发切换代理
   - [x] 推导出response的类型
-  - [ ] 下载/上传
+  - [x] token无感刷新
   - [ ] 接口缓存策略
-  - [ ] token自动刷新
   - [ ] 请求超时重复机制
+  - [ ] 下载/上传
 - [x] mock数据服务: strapi
 
 
@@ -440,13 +440,31 @@ async function getComments(postId: number) {
 
 
 
+### 6.token无感刷新
+
+#### 资源
+
+> [基于 Axios 封装一个完美的双 token 无感刷新用户登录之后，会返回一个用户的标识，之后带上这个标识请求别的接 - 掘金](https://juejin.cn/post/7271139265442021391)
+>
+> https://mp.weixin.qq.com/s/7ZjF2ZtDShC9UiWOTjxm4Q
+>
+> https://mp.weixin.qq.com/s/LHDd3Tol0JIORdMfFpZKaA
 
 
 
+#### 介绍
 
-
-
-
+> 用户登录之后，会返回一个用户的标识，之后带上这个标识请求别的接口，就能识别出该用户。
+>
+> 标识登录状态的方案有两种： session 和 jwt。
+>
+> session 是通过 cookie 返回一个 id，关联服务端内存里保存的 session 对象，请求时服务端取出 cookie 里 id 对应的 session 对象，就可以拿到用户信息。
+>
+> 这两种方案一个服务端存储，通过 cookie 携带标识，一个在客户端存储，通过 header 携带标识。
+>
+> session 的方案默认不支持分布式，因为是保存在一台服务器的内存的，另一台服务器没有。
+>
+> 但是这样有个问题：token 是有过期时间的，比如 3 天，那过期后再访问就需要重新登录了。所以要加上续签机制，也就是延长 token 过期时间。主流的方案是通过双 token，一个 access_token、一个 refresh_token。
 
 
 
