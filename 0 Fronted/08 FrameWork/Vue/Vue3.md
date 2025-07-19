@@ -155,195 +155,6 @@ console.log(map.get('count').value)
 
 
 
-## 与Typescript的一些问题
-
-### 1.声明空数组但显式声明类型, 其类型会变成`never[]`
-```vue
-const arr = ref([]) // this type is implicit a never[]
-```
-表示一个不包含任何元素的数组。当 TypeScript 无法推断出数组的具体类型时，就会默认将其类型设为 `never[]`。
-
-
-### 2.声明响应式数据后,在模板中使用报错`xxx..value' is possibly 'undefined'.ts-plugin(18048)`
-**原因:**
-* 可能是没有提供初始值,TS会将类型判断为`Ref<XxxType | undefined>`
-
-**解决方案**
-* 提供初始值(最佳实践)
-* 使用非空断言
-* 使用可选链和条件判断(安全但啰嗦)
-* 使用类型断言(不推荐)
-
-```vue
-<script>
-//1.提供初始值
-const form = ref<UserType>({
-  avatar: '',
-  name: '',
-  age: 0,
-  email: '',
-})
-
-const updateForm = res => {
-	form.value = res
-}
-
-
-
-//2.使用非空断言操作符
-const form = ref<UserType>({
-})
-
-const updateForm = res => {
-	form.value!.avatar = res
-}
-
-//3.使用可选连或条件判断
-const form = ref<UserType>({
-})
-
-//3.1 可选连操作符
-const updateForm = res => {
-	if (form.value?.avatar !== undefined) {
-		form.value?.avatar = res
-	}
-	
-}
-
-//3.2 直接条件判断
-if (form.value) {
-	form.value.avatar = res
-}
-
-
-
-//4.使用类型断言
-const form = ref<UserType>(); 
-(form.value as UserType).avatar = value;
-
-</script>
-```
-
-
-### 3.某个值的类型为联合类型,做真值判断后再条件判断报错
-```vue
-<script setup lang="ts">
-
-interface formType {
-	status: 0 | 1
-	//...
-}
-
-const form = <formType>({
-	status: 0,
-	//...
-})
-
-
-
-if (form.value.status && form.value.status === 1) {
-	//...
-}
-
-在form.value.status有报错提示:This comparison appears to be unintentional because the types '1' and '0' have no overlap.ts-plugin(2367)
-
-
-
-</script>
-```
-**原因:**
-因为 TypeScript 的类型检查机制导致的:
-* 在 `if (form.value.status && form.value.status === 1)` 中
-- 第一个条件 `form.value.status` 会被 TypeScript 理解为真值检查
-- 因为 `0` 是 falsy 值，所以第一个条件成立时，`status` 就不可能是 `0`
-- 这样在第二个条件 `form.value.status === 1` 中，TypeScript 认为 `status` 只能是 `1`
-- 所以会报类型不重叠的错误
-
-**解决方案**
-1.比较比较值,不做真值判断
-2.如果要判断真值存在, 使用`!==undefined`
-3.如果要检查多个条件,建议使用多个明确的比较
-
-
-```ts
-
-//1
-if(form.value.status === 1)
-
-//2
-if (form.value.status !== undefined && form.value.status === 1)
-
-//3-1
-if ([1].includes(form.value.status))
-
-//3-2
-const isStatusOne = (status: 0 | 1): status is 1 => status === 1; 
-if (isStatusOne(form.value.status)) { // ... }
-```
-
-
-### 不安全的类型转换
-案例:
-```vue
-store.getShortmsgs(filter.value as unknown as Record<string, string>)
-
-filter的类型是:
-const filter = ref<IAnyObj>({})
-
-getShortmsgs的参数类型: async getShortmsgs( params: Record<string, string> = {}, fun?: (data: unknown) => void, ) {
-//...
-}
-```
-
-
-报错:
-```sh
-ite v6.0.3 building for production... transforming (1167) node_modules\lodash-es\_baseIsArrayBuffer.jssrc/pages/short-msg/index.vue:87:22 - error TS2345: Argument of type 'IAnyObj' is not assignable to parameter of type 'Record<string, string>'. 'string' index signatures are incompatible. Type 'unknown' is not assignable to type 'string'.
-```
-
-简单来说,就是`IAnyObj`类型不能转换为`Record<string,string>`类型.,unknown类型不能赋值给string类型(父类型不能赋值给子类型)
-```ts
-interface IAnyObj {
- [index:string]: unknown
-}
-```
-
-
-#### ts中安全的类型转换规则:
-```ts
-// 1. 子类型到父类型的转换是安全的
-class Animal { name: string = "" }
-class Dog extends Animal { bark() {} }
-
-const dog = new Dog();
-const animal: Animal = dog; // 安全，不需要 as
-
-// 2. 联合类型的收缩是安全的
-let value: string | number = "hello";
-let str = value as string; // 安全
-
-// 3. 具有重叠属性的类型转换是安全的
-interface A { x: number; y: number; }
-interface B { x: number; z: number; }
-const a: A = { x: 1, y: 2 };
-const b = a as unknown as B; // 不安全，但通过 unknown 中介可以绕过
-
-// 4. 完全不相关类型间的转换是不安全的
-const num = 42;
-const date = num as Date; // 报错！完全不相关的类型
-
-// 5. 对象类型的属性兼容性
-interface Person { name: string; }
-interface DetailedPerson { name: string; age: number; }
-
-const person: Person = { name: "Tom" };
-// 不安全：缺少必需的属性
-const detailed = person as DetailedPerson; // 报错
-```
-
-
-
-
 
 
 
@@ -1009,8 +820,205 @@ watch(
 
 
 ## 使用实例
+
+
+### 与Typescript的一些问题
+
+#### 1.声明空数组但显式声明类型, 其类型会变成`never[]`
+```vue
+const arr = ref([]) // this type is implicit a never[]
+```
+表示一个不包含任何元素的数组。当 TypeScript 无法推断出数组的具体类型时，就会默认将其类型设为 `never[]`。
+
+
+#### 2.声明响应式数据后,在模板中使用报错`xxx..value' is possibly 'undefined'.ts-plugin(18048)`
+**原因:**
+* 可能是没有提供初始值,TS会将类型判断为`Ref<XxxType | undefined>`
+
+**解决方案**
+* 提供初始值(最佳实践)
+* 使用非空断言
+* 使用可选链和条件判断(安全但啰嗦)
+* 使用类型断言(不推荐)
+
+```vue
+<script>
+//1.提供初始值
+const form = ref<UserType>({
+  avatar: '',
+  name: '',
+  age: 0,
+  email: '',
+})
+
+const updateForm = res => {
+	form.value = res
+}
+
+
+
+//2.使用非空断言操作符
+const form = ref<UserType>({
+})
+
+const updateForm = res => {
+	form.value!.avatar = res
+}
+
+//3.使用可选连或条件判断
+const form = ref<UserType>({
+})
+
+//3.1 可选连操作符
+const updateForm = res => {
+	if (form.value?.avatar !== undefined) {
+		form.value?.avatar = res
+	}
+	
+}
+
+//3.2 直接条件判断
+if (form.value) {
+	form.value.avatar = res
+}
+
+
+
+//4.使用类型断言
+const form = ref<UserType>(); 
+(form.value as UserType).avatar = value;
+
+</script>
+```
+
+
+#### 3.某个值的类型为联合类型,做真值判断后再条件判断报错
+```vue
+<script setup lang="ts">
+
+interface formType {
+	status: 0 | 1
+	//...
+}
+
+const form = <formType>({
+	status: 0,
+	//...
+})
+
+
+
+if (form.value.status && form.value.status === 1) {
+	//...
+}
+
+在form.value.status有报错提示:This comparison appears to be unintentional because the types '1' and '0' have no overlap.ts-plugin(2367)
+
+
+
+</script>
+```
+**原因:**
+因为 TypeScript 的类型检查机制导致的:
+* 在 `if (form.value.status && form.value.status === 1)` 中
+- 第一个条件 `form.value.status` 会被 TypeScript 理解为真值检查
+- 因为 `0` 是 falsy 值，所以第一个条件成立时，`status` 就不可能是 `0`
+- 这样在第二个条件 `form.value.status === 1` 中，TypeScript 认为 `status` 只能是 `1`
+- 所以会报类型不重叠的错误
+
+**解决方案**
+1.比较比较值,不做真值判断
+2.如果要判断真值存在, 使用`!==undefined`
+3.如果要检查多个条件,建议使用多个明确的比较
+
+
+```ts
+
+//1
+if(form.value.status === 1)
+
+//2
+if (form.value.status !== undefined && form.value.status === 1)
+
+//3-1
+if ([1].includes(form.value.status))
+
+//3-2
+const isStatusOne = (status: 0 | 1): status is 1 => status === 1; 
+if (isStatusOne(form.value.status)) { // ... }
+```
+
+
+### 不安全的类型转换
+案例:
+```vue
+store.getShortmsgs(filter.value as unknown as Record<string, string>)
+
+filter的类型是:
+const filter = ref<IAnyObj>({})
+
+getShortmsgs的参数类型: async getShortmsgs( params: Record<string, string> = {}, fun?: (data: unknown) => void, ) {
+//...
+}
+```
+
+
+报错:
+```sh
+ite v6.0.3 building for production... transforming (1167) node_modules\lodash-es\_baseIsArrayBuffer.jssrc/pages/short-msg/index.vue:87:22 - error TS2345: Argument of type 'IAnyObj' is not assignable to parameter of type 'Record<string, string>'. 'string' index signatures are incompatible. Type 'unknown' is not assignable to type 'string'.
+```
+
+简单来说,就是`IAnyObj`类型不能转换为`Record<string,string>`类型.,unknown类型不能赋值给string类型(父类型不能赋值给子类型)
+```ts
+interface IAnyObj {
+ [index:string]: unknown
+}
+```
+
+
+#### ts中安全的类型转换规则:
+```ts
+// 1. 子类型到父类型的转换是安全的
+class Animal { name: string = "" }
+class Dog extends Animal { bark() {} }
+
+const dog = new Dog();
+const animal: Animal = dog; // 安全，不需要 as
+
+// 2. 联合类型的收缩是安全的
+let value: string | number = "hello";
+let str = value as string; // 安全
+
+// 3. 具有重叠属性的类型转换是安全的
+interface A { x: number; y: number; }
+interface B { x: number; z: number; }
+const a: A = { x: 1, y: 2 };
+const b = a as unknown as B; // 不安全，但通过 unknown 中介可以绕过
+
+// 4. 完全不相关类型间的转换是不安全的
+const num = 42;
+const date = num as Date; // 报错！完全不相关的类型
+
+// 5. 对象类型的属性兼容性
+interface Person { name: string; }
+interface DetailedPerson { name: string; age: number; }
+
+const person: Person = { name: "Tom" };
+// 不安全：缺少必需的属性
+const detailed = person as DetailedPerson; // 报错
+```
+
+
+
+
 ### 动态绑定ref
 > https://blog.csdn.net/qq_36330228/article/details/134466234
 
 
+
+#### vue组件的二次封装
+##### 封装要点
+1. props如何传递
+2. 插槽 如何穿透过去
+3. 组件的方法,如何暴露出去
 
